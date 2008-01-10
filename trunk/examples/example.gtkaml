@@ -1,0 +1,8 @@
+/* -*- Mode: C-sharp indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
+
+<Window>
+	<Script><[!CDATA[
+		string j;
+		for (j="a"; j<"z"; j[0]++) ;
+	]]></Script>
+</Window>

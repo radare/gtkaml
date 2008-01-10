@@ -1,0 +1,12 @@
+
+[project]
+name=gtkaml
+base_path=H:\\vladwork\\xliced-trunk\\gtkaml
+description=
+run_cmd=src/gtkamlc
+
+[files]
+current_page=1
+FILE_NAME_0=0:0:H:\\vladwork\\xliced-trunk\\gtkaml\\src\\main.c
+FILE_NAME_1=949:0:H:\\vladwork\\xliced-trunk\\gtkaml\\src\\gtkaml-saxparser.c
+FILE_NAME_2=0:0:H:\\vladwork\\xliced-trunk\\gtkaml\\src\\gtkaml-saxparser.h

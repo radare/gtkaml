@@ -22,7 +22,7 @@
 #include <string.h>
 
 typedef enum GtkamlSaxState { 
-	GTKAML_CLASS_STATE = 0,         /* here we generate the class declaration */
+	GTKAML_CLASS_STATE = 0,         /* here we generate the class declaration - initial state */
 	GTKAML_CONTAINER_STATE,  		/* then we can add things to the current container */
 	GTKAML_NONCONTAINER_STATE,
 	GTKAML_SCRIPT_STATE,			/* the CDATA is then pasted */

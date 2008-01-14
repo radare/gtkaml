@@ -43,8 +43,6 @@ int main( int argc, char *argv[] )
 	gchar * input_file = 0;
 	gchar * valac_path;
 	GMappedFile * mapped_input;
-	
-	int i;
 
 	/* command-line arguments parsing */
 	GOptionEntry entries[] = 
@@ -66,7 +64,7 @@ int main( int argc, char *argv[] )
   	g_option_context_parse (context, &argc, &argv, &error);
   	g_option_context_free(context);
   	if (error) {
-  		fprintf(stderr, "Error parsing command line: %s", error->message);
+  		fprintf(stderr, "Error parsing command line: %s\n", error->message);
   		g_error_free(error);
   		return 1;
 	}
@@ -77,14 +75,14 @@ int main( int argc, char *argv[] )
 		return 0;
 	}
 	if (no_valac) keep_output = 1;
-	if (!argc || argv[argc-1][0]=='-' )
+	if (argc < 2|| argv[argc-1][0]=='-' )
 	{
-		fprintf(stderr, "No input file specified");
+		fprintf(stderr, "No input file specified\n");
 		return 1;
 	}
 	if (!g_file_test(argv[argc-1], G_FILE_TEST_IS_REGULAR))
 	{
-		fprintf(stderr, "File not found: %s", argv[argc-1]);
+		fprintf(stderr, "File not found: %s\n", argv[argc-1]);
 		return 1;
 	}
 	input_file = g_strdup(argv[argc-1]);
@@ -108,7 +106,7 @@ int main( int argc, char *argv[] )
 	
 	mapped_input = g_mapped_file_new( input_file, 0, &error );
 	if (error) {
-		fprintf(stderr, "Error opening input file: %s", error->message);
+		fprintf(stderr, "Error opening input file: %s\n", error->message);
 		g_error_free(error);
 		return 1;
 	}

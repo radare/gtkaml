@@ -35,7 +35,7 @@ gtkamlc_SOURCES = \
 	gtkaml-introspect-parser.h
 
 gtkaml.vala.stamp: $(gtkaml_VALASOURCES)
-	$(VALAC) --pkg gee --basedir=$(top_srcdir) $^
+	$(VALAC) $(VALACFLAGS) --pkg gee $^
 	touch $@
 
 gtkamlc_LDADD = \

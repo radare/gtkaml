@@ -40,12 +40,19 @@ void gtkaml_generator_init( GtkamlSaxParserUserData * data )
 	data->parserResult.code = g_string_new(0);
 }	
 
-void gtkaml_generate_class( GtkamlSaxParserUserData * data, gchar* name )
+ValaClass* gtkaml_generator_new_class( GtkamlSaxParserUserData * data, gchar* name, gchar* base )
 {
-	g_string_append_printf( data->parserResult.class_start, "public class Generated : %s {\n", name );
+	//determine the Vala base class
+	ValaNamespace * root = vala_code_context_get_root(data->vala_context);
+	ValaScope * scope = vala_symbol_get_scope (VALA_SYMBOL(root));
+	ValaSymbol * base_class = vala_scope_lookup( scope, base );
+	g_return_val_if_fail (VALA_IS_CLASS(base_class), 0);
+	g_string_append_printf( data->parserResult.class_start, "public class %s : %s {\n", name, base );
+	g_object_ref( G_OBJECT(base_class) );
+	return VALA_CLASS(base_class);
 }
 
-void gtkaml_generate_member( GtkamlSaxParserUserData * data, const gchar * name, int nb_attributes,  const gchar ** attrs )
+void gtkaml_generator_new_member( GtkamlSaxParserUserData * data, const gchar * name, int nb_attributes,  const gchar ** attrs )
 {
 	GtkamlState * state = g_list_last( data->state_stack)->data;
 	GString* identifier = 0;
@@ -65,7 +72,7 @@ void gtkaml_generate_member( GtkamlSaxParserUserData * data, const gchar * name,
 	g_string_append_printf( data->parserResult.members_declaration, "\tprivate %s %s;\n", (gchar*)name, identifier->str );  
 	g_string_append_printf( data->parserResult.construct_body, "\t\t%s = new %s();\n", identifier->str, (gchar*)name );
 	g_string_append_printf( data->parserResult.construct_body, "\t\t%s.add( %s );\n", 
-						   state->current_container, identifier->str );
+						   state->current_identifier, identifier->str );
 	g_string_free( identifier, TRUE );
 }
 

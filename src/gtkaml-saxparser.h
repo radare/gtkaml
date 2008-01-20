@@ -20,6 +20,7 @@
 #include <libxml/parser.h>
 #include <glib.h>
 #include <string.h>
+#include <vala/vala.h>
 
 typedef enum GtkamlSaxState { 
 	GTKAML_CLASS_STATE = 0,         /* here we generate the class declaration - initial state */
@@ -39,7 +40,8 @@ typedef struct GtkamlSaxParserResult {
 
 typedef struct GtkamlState {
 	GtkamlSaxState current_state;
-	gchar * current_container;
+	gchar * current_identifier;
+	ValaClass * current_base_class;
 } GtkamlState;
 
 typedef struct GtkamlSaxParserUserData {
@@ -47,10 +49,11 @@ typedef struct GtkamlSaxParserUserData {
 	GList * state_stack;
 	gchar * attribute_name;
 	GHashTable * identifiers;
+	ValaCodeContext* vala_context;
 } GtkamlSaxParserUserData;
 
 GString * gtkaml_parse_test( gchar * gtkaml, int size );
-GString * gtkaml_parse_sax2_test( gchar * gtkaml, int size );
+GString * gtkaml_parser_sax2_test( gchar * gtkaml, gulong size, ValaCodeContext* vala_context );
 
 #endif /* _GTKAML_SAXPARSER_H */
 

@@ -41,6 +41,7 @@ AC_CONFIG_FILES([
 Makefile
 examples/Makefile
 src/Makefile
+gtkamlc/Makefile
 ])
 
 AC_OUTPUT

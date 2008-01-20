@@ -1,7 +1,3 @@
-## Process this file with automake to produce Makefile.in
-
-## Created by Anjuta
-
 INCLUDES = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
@@ -17,29 +13,27 @@ AM_CFLAGS = \
 
 bin_PROGRAMS = gtkamlc 
 
-BUILT_SOURCES = gtkaml.vala.stamp
+BUILT_SOURCES = gtkamlc.vala.stamp
 
 gtkaml_VALASOURCES = \
 	GtkamlCompiler.vala \
-	GtkamlParser.vala
+	GtkamlSAXParser.vala \
+	GtkamlCodeGenerator.vala \
+	GtkamlDummyParser.vala
 
 gtkamlc_SOURCES = \
 	gtkaml.vala.stamp \
 	$(gtkaml_VALASOURCES:.vala=.c) \
 	$(gtkaml_VALASOURCES:.vala=.h) \
-	gtkaml-saxparser.c   \
-	gtkaml-saxparser.h   \
-	gtkaml-codegenerator.c   \
-	gtkaml-codegenerator.h 
+	GtkamlSAXParser_startParsing.c
 
-gtkaml.vala.stamp: $(gtkaml_VALASOURCES)
-	$(VALAC) $(VALACFLAGS) --vapidir /usr/share/vala/vapi --pkg vala-1.0 $^ 
+gtkamlc.vala.stamp: $(gtkaml_VALASOURCES)
+	$(VALAC) $(VALACFLAGS) --pkg libxml-2.0 --pkg vala-1.0 $^ 
+	sed -i 's/GTKAML_DUMMY/VALA_CODE_VISITOR/g' GtkamlSAXParser.c
+	sed -i 's/\tGtkamlDummy/\tValaParser/g' GtkamlSAXParser.h
 	touch $@
 
 gtkamlc_LDADD = \
 	$(LIBXML2_LIBS)\
 	$(GLIB_LIBS) \
 	$(VALA_LIBS)
-
-EXTRA_DIST = \
-	gtkaml.in 

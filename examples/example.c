@@ -1,5 +1,5 @@
-
-#include "example.h"
+main(){}
+/*#include "example.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -148,7 +148,7 @@ GType my_widget_get_type (void) {
 	}
 	return my_widget_type_id;
 }
-
+*/
 
 
 

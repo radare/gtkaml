@@ -25,9 +25,9 @@ GString * gtkaml_get_attribute( const gchar * attribute_name, int nb_attributes,
 
 void gtkaml_generator_init( GtkamlSaxParserUserData * data );
 
-void gtkaml_generate_class( GtkamlSaxParserUserData * data, gchar* name );
+ValaClass* gtkaml_generator_new_class( GtkamlSaxParserUserData * data, gchar* name, gchar* base );
 
-void gtkaml_generate_member( GtkamlSaxParserUserData * data, const gchar * name, int nb_attributes, const gchar ** attrs );
+void gtkaml_generator_new_member( GtkamlSaxParserUserData * data, const gchar * name, int nb_attributes, const gchar ** attrs );
 
 void gtkaml_generator_cleanup( GtkamlSaxParserResult parserResult );
 #endif

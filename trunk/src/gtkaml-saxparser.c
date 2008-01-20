@@ -23,11 +23,12 @@
  * @defgroup statestack manages the stack of states 
  * @{
  */
-void gtkaml_state_push( GList ** state_stack,  gchar * current_container, GtkamlSaxState current_state )
+void gtkaml_state_push( GList ** state_stack,  gchar * current_identifier, ValaClass* base_class , GtkamlSaxState current_state )
 {
 	GtkamlState * new_state = g_new0(GtkamlState, 1);
 	new_state->current_state = current_state;
-	new_state->current_container = current_container;
+	new_state->current_identifier = current_identifier;
+	new_state->current_base_class = base_class;
 	*state_stack = g_list_append( *state_stack, new_state );
 }
 
@@ -35,7 +36,8 @@ void gtkaml_state_pop( GList ** state_stack )
 {
 	GtkamlState * popped_state = g_list_last( *state_stack )->data;
 	*state_stack = g_list_remove( *state_stack, popped_state );
-	g_free(popped_state->current_container);
+	g_object_unref(popped_state->current_base_class);
+	g_free(popped_state->current_identifier);
 	g_free(popped_state);
 }
 
@@ -49,7 +51,7 @@ void gtkaml_state_pop( GList ** state_stack )
 void gtkamlStartDocument ( GtkamlSaxParserUserData * data  )
 {
 	gtkaml_generator_init( data );
-	gtkaml_state_push( &data->state_stack, 0, GTKAML_CLASS_STATE );
+	gtkaml_state_push( &data->state_stack, 0, 0, GTKAML_CLASS_STATE );
 	data->attribute_name = 0;
 	data->identifiers = g_hash_table_new_full( g_str_hash, g_str_equal, (GDestroyNotify)g_free, (GDestroyNotify)g_free );
 }
@@ -94,17 +96,25 @@ void gtkamlStartElement ( GtkamlSaxParserUserData * data , const xmlChar *name, 
                                const xmlChar ** attrs )
 {
 	GtkamlState * state = g_list_last(data->state_stack)->data;
+	ValaClass * base_class;
 	
 	switch (state->current_state) {
 		/* NB: each case has to push a meaningful state */
 		case GTKAML_CLASS_STATE: 
-			gtkaml_generate_class( data, (gchar*)name );
-			gtkaml_state_push( &data->state_stack, g_strdup("this"), GTKAML_CONTAINER_STATE );
+			//inspect packages
+			vala_code_context_add_package(data->vala_context, "gtk+-2.0");
+			//begin the class definition
+			base_class = gtkaml_generator_new_class( data, g_strdup("Generated"), (gchar*)name );
+			if (!base_class) {
+				g_message("Class not found: %s", name);
+				xmlStopParser((void*)data);
+			}
+			gtkaml_state_push( &data->state_stack, g_strdup("this"), base_class , GTKAML_CONTAINER_STATE );
 			break;
 		case GTKAML_CONTAINER_STATE:
 			if ( g_ascii_isupper( (gchar)name[0] ) ) {
-				gtkaml_generate_member( data, (gchar*)name, nb_attributes, (const gchar **) attrs );
-				gtkaml_state_push( &data->state_stack, 0, GTKAML_NONCONTAINER_STATE );
+				gtkaml_generator_new_member( data, (gchar*)name, nb_attributes, (const gchar **) attrs );
+				gtkaml_state_push( &data->state_stack, 0, 0, GTKAML_NONCONTAINER_STATE );
 			} else {
 				//else state push ( GTKAML_ATTRIBUTE_STATE )
 				//fallback for characters() to determine attribute name
@@ -182,11 +192,14 @@ GString * gtkaml_parse_test( gchar * gtkaml, int size )
 	return vala;
 }
 
-GString * gtkaml_parse_sax2_test( gchar * gtkaml, int size )
+GString * gtkaml_parser_sax2_test( gchar * gtkaml, gulong size, ValaCodeContext* vala_context )
 {
 	GtkamlSaxParserUserData * user_data = g_new0( GtkamlSaxParserUserData, 1 );
+	
 	GString * vala = g_string_new("");
 
+	user_data->vala_context = vala_context;
+	
 	LIBXML_TEST_VERSION;
 	//xmlSAXVersion( &gtkamlSaxParser, 2 );
 	gtkamlSaxParser.initialized = XML_SAX2_MAGIC;
@@ -208,5 +221,4 @@ GString * gtkaml_parse_sax2_test( gchar * gtkaml, int size )
 	g_free( user_data );
 	xmlCleanupParser();
 	return vala;
-
 }

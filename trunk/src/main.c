@@ -96,7 +96,7 @@ int main( int argc, char *argv[] )
 		return 1;
 	}
 
-	GString * result = gtkaml_parse_sax2_test( g_mapped_file_get_contents(mapped_input), g_mapped_file_get_length(mapped_input) );
+	GString * result = gtkaml_parser_sax2_test( g_mapped_file_get_contents(mapped_input), g_mapped_file_get_length(mapped_input) );
 	
 	g_mapped_file_free( mapped_input );
 	

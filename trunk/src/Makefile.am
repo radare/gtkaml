@@ -33,7 +33,7 @@ gtkamlc_SOURCES = \
 	gtkaml-codegenerator.h 
 
 gtkaml.vala.stamp: $(gtkaml_VALASOURCES)
-	$(VALAC) $(VALACFLAGS) --vapidir /usr/share/vala/vapi --pkg vala-1.0 $^ 
+	$(VALAC) $(VALACFLAGS) --pkg vala-1.0 $^ 
 	touch $@
 
 gtkamlc_LDADD = \

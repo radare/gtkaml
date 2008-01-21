@@ -29,8 +29,10 @@ gtkamlc_SOURCES = \
 
 gtkamlc.vala.stamp: $(gtkaml_VALASOURCES)
 	$(VALAC) $(VALACFLAGS) --pkg libxml-2.0 --pkg vala-1.0 $^ 
-	sed -i 's/GTKAML_DUMMY/VALA_CODE_VISITOR/g' GtkamlSAXParser.c
-	sed -i 's/\tGtkamlDummy/\tValaParser/g' GtkamlSAXParser.h
+	sed 's/GTKAML_DUMMY/VALA_CODE_VISITOR/g' < GtkamlSAXParser.c > GtkamlSAXParser.c.ed
+	mv -f GtkamlSAXParser.c.ed GtkamlSAXParser.c
+	sed 's/\tGtkamlDummy/\tValaParser/g' < GtkamlSAXParser.h > GtkamlSAXParser.h.ed
+	mv -f GtkamlSAXParser.h.ed GtkamlSAXParser.h
 	touch $@
 
 gtkamlc_LDADD = \

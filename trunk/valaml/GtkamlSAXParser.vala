@@ -1,15 +1,33 @@
 using GLib;
 using Vala;
+using Gee;
+
+private enum Gtkaml.StateId {
+	SAX_PARSER_INITIAL_STATE = 0, /* here we generate the class declaration, based on current tag, attributes and namespaces */
+	SAX_PARSER_CONTAINER_STATE,   /* then we can add things to the current container, based on current tag and attributes */
+	SAX_PARSER_ATTRIBUTE_STATE,   /* the characters are then used as value, string literal - we need the current instance.property */
+}
+
 
 public class Gtkaml.SAXParser : GLib.Object {
+	/** the only reason this is public is to be accessible from the [Import]s */
 	public pointer xmlCtxt;
 	private CodeContext context {get;set;}
 	private SourceFile source_file {get;set;}
+	private ArrayList<State> states = new ArrayList<State>();
+	
+	/* this is the output */
+	private string class_start;
+	private string members_declarations;
+	private string code;
+	private string construct_body;
+	private string class_end;
+	
+	/* this is the Flying Spaghetti Monster */
+	
 
 	
-	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file)
-	{
-	}
+	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file) { }
 	
 	public void parse ()
 	{
@@ -34,14 +52,15 @@ public class Gtkaml.SAXParser : GLib.Object {
 	                         int nb_attributes, int nb_defaulted, string[] attributes)
 	{
 		//stdout.printf("Found element:%s\n", localname);
-		var attrs = parse_attributes( attributes, nb_attributes );
+		/*var attrs = parse_attributes( attributes, nb_attributes );
 		var nss = parse_namespaces( namespaces, nb_namespaces );
 		foreach (Attribute attr in attrs) {
 			stdout.printf ("%s:%s:%s:%s\n", attr.localname, attr.prefix, attr.URI, attr.value);
 		}
 		foreach (Namespace ns in nss) {
 			stdout.printf ("%s:%s\n", ns.prefix, ns.URI);
-		}
+		}*/
+		State current_state = states.get(states.size-1);
 		
 	}
 	

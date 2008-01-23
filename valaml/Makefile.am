@@ -22,6 +22,7 @@ valamlc_VALASOURCES = \
 	GtkamlCodeGenerator.vala \
 	GtkamlNamespace.vala \
 	GtkamlAttribute.vala \
+	GtkamlState.vala \
 	GtkamlDummyParser.vala
 
 valamlc_SOURCES = \

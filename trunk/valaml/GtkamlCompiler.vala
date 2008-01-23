@@ -204,7 +204,7 @@ class Gtkaml.Compiler : Object
 			return quit ();
 		}
 		
-		var parser = new Gtkaml.SAXParser ();
+		var parser = new Gtkaml.Parser ();
 		parser.parse (context);
 		
 		if (Report.get_errors () > 0) {

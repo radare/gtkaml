@@ -9,6 +9,7 @@ private enum Gtkaml.StateId {
 }
 
 
+/** this is the Flying Spaghetti Monster */
 public class Gtkaml.SAXParser : GLib.Object {
 	/** the only reason this is public is to be accessible from the [Import]s */
 	public pointer xmlCtxt;
@@ -23,9 +24,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	private string construct_body;
 	private string class_end;
 	
-	/* this is the Flying Spaghetti Monster */
 	
-
 	
 	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file) { }
 	
@@ -60,7 +59,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		foreach (Namespace ns in nss) {
 			stdout.printf ("%s:%s\n", ns.prefix, ns.URI);
 		}*/
-		State current_state = states.get(states.size-1);
+		State current_state = states.get((states as Gee.List).size-1);
 		
 	}
 	

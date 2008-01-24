@@ -1,4 +1,4 @@
-<Gtk:Window xmlns='http://gtkaml.org/0.1/glib-2.0' xmlns:Gtk='gtk+-2.0'>
+<Gtk:Window title="gigel" skip_pager_hint="true" xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' transient_for="gg">
 	<![CDATA[
 		ala bala = portocala;
 	]]>

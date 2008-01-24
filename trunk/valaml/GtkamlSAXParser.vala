@@ -15,7 +15,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	public pointer xmlCtxt;
 	private CodeContext context {get;set;}
 	private SourceFile source_file {get;set;}
-	private ArrayList<State> states = new ArrayList<State>();
+	private StateStack states = new StateStack();
 	
 	/* this is the output */
 	private string class_start;
@@ -59,7 +59,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 		foreach (Namespace ns in nss) {
 			stdout.printf ("%s:%s\n", ns.prefix, ns.URI);
 		}*/
-		State current_state = states.get((states as Gee.List).size-1);
 		
 	}
 	

@@ -1,28 +1,36 @@
 using GLib;
 using Gee;
 
-public class Gtkaml.StateStack : Gee.ArrayList<State>
+public class Gtkaml.StateStack : GLib.Object
 {
+	private Gee.ArrayList<State> array_list {get;set;}
+	
+	public StateStack() {
+		array_list = new ArrayList<State>();
+	}
+		
+	
 	public void push (State element) {
-		add (element);
+		array_list.add (element);
 	}
 	
 	public State peek() {
 		State element = null;
-		int size = (this as Gee.List).size;
+		int size = (array_list as Gee.List).size;
 		if (size != 0) {
-			element = base.get (size - 1);
+			element = array_list.get (size - 1);
 		}
 		return element;
 	}		
 	
 	public State pop() {
 		State element = peek();
-		if (element) {
-			remove(element);
+		if (element != null) {
+			array_list.remove(element);
 			return element;
 		} else {
 			return null;
 		}
 	}
+	
 }

@@ -1,8 +1,15 @@
 using GLib;
 using Vala;
 
+public enum Gtkaml.StateId {
+	SAX_PARSER_INITIAL_STATE = 0, /* here we generate the class declaration, based on current tag, attributes and namespaces */
+	SAX_PARSER_CONTAINER_STATE,   /* then we can add things to the current container, based on current tag and attributes */
+	SAX_PARSER_ATTRIBUTE_STATE,   /* the characters are then used as value, string literal - we need the current instance.property */
+}
+
 public class Gtkaml.State : GLib.Object
 {
-	public string parent_identifier;
-	public Class parent;
+	public StateId state_id;
+	public string parent_name;
+	public Vala.Class parent_type;
 }

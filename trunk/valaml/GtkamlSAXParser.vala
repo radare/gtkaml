@@ -2,11 +2,6 @@ using GLib;
 using Vala;
 using Gee;
 
-private enum Gtkaml.StateId {
-	SAX_PARSER_INITIAL_STATE = 0, /* here we generate the class declaration, based on current tag, attributes and namespaces */
-	SAX_PARSER_CONTAINER_STATE,   /* then we can add things to the current container, based on current tag and attributes */
-	SAX_PARSER_ATTRIBUTE_STATE,   /* the characters are then used as value, string literal - we need the current instance.property */
-}
 
 
 /** this is the Flying Spaghetti Monster */
@@ -15,26 +10,28 @@ public class Gtkaml.SAXParser : GLib.Object {
 	public pointer xmlCtxt;
 	private CodeContext context {get;set;}
 	private SourceFile source_file {get;set;}
-	private StateStack states = new StateStack();
-	
-	/* this is the output */
-	private string class_start;
-	private string members_declarations;
-	private string code;
-	private string construct_body;
-	private string class_end;
+	private StateStack states {get;set;}
+	private CodeGenerator code_generator {get;set;}	
+
 	
 	
 	
-	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file) { }
+	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file) {
+		states = new StateStack ();	
+		code_generator = new CodeGenerator (context, source_file);
+	}
 	
 	public void parse ()
 	{
 		string contents;
 		ulong length;
+		State initial_state = new State();
 		
+		initial_state.state_id = StateId.SAX_PARSER_INITIAL_STATE;
+		states.push (initial_state);
 		
 		FileUtils.get_contents (source_file.filename, out contents, out length);
+		
 		start_parsing (contents, length);
 		
 	}
@@ -59,6 +56,14 @@ public class Gtkaml.SAXParser : GLib.Object {
 		foreach (Namespace ns in nss) {
 			stdout.printf ("%s:%s\n", ns.prefix, ns.URI);
 		}*/
+		State state = states.peek();
+		switch (state.state_id) {
+			case StateId.SAX_PARSER_INITIAL_STATE:
+				code_generator.class_definition_start("Gigel",null);
+			default:
+				stderr.printf("Invalid state\n");
+				stop_parsing();
+		}
 		
 	}
 	

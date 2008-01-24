@@ -9,7 +9,8 @@ public enum Gtkaml.StateId {
 
 public class Gtkaml.State : GLib.Object
 {
-	public StateId state_id;
-	public string parent_name;
-	public Vala.Class parent_type;
+	public StateId state_id {get;set;}
+	public string parent_name {get;set;}
+	public Vala.Class parent_type {get;set;}
+	public State (construct StateId state_id, construct string parent_name, construct Class parent_type){}
 }

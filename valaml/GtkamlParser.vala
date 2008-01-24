@@ -43,13 +43,13 @@ public class Gtkaml.Parser : Gtkaml.Dummy {
 	{
 		SAXParser parser = new SAXParser (context, source_file); 
 		parser.parse();
-		/*SourceFile dummy_file = new SourceFile( context, source_file.filename );
+		SourceFile dummy_file = new SourceFile( context, source_file.filename );
 		
-		NamespaceReference ns_ref = new NamespaceReference("Gtk", new SourceReference(source_file));
+		/*NamespaceReference ns_ref = new NamespaceReference("Gtk", new SourceReference(source_file));
 		
 		dummy_file.add_using_directive(ns_ref);
 		
-		foreach (Namespace ns in context.root.get_namespaces()) {
+		foreach (Vala.Namespace ns in context.root.get_namespaces()) {
 			stdout.printf("%s\n", ns.name );
 			if (ns.name == "Gtk")
 			{

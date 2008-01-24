@@ -2,7 +2,7 @@
 #include <libxml/parser.h>
 
 
-void gtkaml_sax_parser_start_parsing( GtkamlSAXParser * self, const char* contents, gulong length )
+void gtkaml_sax_parser_start_parsing (GtkamlSAXParser * self, const char* contents, gulong length)
 {
 	xmlSAXHandler *saxHandler;
 	xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr)self->xmlCtxt;
@@ -22,7 +22,17 @@ void gtkaml_sax_parser_start_parsing( GtkamlSAXParser * self, const char* conten
 	g_free (saxHandler);
 }
 
-void gtkaml_sax_parser_stop_parsing( GtkamlSAXParser * self )
+void gtkaml_sax_parser_stop_parsing (GtkamlSAXParser * self)
 {
 	xmlStopParser(self->xmlCtxt);
+}
+
+void gtkaml_sax_parser_column_number (GtkamlSAXParser * self)
+{
+	return xmlSAX2GetColumnNumber (self->xmlCtxt);
+}
+
+void gtkaml_sax_parser_line_number (GtkamlSAXParser * self)
+{
+	return xmlSAX2GetLineNumber (self->xmlCtxt);
 }

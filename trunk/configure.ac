@@ -38,7 +38,6 @@ AC_SUBST(VALA_LIBS)
 
 AC_CONFIG_FILES([
 Makefile
-examples/Makefile
 src/Makefile
 valaml/Makefile
 ])

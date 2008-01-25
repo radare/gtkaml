@@ -13,8 +13,8 @@ AM_CFLAGS = \
 
 bin_PROGRAMS = gtkamlexamples
 
-gtkamlexamples_SOURCES = \
-	example.c
+gtkamlexamples_SOURCES = 
+	
 
 gtkamlexamples_LDADD = \
 	$(GTK_LIBS)

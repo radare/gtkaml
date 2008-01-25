@@ -1,8 +1,12 @@
-<Gtk:Window title="gigel" skip_pager_hint="true" xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' transient_for="gg">
+<Gtk:Window title="gigel" 
+	skip_pager_hint="true" 
+	xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' 
+	transient_for="{null}"
+	>
 	<![CDATA[
 		ala bala = portocala;
 	]]>
-	<Gtk:Label text='gogu' id='gigel&lt;'/>
+	<Gtk:Label text='gogu' />
 	<Gtk:Label text='gigel'/>
 	<![CDATA[
 		ala2 bala2 = portocala2;

@@ -8,6 +8,7 @@
 	]]>
 	<Gtk:Label text='gogu' />
 	<Gtk:Label text='gigel'/>
+	<Gtk:Label text='gigel' gtkaml:public="z"/>
 	<![CDATA[
 		ala2 bala2 = portocala2;
 	]]>

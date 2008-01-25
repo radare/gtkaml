@@ -188,18 +188,21 @@ public class Gtkaml.SAXParser : GLib.Object {
 	private void set_members (Gee.List<Attribute> attrs, string identifier, Class clazz) {
 		
 		foreach (Attribute attr in attrs) {
-			Symbol m = SemanticAnalyzer.symbol_lookup_inherited(clazz, attr.localname);
-			if (m == null) {
-				Report.error ( create_source_reference (), "%s not found!\n".printf(attr.localname));
-				stop_parsing ();
-			} else if (m is Property) {
-				Property p = m as Property;
-				code_generator.set_identifier_property (identifier, p.name, p.type_reference, attr.value);
-			} else if (m is Field) {
-				Field f = m as Field;
-				code_generator.set_identifier_property (identifier, f.name, f.type_reference, attr.value);
-			}
-					
+			stdout.printf ("%s prefix %s\n", attr.localname, attr.prefix);
+			if (attr.prefix == null)
+			{
+				Symbol m = SemanticAnalyzer.symbol_lookup_inherited(clazz, attr.localname);
+				if (m == null) {
+					Report.error ( create_source_reference (), "%s not found!\n".printf(attr.localname));
+					stop_parsing ();
+				} else if (m is Property) {
+					Property p = m as Property;
+					code_generator.set_identifier_property (identifier, p.name, p.type_reference, attr.value);
+				} else if (m is Field) {
+					Field f = m as Field;
+					code_generator.set_identifier_property (identifier, f.name, f.type_reference, attr.value);
+				}
+			}					
 		}
 	}		
 		

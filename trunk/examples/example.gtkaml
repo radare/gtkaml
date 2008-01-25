@@ -1,6 +1,0 @@
-<Window>
-	<Script><[!CDATA[
-		string j;
-		for (j="a"; j<"z"; j[0]++) ;
-	]]></Script>
-</Window>

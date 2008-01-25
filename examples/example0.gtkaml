@@ -1,6 +1,8 @@
 <Gtk:Window title="gigel" 
 	skip_pager_hint="true" 
 	xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' 
+	gtkaml:construct = "asdf" gtkaml:construsct = "asdf" 
+	xmlns:gtkaml="http://gtkaml.org/0.1"
 	transient_for="{null}"
 	>
 	<![CDATA[

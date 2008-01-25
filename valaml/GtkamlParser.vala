@@ -26,11 +26,12 @@ public class Gtkaml.Parser : Gtkaml.Dummy {
 		if (FileUtils.test (gtkaml_source_file.filename, FileTest.EXISTS)) {
 			try {
 				string vala_contents = call_sax_parser( this.context, gtkaml_source_file );				
-				string vala_filename = gtkaml_source_file.filename.ndup (gtkaml_source_file.filename.len () - ".gtkaml".len ()) + ".vala";
-				//if (false) 
+				if (vala_contents != null) { 
+					string vala_filename = gtkaml_source_file.filename.ndup (gtkaml_source_file.filename.len () - ".gtkaml".len ()) + ".vala";
 					FileUtils.set_contents (vala_filename, vala_contents);
-				gtkaml_source_file.filename = vala_filename;
-				base.visit_source_file (gtkaml_source_file);
+					gtkaml_source_file.filename = vala_filename;
+					base.visit_source_file (gtkaml_source_file);
+				} 
 			} catch (FileError e) {
 				Report.error (null, e.message);
 			}

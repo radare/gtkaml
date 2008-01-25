@@ -36,9 +36,13 @@ public class Gtkaml.SAXParser : GLib.Object {
 		FileUtils.get_contents (source_file.filename, out contents, out length);
 		
 		start_parsing (contents, length);
-		stdout.printf("====GENERATED CODE====\n%s\n====\n", code_generator.yield());
-		
-		return code_generator.yield();
+
+		string result = code_generator.yield();
+
+		if (Report.get_errors() != 0)
+			return null;
+
+		return result;
 	}
 	
 	[Import]
@@ -48,10 +52,10 @@ public class Gtkaml.SAXParser : GLib.Object {
 	public void stop_parsing();
 	
 	[Import]
-	private int column_number();
+	public int column_number();
 	
 	[Import]
-	private int line_number();
+	public int line_number();
 
 
 	[NoArrayLength]
@@ -68,20 +72,29 @@ public class Gtkaml.SAXParser : GLib.Object {
 				{	//Frist Tag! - that means, add "using" directives first
 					var nss = parse_namespaces (namespaces, nb_namespaces);
 					foreach (Namespace ns in nss) {
-						string[] uri_definition = ns.URI.split_set(":");	
-						var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
-						source_file.add_using_directive (namespace_reference);
-						code_generator.add_using (uri_definition[0]);
-						if (ns.prefix != null)
-							prefixes_namespaces.set (ns.prefix, uri_definition[0]); 
+						if (ns.prefix != null && ns.prefix != "gtkaml")
+						{
+							string[] uri_definition = ns.URI.split_set(":");	
+							var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
+							source_file.add_using_directive (namespace_reference);
+							code_generator.add_using (uri_definition[0]);
+							if (ns.prefix != null)
+								prefixes_namespaces.set (ns.prefix, uri_definition[0]); 
+						}
 					}
 					//now generate the class definition
 					Class clazz = lookup_class (prefix, localname);
+					if (clazz == null) {
+ 						Report.error ( create_source_reference (), "%s not a class".printf (localname));
+						stop_parsing (); 
+						return;
+					}
 					code_generator.class_definition (prefix_to_namespace(null), "Gigel",  prefix_to_namespace(prefix), clazz.name);
 
 					//generate attributes definition
 					var attrs = parse_attributes (attributes, nb_attributes);
 					set_members (attrs, "this", clazz);
+					
 					//push next state
 					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, "this", clazz));
 					break;
@@ -97,7 +110,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 					
 					var attrs = parse_attributes (attributes, nb_attributes);
 					foreach (Attribute attr in attrs) {
-						if (attr.prefix=="gtkaml" && (attr.localname=="public" || attr.localname=="private")) {
+						if (attr.prefix!=null && attr.prefix=="gtkaml" && (attr.localname=="public" || attr.localname=="private")) {
 							if (identifier!=null) {
 								Report.error (source_reference, "Cannot have multiple identifier names:%s".printf(attr.localname));
 								stop_parsing (); return;
@@ -109,13 +122,13 @@ public class Gtkaml.SAXParser : GLib.Object {
 					
 					if (identifier == null) {
 						//generate a name for the identifier
-						identifier = clazz.name.down ();
+						identifier = clazz.name.down (clazz.name.len ());
 						if (generated_identifiers_counter.contains (identifier)) {
 							counter = generated_identifiers_counter.get (identifier);
 						}
 						identifier = "_%s%d".printf (identifier, counter);
 						counter++;
-						generated_identifiers_counter.set (clazz.name.down (), counter);
+						generated_identifiers_counter.set (clazz.name.down (clazz.name.len ()), counter);
 					}
 
 					//generate member definition
@@ -130,7 +143,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 				}
 			default:
 				stderr.printf("Invalid state\n");
-				stop_parsing();
+				stop_parsing(); return;
 		}
 		
 	}
@@ -153,7 +166,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return prefixes_namespaces.get (prefix);		
 	}
 	
-	private SourceReference create_source_reference () {
+	public SourceReference create_source_reference () {
 		return new SourceReference (source_file, line_number (), column_number (), line_number (), column_number ()); 
 	}
 	
@@ -168,17 +181,18 @@ public class Gtkaml.SAXParser : GLib.Object {
 				}
 			}
 		}
-		Report.error ( create_source_reference (), "%s not a class".printf(name));
-		stop_parsing ();
+		return null;
 	}
 	
 	private Method lookup_constructors (Class clazz)
 	{
 		foreach (Method m in clazz.get_methods ()) {
-			if (m.name.has_prefix (".new")) {
+			if (m is CreationMethod) {
+				var cm = m as CreationMethod;
 				stdout.printf ("%s->%s\n", clazz.name, m.name);
-				foreach (FormalParameter p in m.get_parameters ()) {
-					stdout.printf("(%s:%s\n", p.name , (p.type_reference.data_type as Symbol).name);
+				foreach (FormalParameter p in cm.get_parameters ()) {
+					UnresolvedType utype = p.type_reference as UnresolvedType;
+					stdout.printf("(%s:%s\n", p.name , utype.type_name);
 				}
 			}
 		}
@@ -188,7 +202,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 	private void set_members (Gee.List<Attribute> attrs, string identifier, Class clazz) {
 		
 		foreach (Attribute attr in attrs) {
-			stdout.printf ("%s prefix %s\n", attr.localname, attr.prefix);
 			if (attr.prefix == null)
 			{
 				Symbol m = SemanticAnalyzer.symbol_lookup_inherited(clazz, attr.localname);

@@ -1,1 +1,0 @@
-/usr/lib/vala/gen-introspect --namespace=example2 -U__GNUC__ -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include   /home/vlad/Projects/gtkaml/trunk/examples/example2.h > example2.gi 

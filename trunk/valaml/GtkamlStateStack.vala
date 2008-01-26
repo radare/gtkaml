@@ -14,11 +14,11 @@ public class Gtkaml.StateStack : GLib.Object
 		array_list.add (element);
 	}
 	
-	public State peek() {
+	public State peek (int backtrack = 0) {
 		State element = null;
 		int size = (array_list as Gee.List).size;
 		if (size != 0) {
-			element = array_list.get (size - 1);
+			element = array_list.get (size - 1 - backtrack);
 		}
 		return element;
 	}		

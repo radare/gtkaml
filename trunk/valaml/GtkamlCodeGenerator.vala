@@ -48,7 +48,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 				source_value = value.substring (1, value.len () - 2);
 			} else if (utype.type_name == "string") {
 				source_value = "\"" + value + "\"";
-			} else if (utype.type_name == "boolean") {
+			} else if (utype.type_name == "bool") {
 				if (value != "true" && value != "false") {
 					Report.error (null, "'%s' is not a boolean literal".printf (value));
 				}
@@ -68,11 +68,50 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		members_declarations += type + " " + identifier + ";\n";
 	}
 	
-	public void construct_member (string identifier, string type_ns, string type)
+	public void construct_member (string identifier, string type_ns, Class clazz)
 	{
 		construct_body += "\n\t\t" + identifier + " = new ";
 		if (type_ns != null) 
 			construct_body += type_ns + ".";
-		construct_body += type + "();\n";
+		construct_body += clazz.name + " (" + construct_default_parameters (clazz) + ");\n";
+		
 	}
+
+	public void add_code (string value)
+	{
+		code += value + "\n";
+	}
+
+	private string construct_default_parameters (Class clazz)
+	{
+		foreach (Method m in clazz.get_methods ()) {
+			if (m is CreationMethod) {
+				var cm = m as CreationMethod;
+				if (cm != null && cm.name == ".new") {
+					string parameters = ""; bool last_comma = false;
+					foreach (FormalParameter p in cm.get_parameters ()) {
+						UnresolvedType utype = p.type_reference as UnresolvedType;
+						if (utype.nullable) {
+							parameters += "null,";
+							last_comma = true;
+						} else if (utype.type_name == "string") {
+							parameters += "null,";
+							last_comma = true;
+						} else if (utype.type_name == "bool") {
+							parameters += "false,";
+							last_comma = true;
+						} else { //value type not boolean?
+							parameters += "0,";
+							last_comma = true;
+						}
+					}
+					if (last_comma)
+						parameters = parameters.ndup (parameters.len () - 1);
+					return parameters;
+				}
+			}
+		}
+		return "";
+	}
+	
 }

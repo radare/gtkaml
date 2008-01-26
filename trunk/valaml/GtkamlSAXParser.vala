@@ -213,6 +213,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 				} else if (m is Property) {
 					Property p = m as Property;
 					code_generator.set_identifier_property (identifier, p.name, p.type_reference, attr.value);
+				} else if (m is Vala.Signal) {
+					var s = m as Vala.Signal;
+					code_generator.set_identifier_signal (identifier, s.name, s.get_parameters (), attr.value);
 				} else if (m is Field) {
 					Field f = m as Field;
 					code_generator.set_identifier_property (identifier, f.name, f.type_reference, attr.value);

@@ -19,6 +19,16 @@ public class Gtkaml.Parser : Gtkaml.Dummy {
 			base.visit_source_file (source_file);
 		} else if (source_file.filename.has_suffix (".gtkaml")) {
 			parse_gtkaml_file (source_file);
+			/* resume_parsing () test
+			 * does not work because we would have to be called from parser.y _before_ $end is encountered
+			 * /
+			SourceFile fragment1 = new SourceFile (context, "examples/fragment1.vala");
+			string fragment2;
+			ulong length;
+			FileUtils.get_contents ("examples/fragment2.vala", out fragment2, out length);
+			base.visit_source_file (fragment1);
+			resume_parsing (fragment2, length);
+			*/
 		}
 	}
 	
@@ -48,5 +58,6 @@ public class Gtkaml.Parser : Gtkaml.Dummy {
 		
 	}
 	
-	
+	[Import]
+	public void resume_parsing (string buffer, ulong length);
 }

@@ -1,5 +1,6 @@
 using GLib;
 using Vala;
+using Gee;
 
 public class Gtkaml.CodeGenerator : GLib.Object {
 	/* this is the output */
@@ -58,6 +59,25 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			}
 			construct_body += "\t\t%s.%s = %s;\n".printf (identifier, property, source_value);
 		}
+	}
+	
+	public void set_identifier_signal (string identifier, string signal_name, Collection<FormalParameter> parameters, string body)
+	{
+		string[] parameter_names = new string[0];
+		int i = 0;
+		string parameters_joined = "";
+		
+		if (parameters.size > 0) {
+			parameter_names.resize (parameters.size);
+			
+			foreach (FormalParameter p in parameters) {
+				parameter_names[i] = p.name;
+			}
+			parameters_joined = string.joinv (",", parameter_names);
+		}		
+		
+		
+		construct_body += "\t\t%s.%s += (%s) => { %s; };".printf (identifier, signal_name, parameters_joined, body);
 	}
 	
 	public void add_member (string identifier, string type_ns, string type, bool is_public)

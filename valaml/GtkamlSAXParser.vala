@@ -57,6 +57,16 @@ public class Gtkaml.SAXParser : GLib.Object {
 	[Import]
 	public int line_number();
 
+	public void cdata (string value, int len )
+	{
+		State state = states.peek ();
+		if (state.state_id != StateId.SAX_PARSER_INITIAL_STATE){
+			State previous_state = states.peek (1);
+			if (state.state_id != StateId.SAX_PARSER_INITIAL_STATE) {
+				code_generator.add_code (value.ndup (len));
+			}
+		}
+	}
 
 	[NoArrayLength]
 	public void start_element (string localname, string prefix, 
@@ -72,7 +82,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 				{	//Frist Tag! - that means, add "using" directives first
 					var nss = parse_namespaces (namespaces, nb_namespaces);
 					foreach (Namespace ns in nss) {
-						if (ns.prefix != null && ns.prefix != "gtkaml")
+						if ( ns.prefix == null || ns.prefix != null && ns.prefix != "gtkaml")
 						{
 							string[] uri_definition = ns.URI.split_set(":");	
 							var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
@@ -133,8 +143,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 
 					//generate member definition
 					code_generator.add_member (identifier, prefix_to_namespace(prefix), clazz.name, public_identifier);
+					
 					//generate constructor
-					code_generator.construct_member (identifier, prefix_to_namespace(prefix), clazz.name);
+					code_generator.construct_member (identifier, prefix_to_namespace(prefix), clazz);
 					
 					set_members (attrs, identifier, clazz);
 					//push next state
@@ -176,7 +187,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 			if (ns.name == xmlNamespace) {
 				Symbol s = ns.scope.lookup (name);
 				if (s is Class) {
-					//lookup_constructors (s as Class);
 					return s as Class;
 				}
 			}
@@ -184,20 +194,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return null;
 	}
 	
-	private Method lookup_constructors (Class clazz)
-	{
-		foreach (Method m in clazz.get_methods ()) {
-			if (m is CreationMethod) {
-				var cm = m as CreationMethod;
-				stdout.printf ("%s->%s\n", clazz.name, m.name);
-				foreach (FormalParameter p in cm.get_parameters ()) {
-					UnresolvedType utype = p.type_reference as UnresolvedType;
-					stdout.printf("(%s:%s\n", p.name , utype.type_name);
-				}
-			}
-		}
-		return null;
-	}
+
 	
 	private void set_members (Gee.List<Attribute> attrs, string identifier, Class clazz) {
 		

@@ -1,17 +1,18 @@
 <Gtk:Window title="gigel" 
 	skip_pager_hint="true" 
 	xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' 
-	gtkaml:construct = "asdf" gtkaml:construsct = "asdf" 
 	xmlns:gtkaml="http://gtkaml.org/0.1"
 	transient_for="{null}"
 	>
-	<![CDATA[
-		ala bala = portocala;
-	]]>
+<![CDATA[
+	public int times_clicked = 0;
+]]>
 	<Gtk:Label text='gogu' />
 	<Gtk:Label text='gigel'/>
 	<Gtk:Label text='gigel' gtkaml:public="z"/>
-	<![CDATA[
-		ala2 bala2 = portocala2;
-	]]>
+<![CDATA[
+	void clicked () {
+		stdout.printf("clicked!\n");
+	}
+]]>
 </Gtk:Window>

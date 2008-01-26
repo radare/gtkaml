@@ -102,6 +102,11 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		code += value + "\n";
 	}
 
+	public void add_to_parent (string identifier, string parent_name, Class parent_type)
+	{
+		construct_body += "\t\t%s.add (%s);\n".printf (parent_name, identifier);
+	}
+
 	private string construct_default_parameters (Class clazz)
 	{
 		foreach (Method m in clazz.get_methods ()) {

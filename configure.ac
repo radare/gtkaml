@@ -40,6 +40,7 @@ AC_CONFIG_FILES([
 Makefile
 src/Makefile
 valaml/Makefile
+examples/Makefile
 ])
 
 AC_OUTPUT

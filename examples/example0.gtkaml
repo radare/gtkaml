@@ -3,16 +3,28 @@
 	xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' 
 	xmlns:gtkaml="http://gtkaml.org/0.1"
 	transient_for="{null}"
+	
 	>
 <![CDATA[
 	public int times_clicked = 0;
 ]]>
-	<Gtk:Label text='gogu' />
-	<Gtk:Label text='gigel'/>
-	<Gtk:Label text='gigel' gtkaml:public="z"/>
+	<Gtk:Label text='gogu' gtkaml:public="l1" />
+	<Gtk:Button label='gigel' clicked="clicked()" gtkaml:public="b1"/>
+	<Gtk:Label text='gigel' gtkaml:public="l2"/>
 <![CDATA[
 	void clicked () {
 		stdout.printf("clicked!\n");
+	}
+	static int main (string[] args) {
+		Gtk.init (ref args);
+		Gigel g = new Gigel();
+		g.destroy+=Gtk.main_quit;
+		//g.add( g.l1 );
+		//g.add( g.b1 );
+		//g.add (g.l2);
+		g.show_all ();
+		Gtk.main ();
+		return 0;
 	}
 ]]>
 </Gtk:Window>

@@ -1,5 +1,7 @@
 #include "GtkamlSAXParser.h"
 #include <libxml/parser.h>
+#include <glib.h>
+
 
 void gtkaml_sax_parser_error (GtkamlSAXParser * self, char * message, ...)
 {

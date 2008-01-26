@@ -30,7 +30,8 @@ valamlc_SOURCES = \
 	valamlc.vala.stamp \
 	$(valamlc_VALASOURCES:.vala=.c) \
 	$(valamlc_VALASOURCES:.vala=.h) \
-	GtkamlSAXParser_startParsing.c
+	GtkamlParser_resume_parsing.c \
+	GtkamlSAXParser_start_parsing.c
 
 valamlc.vala.stamp: $(valamlc_VALASOURCES)
 	$(VALAC) $(VALACFLAGS) --pkg libxml-2.0 --pkg vala-1.0 $^ 

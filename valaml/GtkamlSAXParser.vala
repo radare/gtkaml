@@ -152,7 +152,12 @@ public class Gtkaml.SAXParser : GLib.Object {
 					//generate constructor
 					code_generator.construct_member (identifier, prefix_to_namespace(prefix), clazz);
 					
+					//generate initialization code					
 					set_members (attrs, identifier, clazz);
+					
+					//add to parent
+					code_generator.add_to_parent (identifier, state.parent_name, state.parent_type);
+					
 					//push next state
 					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, identifier, clazz));
 					break;

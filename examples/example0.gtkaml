@@ -8,20 +8,19 @@
 <![CDATA[
 	public int times_clicked = 0;
 ]]>
-	<Gtk:Label text='gogu' gtkaml:public="l1" />
-	<Gtk:Button label='gigel' clicked="clicked()" gtkaml:public="b1"/>
-	<Gtk:Label text='gigel' gtkaml:public="l2"/>
+	<Gtk:HBox>
+		<Gtk:Label text='gogu' gtkaml:public="l1" />
+		<Gtk:Button label='gigel' clicked="clicked()" gtkaml:public="b1"/>
+		<Gtk:Label text='gigel' gtkaml:public="l2"/>
+	</Gtk:HBox>
 <![CDATA[
 	void clicked () {
 		stdout.printf("clicked!\n");
 	}
 	static int main (string[] args) {
 		Gtk.init (ref args);
-		Gigel g = new Gigel();
+		var g = new Gigel();
 		g.destroy+=Gtk.main_quit;
-		//g.add( g.l1 );
-		//g.add( g.b1 );
-		//g.add (g.l2);
 		g.show_all ();
 		Gtk.main ();
 		return 0;

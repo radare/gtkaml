@@ -4,7 +4,7 @@ using Gee;
 
 
 
-/** this is the Flying Spaghetti Monster */
+/* this is the Flying Spaghetti Monster */
 public class Gtkaml.SAXParser : GLib.Object {
 	/** the only reason this is public is to be accessible from the [Import]s */
 	public pointer xmlCtxt;
@@ -26,14 +26,19 @@ public class Gtkaml.SAXParser : GLib.Object {
 		prefixes_namespaces = new Gee.HashMap<string,string> (str_hash, str_equal, str_equal);
 	}
 	
-	public string parse ()
+	public virtual string parse ()
 	{
 		string contents;
 		ulong length;
 		
-		states.push (new State (StateId.SAX_PARSER_INITIAL_STATE, null, null));
-		
-		FileUtils.get_contents (source_file.filename, out contents, out length);
+		try {
+			FileUtils.get_contents ( this.source_file.filename, out contents, out length);
+		} catch (FileError e) {
+			Report.error (null, e.message);
+			return null;
+		}
+		State initial_state = new State (StateId.SAX_PARSER_INITIAL_STATE, null, null);
+		states.push (initial_state); 
 		
 		start_parsing (contents, length);
 

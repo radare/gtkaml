@@ -9,12 +9,12 @@
 	public int times_clicked = 0;
 ]]>
 	<Gtk:HBox>
-		<Gtk:Label text='gogu' gtkaml:public="l1" />
+		<Gtk:Label label='gogu' gtkaml:public="l1" />
 		<Gtk:Button label='gigel' clicked="clicked()" gtkaml:public="b1"/>
-		<Gtk:Label text='gigel' gtkaml:public="l2"/>
+		<Gtk:Label label='gigel' gtkaml:public="l2"/>
 	</Gtk:HBox>
 <![CDATA[
-	void clicked () {
+	static void clicked () {
 		stdout.printf("clicked!\n");
 	}
 	static int main (string[] args) {

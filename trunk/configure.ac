@@ -9,7 +9,7 @@ AC_PROG_CC
 
 AC_PATH_PROG(VALAC, valac, valac)
 AC_SUBST(VALAC)
-AC_SUBST([VALACFLAGS])
+AC_DEFINE([VALAFLAGS], VALAFLAGS, "valac flags")
 
 AC_DIAGNOSE([obsolete],[AM_PROG_CC_STDC:
 	your code should no longer depend upon `am_cv_prog_cc_stdc', but upon

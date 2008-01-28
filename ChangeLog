@@ -1,7 +1,12 @@
-
 2008-01-25
 Generates the following
 	- private/public data members
 	- blank constructors calls
 	- sets attributes (only from the direct class, not inherited ones): 
 			properies and fields.
+
+2008-01-29
+Added:
+	- signals (always wrapped in a lambda function)
+	- attributes from the whole hierarchy
+	- examples/ added to project

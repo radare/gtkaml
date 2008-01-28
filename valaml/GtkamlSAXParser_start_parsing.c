@@ -32,7 +32,6 @@ void gtkaml_sax_parser_start_parsing (GtkamlSAXParser * self, const char* conten
 	saxHandler->endElementNs = (endElementNsSAX2Func)gtkaml_sax_parser_end_element;
 	saxHandler->cdataBlock = (cdataBlockSAXFunc)gtkaml_sax_parser_cdata_block;
 	saxHandler->error = (errorSAXFunc)gtkaml_sax_parser_error;
-	saxHandler->cdataBlock = (cdataBlockSAXFunc)gtkaml_sax_parser_cdata;
 	saxHandler->initialized = XML_SAX2_MAGIC;
 	
 	self->xmlCtxt = xmlCreatePushParserCtxt (saxHandler, self, contents, 0, NULL);

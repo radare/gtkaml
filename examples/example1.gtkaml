@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Window xmlns="Gtk:gtk+-2.0" xmlns:GLib="GLib">
+	<VBox>
+        <Label use_markup="true" label="&lt;b&gt;Dialog Box Title Here&lt;/b&gt;">
+        </Label>
+        <Notebook tab_vborder="1">
+                <Label>
+                        
+                </Label>
+                <HBox>
+                        <Label label="Nothing to see here, please move along" />
+                </HBox>
+        </Notebook>
+        <HButtonBox>
+                <Button label="_abort" clicked="on_click()"/>
+                <Button label="gtk-redo" use_stock="true"/>
+                <Button label="fail"/>
+        </HButtonBox>
+	</VBox>
+<![CDATA[
+        private static void on_click() { message("you clicked me!"); }
+
+		static int main ( string [] args ) {
+			Gtk.init (ref args);
+			Gigel g = new Gigel();
+			g.destroy += Gtk.main_quit;
+			g.show_all ();
+			Gtk.main ();
+		}
+			
+			
+]]>
+</Window>

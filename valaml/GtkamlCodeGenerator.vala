@@ -116,22 +116,23 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 					string parameters = ""; bool last_comma = false;
 					foreach (FormalParameter p in cm.get_parameters ()) {
 						UnresolvedType utype = p.type_reference as UnresolvedType;
+						
 						if (utype.nullable) {
-							parameters += "null,";
+							parameters += "null, ";
 							last_comma = true;
 						} else if (utype.type_name == "string") {
-							parameters += "null,";
+							parameters += "null, ";
 							last_comma = true;
 						} else if (utype.type_name == "bool") {
-							parameters += "false,";
+							parameters += "false, ";
 							last_comma = true;
 						} else { //value type not boolean?
-							parameters += "0,";
+							parameters += "0, ";
 							last_comma = true;
 						}
 					}
 					if (last_comma)
-						parameters = parameters.ndup (parameters.len () - 1);
+						parameters = parameters.ndup (parameters.len () - 2);
 					return parameters;
 				}
 			}

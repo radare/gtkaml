@@ -93,10 +93,17 @@ public class Gtkaml.SAXParser : GLib.Object {
 							var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
 							source_file.add_using_directive (namespace_reference);
 							code_generator.add_using (uri_definition[0]);
+							//run the AttributeProcessor on this namespace
+							//var attributeProcessor = new Vala.AttributeProcessor ();
+							//attributeProcessor.visit_source_file (source_file);
 							if (ns.prefix != null)
 								prefixes_namespaces.set (ns.prefix, uri_definition[0]); 
 						}
 					}
+					//now run the SymbolResolver which will surely break things!
+					//var symbolResolver = new SymbolResolver ();
+					//symbolResolver.resolve (context);
+					
 					//now generate the class definition
 					Class clazz = lookup_class (prefix, localname);
 					if (clazz == null) {
@@ -107,7 +114,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 					code_generator.class_definition (prefix_to_namespace(null), "Gigel",  prefix_to_namespace(prefix), clazz.name);
 
 					//generate attributes definition
-					var attrs = parse_attributes (attributes, nb_attributes);
 					set_members (attrs, "this", clazz);
 					
 					//push next state
@@ -123,7 +129,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 					
 					Class clazz = lookup_class (prefix, localname);
 					
-					var attrs = parse_attributes (attributes, nb_attributes);
 					foreach (Attribute attr in attrs) {
 						if (attr.prefix!=null && attr.prefix=="gtkaml" && (attr.localname=="public" || attr.localname=="private")) {
 							if (identifier!=null) {

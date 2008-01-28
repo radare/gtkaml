@@ -11,22 +11,34 @@ AM_CFLAGS = \
 	 -g \
 	 $(GTK_CFLAGS)
 
-BUILT_SOURCES = example0.stamp
+BUILT_SOURCES = example0.stamp example1.stamp
 
-bin_PROGRAMS = example0
+bin_PROGRAMS = example0 example1
 
 example0_GTKAMLSOURCES = \
 	example0.gtkaml
 
 example0_SOURCES = \
-	example0.h \
-	example0.c \
+	$(example0_GTKAMLSOURCES:.gtkaml=.c) \
+	$(example0_GTKAMLSOURCES:.gtkaml=.h) \
 	example0.stamp	
 
 example0_LDADD = \
 	$(GTK_LIBS)
 
-example0.stamp : $(example0_GTKAMLSOURCES)
+example1_GTKAMLSOURCES = \
+	example1.gtkaml
+
+example0_SOURCES = \
+	$(example1_GTKAMLSOURCES:.gtkaml=.c) \
+	$(example1_GTKAMLSOURCES:.gtkaml=.h) \
+	example1.stamp	
+
+example1_LDADD = \
+	$(GTK_LIBS)
+
+
+example1.stamp : $(example1_GTKAMLSOURCES)
 	../valaml/valamlc $(VALAFLAGS) --pkg gtk+-2.0 $^
 	touch $@
 

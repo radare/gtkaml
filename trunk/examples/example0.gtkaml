@@ -15,7 +15,7 @@
 	</Gtk:HBox>
 <![CDATA[
 	static void clicked () {
-		stdout.printf("clicked!\n");
+		message("clicked!\n");
 	}
 	static int main (string[] args) {
 		Gtk.init (ref args);

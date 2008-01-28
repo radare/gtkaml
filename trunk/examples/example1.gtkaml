@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Window xmlns="Gtk:gtk+-2.0" xmlns:GLib="GLib">
+<Window xmlns="Gtk:gtk+-2.0" xmlns:GLib="GLib" xmlns:gtkaml="http://gtkaml.org/0.1" title="gtktest" destroy="Gtk.main_quit()">
 	<VBox>
         <Label use_markup="true" label="&lt;b&gt;Dialog Box Title Here&lt;/b&gt;">
         </Label>
-        <Notebook tab_vborder="1">
+        <Notebook can_focus="false" tab_vborder="1">
                 <Label>
                         
                 </Label>
@@ -12,7 +12,7 @@
                 </HBox>
         </Notebook>
         <HButtonBox>
-                <Button label="_abort" clicked="on_click()"/>
+                <Button use_mnemonic="true" label="_abort" clicked="on_click()"/>
                 <Button label="gtk-redo" use_stock="true"/>
                 <Button label="fail"/>
         </HButtonBox>
@@ -23,9 +23,9 @@
 		static int main ( string [] args ) {
 			Gtk.init (ref args);
 			Gigel g = new Gigel();
-			g.destroy += Gtk.main_quit;
 			g.show_all ();
 			Gtk.main ();
+			return 0;	
 		}
 			
 			

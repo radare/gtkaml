@@ -1,9 +1,6 @@
-<Gtk:Window title="gigel" 
-	skip_pager_hint="true" 
+<Gtk:VBox 
 	xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' 
 	xmlns:gtkaml="http://gtkaml.org/0.1"
-	transient_for="{null}"
-	
 	>
 <![CDATA[
 	public int times_clicked = 0;
@@ -19,11 +16,16 @@
 	}
 	static int main (string[] args) {
 		Gtk.init (ref args);
+		var w = new Gtk.Window (WindowType.TOPLEVEL);
 		var g = new Gigel();
+	
 		g.destroy+=Gtk.main_quit;
 		g.show_all ();
+		w.add (g);
+		w.show ();
+		
 		Gtk.main ();
 		return 0;
 	}
 ]]>
-</Gtk:Window>
+</Gtk:VBox>

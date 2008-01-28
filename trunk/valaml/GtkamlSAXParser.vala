@@ -62,17 +62,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 	[Import]
 	public int line_number();
 
-	public void cdata (string value, int len )
-	{
-		State state = states.peek ();
-		if (state.state_id != StateId.SAX_PARSER_INITIAL_STATE){
-			State previous_state = states.peek (1);
-			if (state.state_id != StateId.SAX_PARSER_INITIAL_STATE) {
-				code_generator.add_code (value.ndup (len));
-			}
-		}
-	}
-
 	[NoArrayLength]
 	public void start_element (string localname, string prefix, 
 	                         string URI, int nb_namespaces, string[] namespaces, 
@@ -93,16 +82,10 @@ public class Gtkaml.SAXParser : GLib.Object {
 							var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
 							source_file.add_using_directive (namespace_reference);
 							code_generator.add_using (uri_definition[0]);
-							//run the AttributeProcessor on this namespace
-							//var attributeProcessor = new Vala.AttributeProcessor ();
-							//attributeProcessor.visit_source_file (source_file);
 							if (ns.prefix != null)
 								prefixes_namespaces.set (ns.prefix, uri_definition[0]); 
 						}
 					}
-					//now run the SymbolResolver which will surely break things!
-					//var symbolResolver = new SymbolResolver ();
-					//symbolResolver.resolve (context);
 					
 					//now generate the class definition
 					Class clazz = lookup_class (prefix, localname);
@@ -176,13 +159,19 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	public void end_element (string localname, string prefix, string URI)
 	{
-		//stdout.printf("End element:%s\n", localname );
 		states.pop();
 	}
 	
 	public void cdata_block (string cdata, int len)
 	{
-		//stdout.printf("cdata:%s", cdata.ndup(len));
+		State state = states.peek ();
+		if (state.state_id != StateId.SAX_PARSER_INITIAL_STATE){
+			State previous_state = states.peek (1);
+			if (state.state_id != StateId.SAX_PARSER_INITIAL_STATE) {
+				code_generator.add_code (cdata.ndup (len));
+			}
+		}
+
 	}
 	
 	private string prefix_to_namespace (string prefix)
@@ -198,7 +187,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	private Class lookup_class (string xmlNamespace, string name)
 	{
-		foreach (Vala.Namespace ns in context.root.get_namespaces()) {
+		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
 			if (ns.name == xmlNamespace) {
 				Symbol s = ns.scope.lookup (name);
 				if (s is Class) {
@@ -209,14 +198,25 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return null;
 	}
 	
-
+	private Interface lookup_interface (string xmlNamespace, string name)
+	{
+		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
+			if (ns.name == xmlNamespace) {
+				Symbol s = ns.scope.lookup (name);
+				if (s is Interface) {
+					return s as Interface;
+				}
+			}
+		}
+		return null;
+	}
 	
 	private void set_members (Gee.List<Attribute> attrs, string identifier, Class clazz) {
 		
 		foreach (Attribute attr in attrs) {
 			if (attr.prefix == null)
 			{
-				Symbol m = SemanticAnalyzer.symbol_lookup_inherited(clazz, attr.localname);
+				Member m = member_lookup_inherited(clazz, attr.localname);
 				if (m == null) {
 					Report.error ( create_source_reference (), "%s not found!\n".printf(attr.localname));
 					stop_parsing ();
@@ -233,7 +233,36 @@ public class Gtkaml.SAXParser : GLib.Object {
 			}					
 		}
 	}		
+	
+	public Member member_lookup_inherited (Typesymbol typesymbol, string member) {
+		Member result = typesymbol.scope.lookup (member) as Member;
+		if (result != null)
+			return result;
 		
+		Collection<DataType> base_types;
+		
+		if (typesymbol is Class)
+			base_types = (typesymbol as Class).get_base_types ();
+		else if (typesymbol is Interface)
+			base_types = (typesymbol as Interface).get_prerequisites ();
+
+		foreach (DataType dt in base_types) {
+			if (dt is UnresolvedType) //and it should be
+			{
+				var name = (dt as UnresolvedType).type_name;
+				var ns = (dt as UnresolvedType).namespace_name;
+				var clazz = lookup_class (ns, name);
+				if (clazz != null && ( null != (result = member_lookup_inherited (clazz, member) as Member)))
+					return result;
+				var iface = lookup_interface (ns, name);
+				if (iface != null && ( null != (result = member_lookup_inherited (iface, member) as Member)))
+					return result;
+			}
+		}
+		return null;
+	}								
+					
+	
 	[NoArrayLength]
 	private Gee.List<Attribute> parse_attributes (string[] attributes, int nb_attributes)
 	{	

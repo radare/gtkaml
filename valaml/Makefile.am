@@ -34,7 +34,7 @@ valamlc_SOURCES = \
 	GtkamlSAXParser_start_parsing.c
 
 valamlc.vala.stamp: $(valamlc_VALASOURCES)
-	$(VALAC) $(VALACFLAGS) --pkg libxml-2.0 --pkg vala-1.0 $^ 
+	$(VALAC) $(VALAFLAGS) --pkg libxml-2.0 --pkg vala-1.0 $^ 
 	sed 's/GTKAML_DUMMY/VALA_CODE_VISITOR/g' < GtkamlParser.c > GtkamlParser.c.ed
 	mv -f GtkamlParser.c.ed GtkamlParser.c
 	sed 's/\tGtkamlDummy/\tValaParser/g' < GtkamlParser.h > GtkamlParser.h.ed

@@ -27,7 +27,7 @@ example0_LDADD = \
 	$(GTK_LIBS)
 
 example0.stamp : $(example0_GTKAMLSOURCES)
-	../valaml/valamlc --pkg gtk+-2.0 $^
+	../valaml/valamlc $(VALAFLAGS) --pkg gtk+-2.0 $^
 	touch $@
 
 

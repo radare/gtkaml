@@ -8,9 +8,9 @@ void gtkaml_sax_parser_error (GtkamlSAXParser * self, char * message, ...)
 	va_list args;
 	gchar * output;
 	
-	int errno = ((xmlParserCtxtPtr)self->xmlCtxt)->errNo;
+	int errNo = ((xmlParserCtxtPtr)self->xmlCtxt)->errNo;
 	
-	if (errno == XML_ERR_DOCUMENT_EMPTY)
+	if (errNo == XML_ERR_DOCUMENT_EMPTY)
 		return;
 	
 	va_start (args, message);

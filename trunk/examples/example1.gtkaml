@@ -12,7 +12,7 @@
                 </HBox>
         </Notebook>
         <HButtonBox>
-                <Button use_mnemonic="true" label="_abort" clicked="on_click()"/>
+                <Button label="_abort" clicked="on_click()"/>
                 <Button label="gtk-redo" use_stock="true"/>
                 <Button label="fail"/>
         </HButtonBox>

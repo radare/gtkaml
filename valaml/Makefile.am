@@ -25,11 +25,11 @@ valamlc_VALASOURCES = \
 	GtkamlState.vala \
 	GtkamlStateStack.vala \
 	GtkamlClassDefinition.vala \
-	GtkamlContainerDefinition.vala \
 	GtkamlAttribute.vala \
 	GtkamlSimpleAttribute.vala \
 	GtkamlComplexAttribute.vala \
 	GtkamlMethod.vala \
+	GtkamlImplicitsResolver.vala \
 	GtkamlDummyParser.vala
 
 valamlc_SOURCES = \

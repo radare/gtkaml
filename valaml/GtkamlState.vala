@@ -12,5 +12,7 @@ public class Gtkaml.State : GLib.Object
 	public StateId state_id {get;set;}
 	public string parent_name {get;set;}
 	public Vala.Class parent_type {get;set;}
-	public State (construct StateId state_id, construct string parent_name, construct Class parent_type){}
+	public ClassDefinition class_definition {get;set;}
+	public State (construct StateId state_id, construct string parent_name, construct Class parent_type, construct ClassDefinition class_definition)
+	{}
 }

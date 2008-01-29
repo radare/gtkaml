@@ -17,13 +17,14 @@ public class Gtkaml.SAXParser : GLib.Object {
 	/** prefix/vala.namespace pair */
 	private Gee.Map<string,string> prefixes_namespaces {get;set;}
 
-	
+	private ClassDefinition root_class_definition {get;set;}	
 	
 	
 	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file) {
 		states = new StateStack ();	
 		code_generator = new Gtkaml.CodeGenerator (context, source_file);
 		prefixes_namespaces = new Gee.HashMap<string,string> (str_hash, str_equal, str_equal);
+		root_class_definition = null;
 	}
 	
 	public virtual string parse ()
@@ -37,7 +38,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 			Report.error (null, e.message);
 			return null;
 		}
-		State initial_state = new State (StateId.SAX_PARSER_INITIAL_STATE, null, null);
+		State initial_state = new State (StateId.SAX_PARSER_INITIAL_STATE, null, null, null);
 		states.push (initial_state); 
 		
 		start_parsing (contents, length);
@@ -47,6 +48,10 @@ public class Gtkaml.SAXParser : GLib.Object {
 		if (Report.get_errors() != 0)
 			return null;
 
+		//var implicitsResolver = new ImplicitsResolver (context, "key-file-name"); 
+		//implicitsResolver.resolve (root_class_definition);
+
+		//REMOVE ME 
 		return result;
 	}
 	
@@ -90,24 +95,32 @@ public class Gtkaml.SAXParser : GLib.Object {
 					//now generate the class definition
 					Class clazz = lookup_class (prefix, localname);
 					if (clazz == null) {
- 						Report.error ( create_source_reference (), "%s not a class".printf (localname));
+ 						Report.error ( source_reference, "%s not a class".printf (localname));
 						stop_parsing (); 
 						return;
 					}
+					
+					this.root_class_definition = new ClassDefinition (source_reference, "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
+					foreach (XmlAttribute attr in attrs)
+						root_class_definition.add_attribute (new SimpleAttribute (attr.localname, attr.value));
+					
+					//MOVE ME - no reference to code generator here, please
 					code_generator.class_definition (prefix_to_namespace(null), "Gigel", prefix_to_namespace(prefix), clazz.name);
 
-					//generate attributes definition
+					//REMOVE ME
 					set_members (attrs, "this", clazz);
 					
 					//push next state
-					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, "this", clazz));
+					//REMOVE identifier and clazz
+					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, "this", clazz, root_class_definition));
 					break;
 				}
 			case StateId.SAX_PARSER_CONTAINER_STATE:	
 				{
 					//get a name for the identifier
 					string identifier = null;
-					bool public_identifier = false;
+					DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;
+					
 					int counter = 0;
 					
 					Class clazz = lookup_class (prefix, localname);
@@ -119,7 +132,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 								stop_parsing (); return;
 							}
 							identifier = attr.value;
-							public_identifier = (attr.localname=="public");
+							identifier_scope = (attr.localname=="public") ? DefinitionScope.PUBLIC : DefinitionScope.PRIVATE;
 						}
 					}
 					
@@ -134,20 +147,25 @@ public class Gtkaml.SAXParser : GLib.Object {
 						generated_identifiers_counter.set (clazz.name.down (clazz.name.len ()), counter);
 					}
 
-					//generate member definition
-					code_generator.add_member (identifier, prefix_to_namespace(prefix), clazz.name, public_identifier);
+					var class_definition = new ClassDefinition (source_reference, identifier, prefix_to_namespace (prefix), clazz, identifier_scope, state.class_definition);
+					foreach (XmlAttribute attr in attrs)
+						class_definition.add_attribute (new SimpleAttribute (attr.localname, attr.value));
+
+					//REMOVE ME
+					code_generator.add_member (identifier, prefix_to_namespace(prefix), clazz.name, identifier_scope == DefinitionScope.PUBLIC);
 					
-					//generate constructor
+					//REMOVE ME
 					code_generator.construct_member (identifier, prefix_to_namespace(prefix), clazz);
 					
 					//generate initialization code					
 					set_members (attrs, identifier, clazz);
 					
-					//add to parent
+					//REMOVE ME
 					code_generator.add_to_parent (identifier, state.parent_name, state.parent_type);
 					
 					//push next state
-					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, identifier, clazz));
+					//REMOVE identifier and clazz
+					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, identifier, clazz, class_definition));
 					break;
 				}
 			default:
@@ -198,6 +216,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return null;
 	}
 	
+	//REMOVE ME
 	private Interface lookup_interface (string xmlNamespace, string name)
 	{
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
@@ -211,6 +230,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return null;
 	}
 	
+	//REMOVE ME
 	private void set_members (Gee.List<XmlAttribute> attrs, string identifier, Class clazz) {
 		
 		foreach (XmlAttribute attr in attrs) {
@@ -234,6 +254,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		}
 	}		
 	
+	//REMOVE ME
 	public Member member_lookup_inherited (Typesymbol typesymbol, string member) {
 		Member result = typesymbol.scope.lookup (member) as Member;
 		if (result != null)

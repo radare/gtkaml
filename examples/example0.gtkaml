@@ -1,11 +1,11 @@
-<Gtk:VBox 
+<Gtk:VBox homogeneous="true" spacing="0"
 	xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' 
 	xmlns:gtkaml="http://gtkaml.org/0.1"
 	>
 <![CDATA[
 	public int times_clicked = 0;
 ]]>
-	<Gtk:HBox>
+	<Gtk:HBox homogeneous="true" spacing="0">
 		<Gtk:Label label='gogu' gtkaml:public="l1" />
 		<Gtk:Button label='gigel' clicked="clicked()" gtkaml:public="b1"/>
 		<Gtk:Label label='gigel' gtkaml:public="l2"/>

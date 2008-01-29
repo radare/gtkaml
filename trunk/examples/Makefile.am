@@ -9,7 +9,7 @@ AM_CFLAGS = \
 	 $(GTK_CFLAGS)
 
 BUILT_SOURCES = example0.stamp example1.stamp
-
+EXTRA_DIST = example0.stamp example1.stamp
 bin_PROGRAMS = example0 example1
 
 ## Example 0

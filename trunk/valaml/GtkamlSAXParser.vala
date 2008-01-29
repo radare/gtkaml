@@ -75,7 +75,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 			case StateId.SAX_PARSER_INITIAL_STATE:
 				{	//Frist Tag! - that means, add "using" directives first
 					var nss = parse_namespaces (namespaces, nb_namespaces);
-					foreach (Namespace ns in nss) {
+					foreach (XmlNamespace ns in nss) {
 						if ( ns.prefix == null || ns.prefix != null && ns.prefix != "gtkaml")
 						{
 							string[] uri_definition = ns.URI.split_set(":");	
@@ -94,7 +94,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 						stop_parsing (); 
 						return;
 					}
-					code_generator.class_definition (prefix_to_namespace(null), "Gigel",  prefix_to_namespace(prefix), clazz.name);
+					code_generator.class_definition (prefix_to_namespace(null), "Gigel", prefix_to_namespace(prefix), clazz.name);
 
 					//generate attributes definition
 					set_members (attrs, "this", clazz);
@@ -112,7 +112,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 					
 					Class clazz = lookup_class (prefix, localname);
 					
-					foreach (Attribute attr in attrs) {
+					foreach (XmlAttribute attr in attrs) {
 						if (attr.prefix!=null && attr.prefix=="gtkaml" && (attr.localname=="public" || attr.localname=="private")) {
 							if (identifier!=null) {
 								Report.error (source_reference, "Cannot have multiple identifier names:%s".printf(attr.localname));
@@ -211,9 +211,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return null;
 	}
 	
-	private void set_members (Gee.List<Attribute> attrs, string identifier, Class clazz) {
+	private void set_members (Gee.List<XmlAttribute> attrs, string identifier, Class clazz) {
 		
-		foreach (Attribute attr in attrs) {
+		foreach (XmlAttribute attr in attrs) {
 			if (attr.prefix == null)
 			{
 				Member m = member_lookup_inherited(clazz, attr.localname);
@@ -264,14 +264,14 @@ public class Gtkaml.SAXParser : GLib.Object {
 					
 	
 	[NoArrayLength]
-	private Gee.List<Attribute> parse_attributes (string[] attributes, int nb_attributes)
+	private Gee.List<XmlAttribute> parse_attributes (string[] attributes, int nb_attributes)
 	{	
 		int walker = 0;
 		string end;
-		var attribute_list = new Gee.ArrayList<Attribute> ();
+		var attribute_list = new Gee.ArrayList<XmlAttribute> ();
 		for (int i = 0; i < nb_attributes; i++)
 		{
-			var attr = new Attribute ();
+			var attr = new XmlAttribute ();
 			attr.localname = attributes[walker];
 			attr.prefix = attributes[walker+1];
 			attr.URI = attributes[walker+2];
@@ -285,13 +285,13 @@ public class Gtkaml.SAXParser : GLib.Object {
 	}
 	
 	[NoArrayLength]
-	private Gee.List<Namespace> parse_namespaces (string[] namespaces, int nb_namespaces)
+	private Gee.List<XmlNamespace> parse_namespaces (string[] namespaces, int nb_namespaces)
 	{
 		int walker = 0;
-		var namespace_list = new Gee.ArrayList<Namespace> ();
+		var namespace_list = new Gee.ArrayList<XmlNamespace> ();
 		for (int i = 0; i < nb_namespaces; i++) 
 		{
-			var ns = new Namespace ();
+			var ns = new XmlNamespace ();
 			ns.prefix = namespaces[walker];
 			ns.URI = namespaces[walker+1];
 			namespace_list.add (ns);

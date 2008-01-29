@@ -20,10 +20,16 @@ valamlc_VALASOURCES = \
 	GtkamlSAXParser.vala \
 	GtkamlParser.vala \
 	GtkamlCodeGenerator.vala \
-	GtkamlNamespace.vala \
-	GtkamlAttribute.vala \
+	GtkamlXmlNamespace.vala \
+	GtkamlXmlAttribute.vala \
 	GtkamlState.vala \
 	GtkamlStateStack.vala \
+	GtkamlClassDefinition.vala \
+	GtkamlContainerDefinition.vala \
+	GtkamlAttribute.vala \
+	GtkamlSimpleAttribute.vala \
+	GtkamlComplexAttribute.vala \
+	GtkamlMethod.vala \
 	GtkamlDummyParser.vala
 
 valamlc_SOURCES = \

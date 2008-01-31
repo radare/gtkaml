@@ -17,12 +17,12 @@ public class Gtkaml.SAXParser : GLib.Object {
 	/** prefix/vala.namespace pair */
 	private Gee.Map<string,string> prefixes_namespaces {get;set;}
 
-	private ClassDefinition root_class_definition {get;set;}	
+	private RootClassDefinition root_class_definition {get;set;}	
 	
 	
 	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file) {
 		states = new StateStack ();	
-		code_generator = new Gtkaml.CodeGenerator (context, source_file);
+		code_generator = new Gtkaml.CodeGenerator (context);
 		prefixes_namespaces = new Gee.HashMap<string,string> (str_hash, str_equal, str_equal);
 		root_class_definition = null;
 	}
@@ -48,8 +48,12 @@ public class Gtkaml.SAXParser : GLib.Object {
 		if (Report.get_errors() != 0)
 			return null;
 
-		//var implicitsResolver = new ImplicitsResolver (context, "key-file-name"); 
-		//implicitsResolver.resolve (root_class_definition);
+		var implicitsResolver = new ImplicitsResolver (context, "key-file-name"); 
+		implicitsResolver.resolve (root_class_definition);
+
+		var codeGenerator = new CodeGenerator (context);
+		codeGenerator.generate (root_class_definition);
+		stderr.printf ("===GENERATED CODE==\n%s\n", codeGenerator.yield ());
 
 		//REMOVE ME 
 		return result;
@@ -78,7 +82,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 		var source_reference = create_source_reference ();
 		switch (state.state_id) {
 			case StateId.SAX_PARSER_INITIAL_STATE:
-				{	//Frist Tag! - that means, add "using" directives first
+				{	
+					
+					//Frist Tag! - that means, add "using" directives first
 					var nss = parse_namespaces (namespaces, nb_namespaces);
 					foreach (XmlNamespace ns in nss) {
 						if ( ns.prefix == null || ns.prefix != null && ns.prefix != "gtkaml")
@@ -86,9 +92,10 @@ public class Gtkaml.SAXParser : GLib.Object {
 							string[] uri_definition = ns.URI.split_set(":");	
 							var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
 							source_file.add_using_directive (namespace_reference);
-							code_generator.add_using (uri_definition[0]);
-							if (ns.prefix != null)
-								prefixes_namespaces.set (ns.prefix, uri_definition[0]); 
+							//remove me
+							code_generator.add_using (ns.prefix, uri_definition[0]);
+							prefixes_namespaces.set ((ns.prefix==null)?"":ns.prefix, uri_definition[0]); 
+							root_class_definition.add_using (ns.prefix, uri_definition[0]);
 						}
 					}
 					
@@ -100,10 +107,13 @@ public class Gtkaml.SAXParser : GLib.Object {
 						return;
 					}
 					
-					this.root_class_definition = new ClassDefinition (source_reference, "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
+					this.root_class_definition = new RootClassDefinition (source_reference, "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
+					this.root_class_definition.prefixes_namespaces = prefixes_namespaces;
 					foreach (XmlAttribute attr in attrs)
 						root_class_definition.add_attribute (new SimpleAttribute (attr.localname, attr.value));
 					
+					
+								
 					//MOVE ME - no reference to code generator here, please
 					code_generator.class_definition (prefix_to_namespace(null), "Gigel", prefix_to_namespace(prefix), clazz.name);
 
@@ -150,6 +160,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 					var class_definition = new ClassDefinition (source_reference, identifier, prefix_to_namespace (prefix), clazz, identifier_scope, state.class_definition);
 					foreach (XmlAttribute attr in attrs)
 						class_definition.add_attribute (new SimpleAttribute (attr.localname, attr.value));
+					
 
 					//REMOVE ME
 					code_generator.add_member (identifier, prefix_to_namespace(prefix), clazz.name, identifier_scope == DefinitionScope.PUBLIC);
@@ -191,12 +202,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 		}
 
 	}
-	
+
+	//REMOVE ME	
 	private string prefix_to_namespace (string prefix)
 	{
-		if (prefix == null)
-			return null;
-		return prefixes_namespaces.get (prefix);		
+		return prefixes_namespaces.get ((prefix==null)?"":prefix);		
 	}
 	
 	public SourceReference create_source_reference () {

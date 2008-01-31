@@ -21,7 +21,9 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	public void resolve (ClassDefinition !class_definition)
 	{
 		//first determine which constructor shall we use
-		determine_construct_method (class_definition);
+		class_definition.construct_method = determine_construct_method (class_definition);
+		if (class_definition.construct_method == null) 
+			return;
 		foreach (ClassDefinition child in class_definition.container_children)
 			resolve (child); 
 	}
@@ -30,6 +32,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	{
 		Gee.List<Vala.Method> constructors = lookup_constructors (class_definition.base_type);
 		Vala.Method determined_constructor = null;
+		Gtkaml.Method new_method = new Gtkaml.Method ();
 		Gee.List<Gtkaml.Attribute> to_remove = new Gee.ArrayList<Gtkaml.Attribute> ();
 		//pass one: see if we find an explicitly specified constructor
 		foreach (Vala.Method constructor in constructors) {
@@ -45,8 +48,39 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_constructor == null) {
 			determined_constructor = implicit_method_choice (class_definition, constructors, "constructor");
+			if (determined_constructor == null)
+				return null;
 		}
-		return null;
+		
+		//move the attributes from class definition to construct method
+		new_method = new ConstructMethod ();
+		var parameters = determine_method_parameter_names (class_definition, determined_constructor);
+		foreach (string parameter in parameters) {
+			foreach (Gtkaml.Attribute attr in class_definition.attrs) {
+				if (parameter == attr.name) {
+					new_method.parameter_attributes.add (attr);
+					to_remove.add (attr);
+					break;
+				}
+			}
+		}		
+		
+		if ( (parameters as Gee.List<string).size () != 
+		class_definition.construct_method.parameter_attributes.size ())
+		{
+			string message = "";
+			int i = 0;
+			for (; i < parameters.size -1; i++)
+				message += parameters.get (i) + ",";
+			message += parameters.get (i);
+			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("Constructor", class_definition.full_name, message));
+			return null;
+		}
+		
+		foreach (Attribute attr in to_remove)
+			class_definition.attrs.remove (attr);
+		
+		return new_method;
 	}
 	
 	/**
@@ -111,7 +145,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 
 	public Gee.List<string> determine_method_parameter_names (ClassDefinition! class_definition, Vala.Method! method)
 	{
-		var result = new Gee.ArrayList<string> ();
+		var result = new Gee.ArrayList<string> (str_equal);
 		string method_name= method.name;
 		if (method.name.has_prefix (".new"))
 			method_name = method.name.substring(1, method.name.len () - 1);

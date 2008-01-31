@@ -8,24 +8,67 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	private string class_start = new string();
 	private string members_declarations = new string();
 	private string code = new string();
+	private string constructors = new string();
 	private string construct_body = new string();
 	private string class_end = new string();
 	
 	private CodeContext context {get;set;}
-	private SourceFile source_code {get;set;}
+	private RootClassDefinition root_class_definition {get;set;}
 	
-	public CodeGenerator(construct CodeContext context, construct SourceFile source_code) {}
+	
+	public CodeGenerator (construct CodeContext context) {}
+	
+	public void generate (ClassDefinition! class_definition)
+	{
+		if (class_definition is RootClassDefinition) {
+			root_class_definition = class_definition as RootClassDefinition;
+			this.generate_root_class_definition (null/*class:namespace*/, "ClassColonName" /*class:name*/, class_definition.ns, class_definition.base_type.name );
+		} else {
+			generate_constructor (class_definition);
+		}
+		foreach (ClassDefinition child in class_definition.container_children)
+			generate (child);
+	}
+	
+	private void generate_root_class_definition (string ns, string!name, string base_ns, string! base_name)
+	{
+		class_start += "public class ";
+		if (ns!=null) class_start += ns + ".";
+		class_start += name + " : ";
+		if (base_ns!=null) class_start += base_ns + ".";
+		class_start += base_name + "\n{\n";
+		class_end += "}\n";
+	}
+	
+	public void generate_constructor (ClassDefinition class_definition)
+	{
+		var construct_name = class_definition.construct_method.name;
+		construct_name.substring (".new".len (), construct_name.len () - ".new".len ());
+		constructors += class_definition.name + " = new " + class_definition.full_name + construct_name + " (";
+		foreach (Attribute attr in class_definition.construct_method.parameter_attributes)
+			if (attr is SimpleAttribute) 
+				constructors += (attr as SimpleAttribute).value + ", ";
+		constructors += ");\n";			
+	}
 	
 	public string yield() {
 		return using_directives + class_start + members_declarations + code +
-		"\tconstruct {\n" + construct_body + "\t}\n" + class_end;
+		"\tconstruct {\n" + constructors + "\n" + construct_body + "\t}\n" + class_end;
 	}
 	
-	public void add_using (string ns)
+	private string prefix_to_namespace (string prefix)
 	{
+		return root_class_definition.prefixes_namespaces.get ((prefix==null)?"":prefix);		
+	}
+
+	
+	public void add_using (string prefix, string ns)
+	{
+		//remove me
 		using_directives+="using %s;\n".printf(ns);
 	}
 	
+	//remove me
 	public void class_definition (string ns, string name, string parent_ns, string parent_name) {
 		class_start += "public class ";
 		if (ns!=null) class_start += ns + ".";

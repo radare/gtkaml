@@ -7,7 +7,7 @@
 ]]>
 	<Gtk:HBox homogeneous="true" spacing="0">
 		<Gtk:Label label='gogu' gtkaml:public="l1" />
-		<Gtk:Button label='gigel' clicked="clicked()" gtkaml:public="b1"/>
+		<Gtk:Button label='gigel' clicked="clicked()" gtkaml:private="b1"/>
 		<Gtk:Label label='gigel' gtkaml:public="l2"/>
 	</Gtk:HBox>
 <![CDATA[

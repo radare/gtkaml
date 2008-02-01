@@ -17,14 +17,18 @@ public class Gtkaml.SAXParser : GLib.Object {
 	/** prefix/vala.namespace pair */
 	private Gee.Map<string,string> prefixes_namespaces {get;set;}
 
-	private RootClassDefinition root_class_definition {get;set;}	
+	private Gtkaml.RootClassDefinition root_class_definition {get;set;}	
 	
 	
 	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file) {
+		
+	}
+	
+	construct {
 		states = new StateStack ();	
-		code_generator = new Gtkaml.CodeGenerator (context);
 		prefixes_namespaces = new Gee.HashMap<string,string> (str_hash, str_equal, str_equal);
 		root_class_definition = null;
+		code_generator = new Gtkaml.CodeGenerator (context);
 	}
 	
 	public virtual string parse ()
@@ -38,25 +42,28 @@ public class Gtkaml.SAXParser : GLib.Object {
 			Report.error (null, e.message);
 			return null;
 		}
-		State initial_state = new State (StateId.SAX_PARSER_INITIAL_STATE, null, null, null);
-		states.push (initial_state); 
-		
-		start_parsing (contents, length);
 
-		string result = code_generator.yield();
+		State initial_state = new State (StateId.SAX_PARSER_INITIAL_STATE, null);
+		states.push (initial_state); 
+		start_parsing (contents, length);
 
 		if (Report.get_errors() != 0)
 			return null;
 
 		var implicitsResolver = new ImplicitsResolver (context, "key-file-name"); 
 		implicitsResolver.resolve (root_class_definition);
+		
+		if (Report.get_errors() != 0)
+			return null;
 
-		var codeGenerator = new CodeGenerator (context);
-		codeGenerator.generate (root_class_definition);
-		stderr.printf ("===GENERATED CODE==\n%s\n", codeGenerator.yield ());
+		
+		code_generator.generate (root_class_definition);
 
-		//REMOVE ME 
-		return result;
+		if (Report.get_errors() != 0)
+			return null;
+		stderr.printf ("===GENERATED CODE==\n%s\n===\n", code_generator.yield ());
+
+		return code_generator.yield ();
 	}
 	
 	[Import]
@@ -92,10 +99,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 							string[] uri_definition = ns.URI.split_set(":");	
 							var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
 							source_file.add_using_directive (namespace_reference);
-							//remove me
-							code_generator.add_using (ns.prefix, uri_definition[0]);
-							prefixes_namespaces.set ((ns.prefix==null)?"":ns.prefix, uri_definition[0]); 
-							root_class_definition.add_using (ns.prefix, uri_definition[0]);
+							if (ns.prefix==null) {
+								prefixes_namespaces.set ("", uri_definition[0]); 
+							} else {
+								prefixes_namespaces.set (ns.prefix, uri_definition[0]); 
+							}
 						}
 					}
 					
@@ -107,22 +115,15 @@ public class Gtkaml.SAXParser : GLib.Object {
 						return;
 					}
 					
-					this.root_class_definition = new RootClassDefinition (source_reference, "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
+					this.root_class_definition = new Gtkaml.RootClassDefinition (source_reference, "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
 					this.root_class_definition.prefixes_namespaces = prefixes_namespaces;
-					foreach (XmlAttribute attr in attrs)
-						root_class_definition.add_attribute (new SimpleAttribute (attr.localname, attr.value));
-					
-					
-								
-					//MOVE ME - no reference to code generator here, please
-					code_generator.class_definition (prefix_to_namespace(null), "Gigel", prefix_to_namespace(prefix), clazz.name);
-
-					//REMOVE ME
-					set_members (attrs, "this", clazz);
+					foreach (XmlAttribute attr in attrs) {
+						var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
+						root_class_definition.add_attribute (simple_attribute);
+					}
 					
 					//push next state
-					//REMOVE identifier and clazz
-					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, "this", clazz, root_class_definition));
+					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, root_class_definition));
 					break;
 				}
 			case StateId.SAX_PARSER_CONTAINER_STATE:	
@@ -142,7 +143,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 								stop_parsing (); return;
 							}
 							identifier = attr.value;
-							identifier_scope = (attr.localname=="public") ? DefinitionScope.PUBLIC : DefinitionScope.PRIVATE;
+							if (attr.localname == "public") {
+								identifier_scope = DefinitionScope.PUBLIC;
+							} else {
+								identifier_scope = DefinitionScope.PRIVATE;
+							}
 						}
 					}
 					
@@ -157,26 +162,16 @@ public class Gtkaml.SAXParser : GLib.Object {
 						generated_identifiers_counter.set (clazz.name.down (clazz.name.len ()), counter);
 					}
 
-					var class_definition = new ClassDefinition (source_reference, identifier, prefix_to_namespace (prefix), clazz, identifier_scope, state.class_definition);
-					foreach (XmlAttribute attr in attrs)
-						class_definition.add_attribute (new SimpleAttribute (attr.localname, attr.value));
+					ClassDefinition class_definition = new ClassDefinition (source_reference, identifier, prefix_to_namespace (prefix), clazz, identifier_scope, state.class_definition);
+					foreach (XmlAttribute attr in attrs) {
+						var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
+						class_definition.add_attribute (simple_attribute);
+					}
 					
 
-					//REMOVE ME
-					code_generator.add_member (identifier, prefix_to_namespace(prefix), clazz.name, identifier_scope == DefinitionScope.PUBLIC);
-					
-					//REMOVE ME
-					code_generator.construct_member (identifier, prefix_to_namespace(prefix), clazz);
-					
-					//generate initialization code					
-					set_members (attrs, identifier, clazz);
-					
-					//REMOVE ME
-					code_generator.add_to_parent (identifier, state.parent_name, state.parent_type);
 					
 					//push next state
-					//REMOVE identifier and clazz
-					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, identifier, clazz, class_definition));
+					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, class_definition));
 					break;
 				}
 			default:
@@ -203,10 +198,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 
 	}
 
-	//REMOVE ME	
 	private string prefix_to_namespace (string prefix)
 	{
-		return prefixes_namespaces.get ((prefix==null)?"":prefix);		
+		if (prefix==null)
+			return prefixes_namespaces.get ("");		
+		return prefixes_namespaces.get (prefix);		
 	}
 	
 	public SourceReference create_source_reference () {
@@ -219,80 +215,13 @@ public class Gtkaml.SAXParser : GLib.Object {
 			if (ns.name == xmlNamespace) {
 				Symbol s = ns.scope.lookup (name);
 				if (s is Class) {
-					return s as Class;
+					return (s as Class);
 				}
 			}
 		}
 		return null;
 	}
 	
-	//REMOVE ME
-	private Interface lookup_interface (string xmlNamespace, string name)
-	{
-		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
-			if (ns.name == xmlNamespace) {
-				Symbol s = ns.scope.lookup (name);
-				if (s is Interface) {
-					return s as Interface;
-				}
-			}
-		}
-		return null;
-	}
-	
-	//REMOVE ME
-	private void set_members (Gee.List<XmlAttribute> attrs, string identifier, Class clazz) {
-		
-		foreach (XmlAttribute attr in attrs) {
-			if (attr.prefix == null)
-			{
-				Member m = member_lookup_inherited(clazz, attr.localname);
-				if (m == null) {
-					Report.error ( create_source_reference (), "%s not found!\n".printf(attr.localname));
-					stop_parsing ();
-				} else if (m is Property) {
-					Property p = m as Property;
-					code_generator.set_identifier_property (identifier, p.name, p.type_reference, attr.value);
-				} else if (m is Vala.Signal) {
-					var s = m as Vala.Signal;
-					code_generator.set_identifier_signal (identifier, s.name, s.get_parameters (), attr.value);
-				} else if (m is Field) {
-					Field f = m as Field;
-					code_generator.set_identifier_property (identifier, f.name, f.type_reference, attr.value);
-				}
-			}					
-		}
-	}		
-	
-	//REMOVE ME
-	public Member member_lookup_inherited (Typesymbol typesymbol, string member) {
-		Member result = typesymbol.scope.lookup (member) as Member;
-		if (result != null)
-			return result;
-		
-		Collection<DataType> base_types;
-		
-		if (typesymbol is Class)
-			base_types = (typesymbol as Class).get_base_types ();
-		else if (typesymbol is Interface)
-			base_types = (typesymbol as Interface).get_prerequisites ();
-
-		foreach (DataType dt in base_types) {
-			if (dt is UnresolvedType) //and it should be
-			{
-				var name = (dt as UnresolvedType).type_name;
-				var ns = (dt as UnresolvedType).namespace_name;
-				var clazz = lookup_class (ns, name);
-				if (clazz != null && ( null != (result = member_lookup_inherited (clazz, member) as Member)))
-					return result;
-				var iface = lookup_interface (ns, name);
-				if (iface != null && ( null != (result = member_lookup_inherited (iface, member) as Member)))
-					return result;
-			}
-		}
-		return null;
-	}								
-					
 	
 	[NoArrayLength]
 	private Gee.List<XmlAttribute> parse_attributes (string[] attributes, int nb_attributes)

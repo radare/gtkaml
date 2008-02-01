@@ -7,6 +7,19 @@ AM_MAINTAINER_MODE
 AC_ISC_POSIX
 AC_PROG_CC
 
+EXTRA_CFLAGS=
+EXTRA_LDFLAGS=
+case $host in
+*-*-mingw32* | *-*-windows)
+		EXTRA_CFLAGS="-mno-cygwin -mwindows -mms-bitfields -fno-strict-aliasing "	
+		EXTRA_LDFLAGS="-export-all-symbols -mwindows -no-undefined -mms-bitfields" ;;
+*-*-cygwin*)
+		EXTRA_CFLAGS="-fno-strict-aliasing"
+		EXTRA_LDFLAGS="-export-all-symbols -mms-bitfields";;
+esac
+AC_SUBST(EXTRA_CFLAGS)
+AC_SUBST(EXTRA_LDFLAGS)
+
 AC_PATH_PROG(VALAC, valac, valac)
 AC_SUBST(VALAC)
 AC_DEFINE([VALAFLAGS], VALAFLAGS, "valac flags")

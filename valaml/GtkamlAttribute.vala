@@ -3,5 +3,5 @@ using Vala;
 
 public abstract class Gtkaml.Attribute : GLib.Object {
 	public string name {get;set;}
-	public Member target_type {get;set;}
+	public Symbol target_type {get;set;}
 }

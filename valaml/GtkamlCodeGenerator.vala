@@ -43,8 +43,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		} else {
 			write_declaration (class_definition);
 			write_constructor (class_definition);
-			write_setters (class_definition);
 		}
+		write_setters (class_definition);
 		foreach (ClassDefinition child in class_definition.children)
 			generate (child);
 	}
@@ -129,6 +129,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			type = (attr.target_type as Field).type_reference;
 		} else if (attr.target_type is Property) {
 			type = (attr.target_type as Property).type_reference;
+		} else if (attr.target_type is FormalParameter) {
+			type = (attr.target_type as FormalParameter).type_reference;
 		} else {		
 			Report.error(null, "Don't know what to do with %s to a method".printf (attr.name));
 			return null;

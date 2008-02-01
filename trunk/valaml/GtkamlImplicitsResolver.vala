@@ -24,6 +24,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	
 	public void resolve (ClassDefinition !class_definition)
 	{
+		stderr.printf ("Resolving %s(%s)\n", class_definition.identifier, class_definition.base_type.name);
 		if (!(class_definition is RootClassDefinition))
 		{
 			//first determine which constructor shall we use
@@ -50,6 +51,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		Gtkaml.AddMethod new_method = new Gtkaml.AddMethod ();
 		Gee.List<Gtkaml.Attribute> to_remove = new Gee.ArrayList<Gtkaml.Attribute> ();
 
+		stderr.printf ("Found %d for %s to be added in %s:\n", adds.size, child_definition.base_full_name, child_definition.parent_container.base_full_name);
 		foreach (Vala.Method addm in adds)
 			stdout.printf ("%s\n", addm.name);
 			
@@ -199,6 +201,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 					foreach (Gtkaml.Attribute attr in class_definition.attrs) {
 						if (parameter == attr.name) {
 							current_matches ++;
+							stderr.printf("Matched %s\n", attr.name);
 							break;
 						}
 					}
@@ -206,6 +209,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				if (first_parameter != null)
 				{
 					current_matches++;
+					stderr.printf ("increasing matches to %d to match %d\n", current_matches, parameters.size);
 				} 
 				//full match?
 				if (current_matches == parameters.size ) {
@@ -242,6 +246,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			}
 					
 			
+			stderr.printf( "Determined the %s %s for %s\n", max_matches_method.name, wording, class_definition.identifier+"("+class_definition.base_full_name+")");							
 			return max_matches_method;
 	}	
 
@@ -284,6 +289,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			method_name = method.name.substring(1, method.name.len () - 1);
 		if (key_file.has_key (class_definition.base_full_name, method_name))
 		{
+			stderr.printf ("Found %s in implicits\n", class_definition.base_full_name);
 			string [] result_array = key_file.get_string_list (class_definition.base_full_name, method_name);
 			for (int i = 0; i < result_array.length; i++)
 				result.add (result_array [i]);

@@ -1,16 +1,17 @@
 using GLib;
 using Vala;
 
-public class Gtkaml.Method : GLib.Object {
+public abstract class Gtkaml.Method : GLib.Object {
 	public string name {get;set;}
-	public Gee.List<Attribute> parameter_attributes{get;set;}
-	public Method()
+	public Gee.List<Gtkaml.Attribute> parameter_attributes{get;set;}
+	construct
 	{
-		parameter_attributes = new Gee.ArrayList<Attribute> ();
+		parameter_attributes = new Gee.ArrayList<Gtkaml.Attribute> ();
 	}
 }
 
-public class Gtkaml.AddMethod : Gtkaml.Method {
+public class Gtkaml.AddMethod : Gtkaml.Method 
+{
 }
 
 public class Gtkaml.ConstructMethod : Gtkaml.Method 

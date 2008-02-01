@@ -6,6 +6,7 @@ INCLUDES = \
 AM_CFLAGS = \
 	 -Wall \
 	 -g \
+	 $(EXTRA_CFLAGS) \
 	 $(GTK_CFLAGS)
 
 BUILT_SOURCES = example0.stamp example1.stamp
@@ -23,7 +24,8 @@ example0_SOURCES = \
 	example0.stamp	
 
 example0_LDADD = \
-	$(GTK_LIBS)
+	$(GTK_LIBS) \
+	$(EXTRA_LDFLAGS)
 
 example0.stamp : $(example0_GTKAMLSOURCES)
 	../valaml/valamlc $(VALAFLAGS) --pkg gtk+-2.0 $^
@@ -40,7 +42,8 @@ example1_SOURCES = \
 	example1.stamp	
 
 example1_LDADD = \
-	$(GTK_LIBS)
+	$(GTK_LIBS) \
+	$(EXTRA_LDFLAGS)
 
 example1.stamp : $(example1_GTKAMLSOURCES)
 	../valaml/valamlc $(VALAFLAGS) --pkg gtk+-2.0 $^

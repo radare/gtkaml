@@ -12,7 +12,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	construct {
 		try {
 			key_file = new KeyFile ();
-			key_file.load_from_file ("/home/vlad/Projects/gtkaml/trunk/data/implicits.ini", KeyFileFlags.NONE);
+			key_file.load_from_file ("../data/implicits.ini", KeyFileFlags.NONE);
 		} catch (KeyFileError error) {
 			Report.error (null, error.message);
 		}
@@ -32,7 +32,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	{
 		Gee.List<Vala.Method> constructors = lookup_constructors (class_definition.base_type);
 		Vala.Method determined_constructor = null;
-		Gtkaml.Method new_method = new Gtkaml.Method ();
+		Gtkaml.ConstructMethod new_method = new Gtkaml.ConstructMethod ();
 		Gee.List<Gtkaml.Attribute> to_remove = new Gee.ArrayList<Gtkaml.Attribute> ();
 		//pass one: see if we find an explicitly specified constructor
 		foreach (Vala.Method constructor in constructors) {
@@ -52,9 +52,10 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				return null;
 		}
 		
+		new_method.name = determined_constructor.name;
 		//move the attributes from class definition to construct method
-		new_method = new ConstructMethod ();
-		var parameters = determine_method_parameter_names (class_definition, determined_constructor);
+		Gee.List<string> parameters = determine_method_parameter_names (class_definition, determined_constructor);
+		
 		foreach (string parameter in parameters) {
 			foreach (Gtkaml.Attribute attr in class_definition.attrs) {
 				if (parameter == attr.name) {
@@ -65,19 +66,18 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			}
 		}		
 		
-		if ( (parameters as Gee.List<string).size () != 
-		class_definition.construct_method.parameter_attributes.size ())
+		if ( parameters.size  != new_method.parameter_attributes.size )
 		{
 			string message = "";
 			int i = 0;
-			for (; i < parameters.size -1; i++)
+			for (i = 0; i < parameters.size -1; i++)
 				message += parameters.get (i) + ",";
 			message += parameters.get (i);
 			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("Constructor", class_definition.full_name, message));
 			return null;
 		}
 		
-		foreach (Attribute attr in to_remove)
+		foreach (Gtkaml.Attribute attr in to_remove)
 			class_definition.attrs.remove (attr);
 		
 		return new_method;

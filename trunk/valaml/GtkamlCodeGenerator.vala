@@ -22,7 +22,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	{
 		if (class_definition is RootClassDefinition) {
 			root_class_definition = class_definition as RootClassDefinition;
-			this.generate_root_class_definition (null/*class:namespace*/, "ClassColonName" /*class:name*/, class_definition.ns, class_definition.base_type.name );
+			generate_root_class_definition (null/*class:namespace*/, "ClassColonName" /*class:name*/, root_class_definition.ns, root_class_definition.base_type.name );
 		} else {
 			generate_constructor (class_definition);
 		}
@@ -42,13 +42,17 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	
 	public void generate_constructor (ClassDefinition class_definition)
 	{
-		var construct_name = class_definition.construct_method.name;
-		construct_name.substring (".new".len (), construct_name.len () - ".new".len ());
-		constructors += class_definition.name + " = new " + class_definition.full_name + construct_name + " (";
-		foreach (Attribute attr in class_definition.construct_method.parameter_attributes)
-			if (attr is SimpleAttribute) 
-				constructors += (attr as SimpleAttribute).value + ", ";
-		constructors += ");\n";			
+		string construct_name = class_definition.construct_method.name;
+		construct_name = construct_name.substring (".new".len (), construct_name.len () - ".new".len ());
+		constructors += "\t\t" + class_definition.name + " = new " + class_definition.full_name + construct_name + " (";
+		foreach (Gtkaml.Attribute attr in class_definition.construct_method.parameter_attributes) {
+			if (attr is SimpleAttribute) {
+				var simple_attribute = attr as SimpleAttribute;
+				constructors += simple_attribute.value + ", ";
+			}
+		}
+		constructors += ");\n";		
+			
 	}
 	
 	public string yield() {
@@ -68,15 +72,6 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		using_directives+="using %s;\n".printf(ns);
 	}
 	
-	//remove me
-	public void class_definition (string ns, string name, string parent_ns, string parent_name) {
-		class_start += "public class ";
-		if (ns!=null) class_start += ns + ".";
-		class_start += name + " : ";
-		if (parent_ns!=null) class_start += parent_ns + ".";
-		class_start += parent_name + "\n{\n";
-		class_end += "}\n";
-	}
 	
 	/** 
 	 * Generates the code identifier.property = value
@@ -143,11 +138,6 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	public void add_code (string value)
 	{
 		code += value + "\n";
-	}
-
-	public void add_to_parent (string identifier, string parent_name, Class parent_type)
-	{
-		construct_body += "\t\t%s.add (%s);\n".printf (parent_name, identifier);
 	}
 
 	private string construct_default_parameters (Class clazz)

@@ -4,7 +4,7 @@ using Gee;
 
 
 
-/* this is the Flying Spaghetti Monster */
+/** this is the Flying Spaghetti Monster */
 public class Gtkaml.SAXParser : GLib.Object {
 	/** the only reason this is public is to be accessible from the [Import]s */
 	public pointer xmlCtxt;

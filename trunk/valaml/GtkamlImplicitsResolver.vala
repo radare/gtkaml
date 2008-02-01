@@ -1,8 +1,12 @@
 using GLib;
 using Vala;
 
+/** 
+ * determines which constructors to use or which container add functions to use
+ */
 public class Gtkaml.ImplicitsResolver : GLib.Object 
 {
+	/** configuration file with some hints*/
 	private KeyFile key_file;
 	private string key_file_name {get;set;}
 	private Vala.CodeContext context {get;set;}
@@ -20,15 +24,19 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	
 	public void resolve (ClassDefinition !class_definition)
 	{
+		stderr.printf ("Resolving %s(%s)\n", class_definition.identifier, class_definition.base_type.name);
 		//first determine which constructor shall we use
-		determine_construct_method (class_definition);
+		if (!(class_definition is RootClassDefinition))
+		{
+			determine_construct_method (class_definition);
+			if (class_definition.construct_method == null) 
+				return;
+		}
 		//then determine the .add function, if applyable
 		//
 		//resolve the attr types
 		determine_attribute_types (class_definition);
-		if (class_definition.construct_method == null) 
-			return;
-		foreach (ClassDefinition child in class_definition.container_children)
+		foreach (ClassDefinition child in class_definition.children)
 			resolve (child); 
 	}
 
@@ -53,7 +61,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		if (determined_constructor == null) {
 			determined_constructor = implicit_method_choice (class_definition, constructors, "constructor");
 			if (determined_constructor == null) {
-				Report.error (class_definition.source_reference, "No matching constructor for %s\n".printf (class_definition.full_name));
+				Report.error (class_definition.source_reference, "No matching constructor for %s\n".printf (class_definition.base_full_name));
 				return;
 			}
 		}
@@ -61,7 +69,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		new_method.name = determined_constructor.name;
 		//move the attributes from class definition to construct method
 		Gee.List<string> parameters = determine_method_parameter_names (class_definition, determined_constructor);
-		
 		foreach (string parameter in parameters) {
 			foreach (Gtkaml.Attribute attr in class_definition.attrs) {
 				if (parameter == attr.name) {
@@ -80,7 +87,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			for (i = 0; i < parameters.size -1; i++)
 				message += parameters.get (i) + ",";
 			message += parameters.get (i);
-			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("Constructor", class_definition.full_name, message));
+			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("Constructor", class_definition.base_full_name, message));
 			return;
 		}
 		
@@ -97,7 +104,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	{
 			int min_params = 999;
 			Gee.List<string> min_param_names = null;
-			int max_matches = 0;
+			int max_matches = -1;
 			Vala.Method max_matches_method;
 			int count_with_max_match = 0;
 			foreach (Vala.Method method in methods) {
@@ -107,6 +114,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 					foreach (Gtkaml.Attribute attr in class_definition.attrs) {
 						if (parameter == attr.name) {
 							current_matches ++;
+							stderr.printf("Matched %s\n", attr.name);
 							break;
 						}
 					}
@@ -129,24 +137,24 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			
 			if (max_matches_method == null){
 				if (min_param_names == null) {
-					Report.error(class_definition.source_reference, "The class %s doesn't have %ss\n".printf (class_definition.full_name, wording));
+					Report.error(class_definition.source_reference, "The class %s doesn't have %ss\n".printf (class_definition.base_full_name, wording));
 				} else {
 					string message = "";
 					int i = 0;
 					for (; i < min_param_names.size -1; i++)
 						message += min_param_names.get (i) + ",";
 					message += min_param_names.get (i);
-					Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf (wording, class_definition.full_name, message));
+					Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf (wording, class_definition.base_full_name, message));
 				}
 				return null;
 			}
 			
 			if (count_with_max_match > 1) {
-				Report.warning (class_definition.source_reference, "More than one %s matches your definition of %s\n".printf (wording, class_definition.full_name));
+				Report.warning (class_definition.source_reference, "More than one %s matches your definition of %s(%s)\n".printf (wording, class_definition.identifier, class_definition.base_full_name));
 			}
 					
 			
-			stderr.printf( "Determined the %s %s for %s\n", max_matches_method.name, wording, class_definition.name+"("+class_definition.full_name+")");							
+			stderr.printf( "Determined the %s %s for %s\n", max_matches_method.name, wording, class_definition.identifier+"("+class_definition.base_full_name+")");							
 			return max_matches_method;
 	}	
 
@@ -156,10 +164,10 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		string method_name= method.name;
 		if (method.name.has_prefix (".new"))
 			method_name = method.name.substring(1, method.name.len () - 1);
-		if (key_file.has_key (class_definition.full_name, method_name))
+		if (key_file.has_key (class_definition.base_full_name, method_name))
 		{
-			stderr.printf ("Found %s in implicits\n", class_definition.full_name);
-			string [] result_array = key_file.get_string_list (class_definition.full_name, method_name);
+			stderr.printf ("Found %s in implicits\n", class_definition.base_full_name);
+			string [] result_array = key_file.get_string_list (class_definition.base_full_name, method_name);
 			for (int i = 0; i < result_array.length; i++)
 				result.add (result_array [i]);
 		} else {
@@ -182,7 +190,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		{
 			attr.target_type = member_lookup_inherited (class_definition.base_type, attr.name);
 			if (attr.target_type == null) {
-				Report.error (class_definition.source_reference, "Cannot find member %s of class %s\n".printf (attr.name, class_definition.full_name));
+				Report.error (class_definition.source_reference, "Cannot find member %s of class %s\n".printf (attr.name, class_definition.base_full_name));
 			}
 		}
 	}
@@ -222,6 +230,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	public Gee.List<Vala.Method> lookup_constructors (Class clazz) {
 		var constructors = new Gee.ArrayList<Vala.Method> ();
 		foreach (Vala.Method m in clazz.get_methods ()) {
+			//todo: if m is ConstructMethod ?
 			if (m.name.has_prefix (".new")) {
 				constructors.add (m);
 			}

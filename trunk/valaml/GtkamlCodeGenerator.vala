@@ -19,23 +19,37 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	
 	public CodeGenerator (construct CodeContext context) {}
 	
+	public string yield() {
+		return using_directives + "\n" +
+		       class_start + "\n" +
+		       members_declarations + "\n" +
+		       code + "\n" +
+		       "\tconstruct {\n" + 
+		           construct_body_locals + "\n" + 
+		           constructors + "\n" + 
+		           construct_body + "\n" + 
+		       "\t}\n" + 
+		       class_end;
+	}
+	
 	public void generate (ClassDefinition! class_definition)
 	{
 		if (class_definition is RootClassDefinition) {
 			root_class_definition = class_definition as RootClassDefinition;
 			foreach (string prefix in root_class_definition.prefixes_namespaces.get_keys ()) {
-				add_using (prefix_to_namespace (prefix));
+				write_using (prefix_to_namespace (prefix));
 			}
-			generate_root_class_definition (null/*class:namespace*/, "Gigel" /*class:name*/, root_class_definition.ns, root_class_definition.base_type.name );
+			write_root_class_definition (null/*class:namespace*/, "Gigel" /*class:name*/, root_class_definition.base_ns, root_class_definition.base_type.name );
 		} else {
-			generate_declaration (class_definition);
-			generate_constructor (class_definition);
+			write_declaration (class_definition);
+			write_constructor (class_definition);
+			write_setters (class_definition);
 		}
-		foreach (ClassDefinition child in class_definition.container_children)
+		foreach (ClassDefinition child in class_definition.children)
 			generate (child);
 	}
 	
-	private void generate_root_class_definition (string ns, string!name, string base_ns, string! base_name)
+	private void write_root_class_definition (string ns, string!name, string base_ns, string! base_name)
 	{
 		class_start += "public class ";
 		if (ns!=null) class_start += ns + ".";
@@ -45,39 +59,52 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		class_end += "}\n";
 	}
 
-	public void generate_declaration (ClassDefinition! class_definition)
+	public void write_declaration (ClassDefinition! class_definition)
 	{
-		switch (class_definition.enclosing_scope) {
+		switch (class_definition.definition_scope) {
 			case DefinitionScope.PUBLIC:
-				members_declarations += "\tpublic " + class_definition.full_name + " " + class_definition.name + ";\n";
+				members_declarations += "\tpublic " + class_definition.base_full_name + " " + class_definition.identifier + ";\n";
 				break;
 			case DefinitionScope.PRIVATE:
-				members_declarations += "\tprivate " + class_definition.full_name + " " + class_definition.name + ";\n";
+				members_declarations += "\tprivate " + class_definition.base_full_name + " " + class_definition.identifier + ";\n";
 				break;
 			case DefinitionScope.CONSTRUCTOR:
-				construct_body_locals += "\t\t" + class_definition.full_name + " " + class_definition.name + ";\n";
+				construct_body_locals += "\t\t" + class_definition.base_full_name + " " + class_definition.identifier + ";\n";
 			break;
 		}
 	}	
 		
 	
-	public void generate_constructor (ClassDefinition! class_definition)
+	public void write_constructor (ClassDefinition! class_definition)
 	{
 		string construct_name = class_definition.construct_method.name;
 		construct_name = construct_name.substring (".new".len (), construct_name.len () - ".new".len ());
-		constructors += "\t\t" + class_definition.name + " = new " + class_definition.full_name + construct_name + " (";
+		constructors += "\t\t" + class_definition.identifier + " = new " + class_definition.base_full_name + construct_name + " (";
 		int i = 0;
 		for (; i < class_definition.construct_method.parameter_attributes.size - 1 ; i++) {
 			Attribute attr = class_definition.construct_method.parameter_attributes.get (i);
-			constructors += generate_method_parameter (attr) + ", ";
+			constructors += generate_literal (attr) + ", ";
 		}
-		constructors += generate_method_parameter (class_definition.construct_method.parameter_attributes.get (i));
+		if (i < class_definition.construct_method.parameter_attributes.size)
+			constructors += generate_literal (class_definition.construct_method.parameter_attributes.get (i));
 		constructors += ");\n";		
 	}
 	
-	public string yield() {
-		return using_directives + class_start + members_declarations + code +
-		"\tconstruct {\n" + construct_body_locals + "\n" + constructors + "\n" + construct_body + "\t}\n" + class_end;
+	public void write_setters (ClassDefinition! class_definition)
+	{
+		foreach (Attribute attr in class_definition.attrs) 
+		{
+			if (attr.target_type is Field) {
+				write_setter (class_definition, attr);
+			} else if (attr.target_type is Property) {
+				write_setter (class_definition, attr);
+			} else if (attr.target_type is Vala.Signal) {
+				write_signal_setter (class_definition, attr);
+			} else {
+				Report.error (class_definition.source_reference, "Unknown attribute type %s".printf (attr.name));
+				return;
+			}
+		}
 	}
 	
 	private string prefix_to_namespace (string prefix)
@@ -86,33 +113,37 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	}
 
 	
-	public void add_using (string ns)
+	public void write_using (string ns)
 	{
 		using_directives+="using %s;\n".printf(ns);
 	}
 	
-	public string generate_method_parameter (Attribute attr)
-	{
+	
+	public string generate_literal (Attribute attr) {
+		string literal;
+		DataType type;
+		
+		if (attr is ComplexAttribute) return (attr as ComplexAttribute).complex_type.identifier;
+		
 		if (attr.target_type is Field) {
-			return generate_literal((attr.target_type as Field).type_reference, attr);
+			type = (attr.target_type as Field).type_reference;
 		} else if (attr.target_type is Property) {
-			return generate_literal((attr.target_type as Property).type_reference, attr);
+			type = (attr.target_type as Property).type_reference;
 		} else {		
-			Report.error(null, "cannot give a parameter %s to a method".printf (attr.name));
+			Report.error(null, "Don't know what to do with %s to a method".printf (attr.name));
 			return null;
 		}
-	}
-	
-	public string generate_literal (DataType type, Attribute attr) {
-		string literal;
-		if (attr is ComplexAttribute) return (attr as ComplexAttribute).complex_type.name;
 		
 		string value = (attr as SimpleAttribute).value;
 		if (type is UnresolvedType)
 		{
 			UnresolvedType utype = type as UnresolvedType;
-			if (value.has_prefix ("{") && value.has_suffix ("}")) {
-				literal = value.substring (1, value.len () - 2);
+			if (value.has_prefix ("{")) {
+				if (value.has_suffix ("}")) {
+					literal = value.substring (1, value.len () - 2);
+				} else {
+					Report.error( null, "Attribute %s not properly ended".printf (attr.name));
+				}
 			} else if (utype.type_name == "string") {
 				literal = "\"" + value + "\"";
 			} else if (utype.type_name == "bool") {
@@ -130,24 +161,47 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			return null;
 		}
 	}
-	
-	public void set_identifier_signal (string identifier, string signal_name, Collection<FormalParameter> parameters, string body)
+
+	public void write_setter (ClassDefinition! class_definition, Attribute attr) 
 	{
+		construct_body += "\t\t%s.%s = %s;\n".printf (class_definition.identifier, attr.name, generate_literal (attr));
+	}
+	
+	public void write_signal_setter (ClassDefinition! class_definition, Attribute signal_attr)
+	{
+		if (! (signal_attr is SimpleAttribute) ) {
+			Report.error (class_definition.source_reference, "Cannot set the signal '%s' to this value.".printf (signal_attr.name));
+			return;
+		}
+		var simple_attribute = signal_attr as SimpleAttribute;
+		var the_signal = simple_attribute.target_type as Vala.Signal;
+		string parameters_joined = "";
+		string body = simple_attribute.value;
+		
+		if ( body.has_prefix ("{") )
+		{
+			if ( body.has_suffix ("}") ) {
+				parameters_joined = body.substring (1, body.len () - 2);
+				construct_body += "\t\t%s.%s += %s;\n".printf (class_definition.identifier, signal_attr.name, parameters_joined);
+				return;
+			} else {
+				Report.error (class_definition.source_reference, "Signal %s not properly ended".printf (signal_attr.name));
+				return;
+			}
+		} 
+		
+		var parameters = the_signal.get_parameters ();
 		string[] parameter_names = new string[0];
 		int i = 0;
-		string parameters_joined = "";
 		
 		if (parameters.size > 0) {
 			parameter_names.resize (parameters.size);
-			
 			foreach (FormalParameter p in parameters) {
 				parameter_names[i] = p.name;
 			}
 			parameters_joined = string.joinv (",", parameter_names);
 		}		
-		
-		
-		construct_body += "\t\t%s.%s += (%s) => { %s; };".printf (identifier, signal_name, parameters_joined, body);
+		construct_body += "\t\t%s.%s += (%s) => { %s; };\n".printf (class_definition.identifier, signal_attr.name, parameters_joined, body);
 	}
 	
 	public void add_code (string value)
@@ -155,37 +209,5 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		code += value + "\n";
 	}
 
-	private string construct_default_parameters (Class clazz)
-	{
-		foreach (Method m in clazz.get_methods ()) {
-			if (m is CreationMethod) {
-				var cm = m as CreationMethod;
-				if (cm != null && cm.name == ".new") {
-					string parameters = ""; bool last_comma = false;
-					foreach (FormalParameter p in cm.get_parameters ()) {
-						UnresolvedType utype = p.type_reference as UnresolvedType;
-						
-						if (utype.nullable) {
-							parameters += "null, ";
-							last_comma = true;
-						} else if (utype.type_name == "string") {
-							parameters += "null, ";
-							last_comma = true;
-						} else if (utype.type_name == "bool") {
-							parameters += "false, ";
-							last_comma = true;
-						} else { //value type not boolean?
-							parameters += "0, ";
-							last_comma = true;
-						}
-					}
-					if (last_comma)
-						parameters = parameters.ndup (parameters.len () - 2);
-					return parameters;
-				}
-			}
-		}
-		return "";
-	}
 	
 }

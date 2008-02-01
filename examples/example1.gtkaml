@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Window xmlns="Gtk:gtk+-2.0" xmlns:GLib="GLib" xmlns:gtkaml="http://gtkaml.org/0.1" title="gtktest" destroy="Gtk.main_quit()">
-	<VBox>
+	<VBox homogeneous="false" spacing="4">
         <Label use_markup="true" label="&lt;b&gt;Dialog Box Title Here&lt;/b&gt;">
         </Label>
         <Notebook can_focus="false" tab_vborder="1">
-                <Label>
+                <Label label="gg">
                         
                 </Label>
-                <HBox>
+                <HBox homogeneous="false" spacing="4">
                         <Label label="Nothing to see here, please move along" />
                 </HBox>
         </Notebook>

@@ -45,6 +45,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			write_constructor (class_definition);
 		}
 		write_setters (class_definition);
+		if (class_definition.parent_container != null)
+			write_add (class_definition);
 		foreach (ClassDefinition child in class_definition.children)
 			generate (child);
 	}
@@ -88,6 +90,19 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		if (i < class_definition.construct_method.parameter_attributes.size)
 			constructors += generate_literal (class_definition.construct_method.parameter_attributes.get (i));
 		constructors += ");\n";		
+	}
+	
+	public void write_add (ClassDefinition! child_definition) {
+		construct_body += "\t\t%s.%s (".printf (child_definition.parent_container.identifier, child_definition.add_method.name);
+		int i = 0;
+		for (; i < child_definition.add_method.parameter_attributes.size - 1 ; i++) {
+			Attribute attr = child_definition.add_method.parameter_attributes.get (i);
+			construct_body += generate_literal (attr) + ", ";
+		}
+		if (i < child_definition.add_method.parameter_attributes.size)
+			construct_body += generate_literal (child_definition.add_method.parameter_attributes.get (i));
+		construct_body += ");\n\n";		
+			
 	}
 	
 	public void write_setters (ClassDefinition! class_definition)

@@ -39,6 +39,7 @@ public class Gtkaml.ClassDefinition : GLib.Object {
 	public Gee.List<ClassDefinition> children {get;set;}
 	public DefinitionScope definition_scope {get;set;}
 	public ConstructMethod construct_method {get;set;}
+	public AddMethod add_method {get;set;}
 
 	public ClassDefinition (SourceReference source_reference, string! identifier, string base_ns, Vala.Class! base_type, 
 		DefinitionScope! definition_scope, ClassDefinition parent_container = null)

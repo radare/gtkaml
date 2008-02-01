@@ -18,7 +18,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	private Gee.Map<string,string> prefixes_namespaces {get;set;}
 
 	private Gtkaml.RootClassDefinition root_class_definition {get;set;}	
-	public string gtkaml_prefix;
+	public string gtkaml_prefix="gtkaml";
 	
 	
 	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file) {
@@ -62,8 +62,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 
 		if (Report.get_errors() != 0)
 			return null;
-		stderr.printf ("===GENERATED CODE==\n%s\n===\n", code_generator.yield ());
-
+		
 		return code_generator.yield ();
 	}
 	
@@ -215,7 +214,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	private Class lookup_class (string xmlNamespace, string name)
 	{
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
-			if (ns.name == xmlNamespace) {
+			if ( (ns.name == null && xmlNamespace == null ) || ns.name == xmlNamespace) {
 				Symbol s = ns.scope.lookup (name);
 				if (s is Class) {
 					return (s as Class);

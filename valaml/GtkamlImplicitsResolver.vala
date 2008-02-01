@@ -21,14 +21,18 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	public void resolve (ClassDefinition !class_definition)
 	{
 		//first determine which constructor shall we use
-		class_definition.construct_method = determine_construct_method (class_definition);
+		determine_construct_method (class_definition);
+		//then determine the .add function, if applyable
+		//
+		//resolve the attr types
+		determine_attribute_types (class_definition);
 		if (class_definition.construct_method == null) 
 			return;
 		foreach (ClassDefinition child in class_definition.container_children)
 			resolve (child); 
 	}
 
-	public ConstructMethod determine_construct_method (ClassDefinition! class_definition)
+	public void determine_construct_method (ClassDefinition! class_definition)
 	{
 		Gee.List<Vala.Method> constructors = lookup_constructors (class_definition.base_type);
 		Vala.Method determined_constructor = null;
@@ -48,8 +52,10 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_constructor == null) {
 			determined_constructor = implicit_method_choice (class_definition, constructors, "constructor");
-			if (determined_constructor == null)
-				return null;
+			if (determined_constructor == null) {
+				Report.error (class_definition.source_reference, "No matching constructor for %s\n".printf (class_definition.full_name));
+				return;
+			}
 		}
 		
 		new_method.name = determined_constructor.name;
@@ -61,6 +67,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				if (parameter == attr.name) {
 					new_method.parameter_attributes.add (attr);
 					to_remove.add (attr);
+					attr.target_type = member_lookup_inherited (class_definition.base_type, attr.name);
 					break;
 				}
 			}
@@ -74,13 +81,13 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				message += parameters.get (i) + ",";
 			message += parameters.get (i);
 			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("Constructor", class_definition.full_name, message));
-			return null;
+			return;
 		}
 		
 		foreach (Gtkaml.Attribute attr in to_remove)
 			class_definition.attrs.remove (attr);
 		
-		return new_method;
+		class_definition.construct_method =  new_method;
 	}
 	
 	/**
@@ -139,7 +146,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			}
 					
 			
-			stderr.printf( "Determined the %s %s for %s\n", max_matches_method.name, wording, class_definition.name);							
+			stderr.printf( "Determined the %s %s for %s\n", max_matches_method.name, wording, class_definition.name+"("+class_definition.full_name+")");							
 			return max_matches_method;
 	}	
 
@@ -167,6 +174,17 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	public AddMethod determine_add_method (ClassDefinition container_definition, ref Gee.List<Attribute>child_attrs)
 	{
 		return null;
+	}
+	
+	public void determine_attribute_types (ClassDefinition! class_definition)
+	{
+		foreach (Attribute attr in class_definition.attrs)
+		{
+			attr.target_type = member_lookup_inherited (class_definition.base_type, attr.name);
+			if (attr.target_type == null) {
+				Report.error (class_definition.source_reference, "Cannot find member %s of class %s\n".printf (attr.name, class_definition.full_name));
+			}
+		}
 	}
 	
 	public Member member_lookup_inherited (Class clazz, string! member) {

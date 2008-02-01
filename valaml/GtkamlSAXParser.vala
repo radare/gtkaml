@@ -18,6 +18,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	private Gee.Map<string,string> prefixes_namespaces {get;set;}
 
 	private Gtkaml.RootClassDefinition root_class_definition {get;set;}	
+	public string gtkaml_prefix;
 	
 	
 	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file) {
@@ -94,7 +95,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 					//Frist Tag! - that means, add "using" directives first
 					var nss = parse_namespaces (namespaces, nb_namespaces);
 					foreach (XmlNamespace ns in nss) {
-						if ( ns.prefix == null || ns.prefix != null && ns.prefix != "gtkaml")
+						if ( ns.prefix == null || ns.prefix != null && ns.prefix != gtkaml_prefix)
 						{
 							string[] uri_definition = ns.URI.split_set(":");	
 							var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
@@ -137,7 +138,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 					Class clazz = lookup_class (prefix, localname);
 					
 					foreach (XmlAttribute attr in attrs) {
-						if (attr.prefix!=null && attr.prefix=="gtkaml" && (attr.localname=="public" || attr.localname=="private")) {
+						if (attr.prefix!=null && attr.prefix==gtkaml_prefix && (attr.localname=="public" || attr.localname=="private")) {
 							if (identifier!=null) {
 								Report.error (source_reference, "Cannot have multiple identifier names:%s".printf(attr.localname));
 								stop_parsing (); return;
@@ -164,8 +165,10 @@ public class Gtkaml.SAXParser : GLib.Object {
 
 					ClassDefinition class_definition = new ClassDefinition (source_reference, identifier, prefix_to_namespace (prefix), clazz, identifier_scope, state.class_definition);
 					foreach (XmlAttribute attr in attrs) {
-						var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
-						class_definition.add_attribute (simple_attribute);
+						if (attr.prefix == null) {
+							var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
+							class_definition.add_attribute (simple_attribute);
+						}
 					}
 					
 
@@ -254,6 +257,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 			var ns = new XmlNamespace ();
 			ns.prefix = namespaces[walker];
 			ns.URI = namespaces[walker+1];
+			if (ns.URI != null && ns.URI.has_prefix ("http://gtkaml.org/")) {
+				gtkaml_prefix = ns.prefix;
+			}
 			namespace_list.add (ns);
 			walker += 2;
 		}

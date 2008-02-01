@@ -16,8 +16,6 @@ public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
 		this.attrs = new Gee.ArrayList<Gtkaml.Attribute> ();
 		this.construct_method = null;
 		this.container_children = new Gee.ArrayList<ClassDefinition> ();
-
-		//prefixes_namespaces = new Gee.HashMap<string,string> (str_hash, str_equal, str_equal);
 	}
 	
 	 

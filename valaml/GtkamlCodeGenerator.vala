@@ -9,6 +9,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	private string members_declarations = new string();
 	private string code = new string();
 	private string constructors = new string();
+	private string construct_body_locals = new string();
 	private string construct_body = new string();
 	private string class_end = new string();
 	
@@ -22,8 +23,12 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	{
 		if (class_definition is RootClassDefinition) {
 			root_class_definition = class_definition as RootClassDefinition;
-			generate_root_class_definition (null/*class:namespace*/, "ClassColonName" /*class:name*/, root_class_definition.ns, root_class_definition.base_type.name );
+			foreach (string prefix in root_class_definition.prefixes_namespaces.get_keys ()) {
+				add_using (prefix_to_namespace (prefix));
+			}
+			generate_root_class_definition (null/*class:namespace*/, "Gigel" /*class:name*/, root_class_definition.ns, root_class_definition.base_type.name );
 		} else {
+			generate_declaration (class_definition);
 			generate_constructor (class_definition);
 		}
 		foreach (ClassDefinition child in class_definition.container_children)
@@ -39,25 +44,40 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		class_start += base_name + "\n{\n";
 		class_end += "}\n";
 	}
+
+	public void generate_declaration (ClassDefinition! class_definition)
+	{
+		switch (class_definition.enclosing_scope) {
+			case DefinitionScope.PUBLIC:
+				members_declarations += "\tpublic " + class_definition.full_name + " " + class_definition.name + ";\n";
+				break;
+			case DefinitionScope.PRIVATE:
+				members_declarations += "\tprivate " + class_definition.full_name + " " + class_definition.name + ";\n";
+				break;
+			case DefinitionScope.CONSTRUCTOR:
+				construct_body_locals += "\t\t" + class_definition.full_name + " " + class_definition.name + ";\n";
+			break;
+		}
+	}	
+		
 	
-	public void generate_constructor (ClassDefinition class_definition)
+	public void generate_constructor (ClassDefinition! class_definition)
 	{
 		string construct_name = class_definition.construct_method.name;
 		construct_name = construct_name.substring (".new".len (), construct_name.len () - ".new".len ());
 		constructors += "\t\t" + class_definition.name + " = new " + class_definition.full_name + construct_name + " (";
-		foreach (Gtkaml.Attribute attr in class_definition.construct_method.parameter_attributes) {
-			if (attr is SimpleAttribute) {
-				var simple_attribute = attr as SimpleAttribute;
-				constructors += simple_attribute.value + ", ";
-			}
+		int i = 0;
+		for (; i < class_definition.construct_method.parameter_attributes.size - 1 ; i++) {
+			Attribute attr = class_definition.construct_method.parameter_attributes.get (i);
+			constructors += generate_method_parameter (attr) + ", ";
 		}
+		constructors += generate_method_parameter (class_definition.construct_method.parameter_attributes.get (i));
 		constructors += ");\n";		
-			
 	}
 	
 	public string yield() {
 		return using_directives + class_start + members_declarations + code +
-		"\tconstruct {\n" + constructors + "\n" + construct_body + "\t}\n" + class_end;
+		"\tconstruct {\n" + construct_body_locals + "\n" + constructors + "\n" + construct_body + "\t}\n" + class_end;
 	}
 	
 	private string prefix_to_namespace (string prefix)
@@ -66,36 +86,48 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	}
 
 	
-	public void add_using (string prefix, string ns)
+	public void add_using (string ns)
 	{
-		//remove me
 		using_directives+="using %s;\n".printf(ns);
 	}
 	
+	public string generate_method_parameter (Attribute attr)
+	{
+		if (attr.target_type is Field) {
+			return generate_literal((attr.target_type as Field).type_reference, attr);
+		} else if (attr.target_type is Property) {
+			return generate_literal((attr.target_type as Property).type_reference, attr);
+		} else {		
+			Report.error(null, "cannot give a parameter %s to a method".printf (attr.name));
+			return null;
+		}
+	}
 	
-	/** 
-	 * Generates the code identifier.property = value
-	 * Also inspects the type to determine if value is string, boolean, int or {expression}
-	 */
-	public void set_identifier_property (string identifier, string property, DataType type, string value) {
-		string source_value;
+	public string generate_literal (DataType type, Attribute attr) {
+		string literal;
+		if (attr is ComplexAttribute) return (attr as ComplexAttribute).complex_type.name;
+		
+		string value = (attr as SimpleAttribute).value;
 		if (type is UnresolvedType)
 		{
 			UnresolvedType utype = type as UnresolvedType;
-			//stdout.printf("%s", utype.type_name); 
 			if (value.has_prefix ("{") && value.has_suffix ("}")) {
-				source_value = value.substring (1, value.len () - 2);
+				literal = value.substring (1, value.len () - 2);
 			} else if (utype.type_name == "string") {
-				source_value = "\"" + value + "\"";
+				literal = "\"" + value + "\"";
 			} else if (utype.type_name == "bool") {
 				if (value != "true" && value != "false") {
 					Report.error (null, "'%s' is not a boolean literal".printf (value));
+					return null;
 				}
-				source_value = value;
+				literal = value;
 			} else {
-				source_value = value;
+				literal = value;
 			}
-			construct_body += "\t\t%s.%s = %s;\n".printf (identifier, property, source_value);
+			return literal;
+		} else { 
+			Report.error (null, "Don't know what to do with %s\n type".printf (attr.target_type.name)); 
+			return null;
 		}
 	}
 	
@@ -118,23 +150,6 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		construct_body += "\t\t%s.%s += (%s) => { %s; };".printf (identifier, signal_name, parameters_joined, body);
 	}
 	
-	public void add_member (string identifier, string type_ns, string type, bool is_public)
-	{
-		members_declarations += (is_public?"\tpublic ":"\tprivate ");
-		if (type_ns != null) 
-			members_declarations += type_ns + ".";
-		members_declarations += type + " " + identifier + ";\n";
-	}
-	
-	public void construct_member (string identifier, string type_ns, Class clazz)
-	{
-		construct_body += "\n\t\t" + identifier + " = new ";
-		if (type_ns != null) 
-			construct_body += type_ns + ".";
-		construct_body += clazz.name + " (" + construct_default_parameters (clazz) + ");\n";
-		
-	}
-
 	public void add_code (string value)
 	{
 		code += value + "\n";

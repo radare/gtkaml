@@ -211,14 +211,18 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		string[] parameter_names = new string[0];
 		int i = 0;
 		
+		parameters_joined = "target";
 		if (parameters.size > 0) {
 			parameter_names.resize (parameters.size);
 			foreach (FormalParameter p in parameters) {
 				parameter_names[i] = p.name;
 			}
-			parameters_joined = string.joinv (",", parameter_names);
-		}		
-		construct_body += "\t\t%s.%s += (%s) => { %s; };\n".printf (class_definition.identifier, signal_attr.name, parameters_joined, body);
+			parameters_joined += ", " + string.joinv (",", parameter_names);
+			construct_body += "\t\t%s.%s += (%s) => { %s; };\n".printf (class_definition.identifier, signal_attr.name, parameters_joined, body);
+		} else {
+			construct_body += "\t\t%s.%s += %s => { %s; };\n".printf (class_definition.identifier, signal_attr.name, parameters_joined, body);
+		}
+		
 	}
 	
 	public void add_code (string value)

@@ -91,9 +91,10 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		{
 			string message = "";
 			int i = 0;
-			for (i = 0; i < parameters.size -1; i++)
+			if (first_parameter!=null) i = 1;
+			for (; i < parameters.size -1; i++)
 				message += parameters.get (i) + ",";
-			if (parameters.size > 0)
+			if (i < parameters.size)
 				message += parameters.get (i);
 			Report.error (child_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("add method", child_definition.parent_container.base_full_name, message));
 			return;
@@ -226,9 +227,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				} else {
 					string message = "";
 					int i = 0;
-					for (; i < min_param_names.size -1; i++)
-						message += min_param_names.get (i) + ",";
-					message += min_param_names.get (i);
+					if (first_parameter!=null) i = 1;
+					for (; i < min_param_names.size - 1; i++) {
+						message += min_param_names.get (i) + " ,";
+					}
+					if (i < min_param_names.size )
+						message += min_param_names.get (i);
 					Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf (wording, class_definition.base_full_name, message));
 				}
 				return null;

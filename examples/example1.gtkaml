@@ -19,7 +19,12 @@ please move along</label>
         </Notebook>
         <HButtonBox expand="false" fill="true" padding="0">
                 <Button with_mnemonic="true" label="_abort" clicked="on_click()"/>
-                <Button label="gtk-redo" use_stock="true"/>
+                <Button label="gtk-redo" use_stock="true">
+                	<clicked>{ target => {
+                			target.sensitive = false;
+                		}	
+                	}</clicked>
+                </Button>
                 <Button label="fail"/>
         </HButtonBox>
 	</VBox>

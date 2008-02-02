@@ -26,3 +26,4 @@ Rewrite:
 	  (e.g. you can use xmlns:class="http://gtkaml.org" and then 
 	- 'complex' attributes: tags that have the name of an attribute of the parent tag are used to 
 	  specify complex widget values (e.g. tab_label parameter of add_page ())
+	- 'simple' attributes as tags - the CDATA or text content is the literal;

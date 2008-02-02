@@ -31,13 +31,36 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			if (class_definition.construct_method == null) 
 				return;
 			//then determine the .add function, if applyable
-			determine_add_method (class_definition);
+			if (class_definition.parent_container != null)
+				determine_add_method (class_definition);
+			resolve_complex_attributes (class_definition);
 		}
 		//resolve the rest of the attr types
 		determine_attribute_types (class_definition);
 		foreach (ClassDefinition child in class_definition.children)
 			resolve (child); 
 	}
+
+	public void resolve_complex_attributes (ClassDefinition! class_definition)
+	{
+		foreach (Attribute attr in class_definition.attrs) {
+			if (attr is ComplexAttribute)
+				resolve ( (attr as ComplexAttribute).complex_type );
+		}
+		if (class_definition.construct_method != null && class_definition.construct_method.parameter_attributes != null)
+			foreach (Attribute attr in class_definition.construct_method.parameter_attributes) {
+				if (attr is ComplexAttribute)
+					resolve ( (attr as ComplexAttribute).complex_type );
+			}
+		bool first=true; //do not generate the first parameter of the container add child method
+		if (class_definition.add_method != null && class_definition.add_method.parameter_attributes != null)
+			foreach (Attribute attr in class_definition.add_method.parameter_attributes) {
+				if (attr is ComplexAttribute && !first) {
+					resolve ( (attr as ComplexAttribute).complex_type );
+				}
+				first = false;
+			}						
+	}		
 
 	/**
 	 * Determines which add method of parent container would be useful
@@ -62,7 +85,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			}
 		}
 		
-		ComplexAttribute first_parameter = new ComplexAttribute ( "widget", child_definition.identifier, child_definition);
+		ComplexAttribute first_parameter = new ComplexAttribute ( "widget", child_definition);
 		
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_add == null) {

@@ -40,8 +40,10 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 				write_using (prefix_to_namespace (prefix));
 			}
 			write_root_class_definition (root_class_definition.target_namespace, root_class_definition.target_name, root_class_definition.base_ns, root_class_definition.base_type.name );
+			write_complex_attributes (root_class_definition);
 		} else {
 			write_declaration (class_definition);
+			write_complex_attributes (class_definition);//this should really go before the constructor
 			write_constructor (class_definition);
 		}
 		write_setters (class_definition);
@@ -49,6 +51,27 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			write_add (class_definition);
 		foreach (ClassDefinition child in class_definition.children)
 			generate (child);
+	}
+
+	public void write_complex_attributes (ClassDefinition! class_definition)
+	{	
+		foreach (Attribute attr in class_definition.attrs) {
+			if (attr is ComplexAttribute)
+				generate ( (attr as ComplexAttribute).complex_type );
+		}
+		if (class_definition.construct_method != null && class_definition.construct_method.parameter_attributes != null)
+			foreach (Attribute attr in class_definition.construct_method.parameter_attributes) {
+				if (attr is ComplexAttribute)
+					generate ( (attr as ComplexAttribute).complex_type );
+			}
+		bool first=true; //do not generate the first parameter of the container add child method
+		if (class_definition.add_method != null && class_definition.add_method.parameter_attributes != null)
+			foreach (Attribute attr in class_definition.add_method.parameter_attributes) {
+				if (attr is ComplexAttribute && !first) {
+					generate ( (attr as ComplexAttribute).complex_type );
+				}
+				first = false;
+			}						
 	}
 	
 	private void write_root_class_definition (string ns, string!name, string base_ns, string! base_name)
@@ -138,8 +161,9 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		string literal;
 		DataType type;
 		
-		if (attr is ComplexAttribute) return (attr as ComplexAttribute).complex_type.identifier;
-		
+		if (attr is ComplexAttribute) {
+			return (attr as ComplexAttribute).complex_type.identifier;
+		}
 		if (attr.target_type is Field) {
 			type = (attr.target_type as Field).type_reference;
 		} else if (attr.target_type is Property) {

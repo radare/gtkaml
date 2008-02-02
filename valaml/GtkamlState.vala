@@ -11,6 +11,11 @@ public class Gtkaml.State : GLib.Object
 {
 	public StateId state_id {get;set;}
 	public Gtkaml.ClassDefinition class_definition {get;set;}
-	public State (construct StateId state_id, construct Gtkaml.ClassDefinition class_definition)
-	{}
+	public Gtkaml.Attribute attribute {get;set;}
+	public string attribute_name{get;set;}
+	
+	public State (construct StateId state_id, construct Gtkaml.ClassDefinition class_definition, construct Gtkaml.Attribute attribute = null, construct string attribute_name = null)
+	{
+	}
+
 }

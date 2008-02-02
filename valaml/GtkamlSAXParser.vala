@@ -106,98 +106,76 @@ public class Gtkaml.SAXParser : GLib.Object {
 							}
 						}
 					}
-					if (Report.get_errors() > 0) 
-						stop_parsing ();
-					//now generate the class definition
+					
 					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
 					if (clazz == null) {
  						Report.error ( source_reference, "%s not a class".printf (localname));
 						stop_parsing (); 
 						return;
 					}
-					
-					this.root_class_definition = new Gtkaml.RootClassDefinition (source_reference, "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
-					this.root_class_definition.prefixes_namespaces = prefixes_namespaces;
-					foreach (XmlAttribute attr in attrs) {
-						if (attr.prefix != null && attr.prefix == gtkaml_prefix) {
-							switch (attr.localname) {
-								case "name":
-									root_class_definition.target_name = attr.value;
-									break;
-								case "namespace":
-									root_class_definition.target_namespace = attr.value;
-									break;
-								default:
-									Report.warning (source_reference, "Unknown gtkaml attribute %s".printf (attr.localname));
-									break;
-							}
-						}
-						var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
-						root_class_definition.add_attribute (simple_attribute);
-					}
-					
-					if (root_class_definition.target_name == null) {
-						Report.error (source_reference, "No class name specified: use %s:name for this".printf (gtkaml_prefix));
-					}
-					if (Report.get_errors() > 0) 
+
+					this.root_class_definition = get_root_definition (clazz, attrs, prefix);
+										
+					if (Report.get_errors() > 0)  {
 						stop_parsing ();
-					//push next state
+						return;
+					}
+
 					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, root_class_definition));
 					break;
 				}
 			case StateId.SAX_PARSER_CONTAINER_STATE:	
 				{
-					//get a name for the identifier
-					string identifier = null;
-					DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;
-					
-					int counter = 0;
 					
 					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
 					
-					foreach (XmlAttribute attr in attrs) {
-						if (attr.prefix!=null && attr.prefix==gtkaml_prefix && (attr.localname=="public" || attr.localname=="private")) {
-							if (identifier!=null) {
-								Report.error (source_reference, "Cannot have multiple identifier names:%s".printf(attr.localname));
-								stop_parsing (); return;
-							}
-							identifier = attr.value;
-							if (attr.localname == "public") {
-								identifier_scope = DefinitionScope.PUBLIC;
-							} else {
-								identifier_scope = DefinitionScope.PRIVATE;
-							}
-						}
+					if (clazz != null) { //this is a member/container child object
+						ClassDefinition class_definition = get_child_for_container (clazz, state.class_definition, attrs, prefix);
+						states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, class_definition));
+					} else { //no class with this name found, assume it's an attribute
+						ClassDefinition attribute_parent_class_definition = state.class_definition;
+						states.push (new State (StateId.SAX_PARSER_ATTRIBUTE_STATE, attribute_parent_class_definition, null, localname));
+					}
+					if (Report.get_errors() > 0)  {
+						stop_parsing ();
+						return;
+					}
+					break;
+				}
+			case StateId.SAX_PARSER_ATTRIBUTE_STATE:
+				{
+					//a tag found within an attribute state switches us to container_state
+					
+					if (state.attribute != null) { //this was created by non-discardable text nodes
+						Report.error (source_reference, "Incorrect attribute definition for %s".printf (state.attribute_name));
+						stop_parsing ();
+						return;
 					}
 					
-					if (identifier == null) {
-						//generate a name for the identifier
-						identifier = clazz.name.down (clazz.name.len ());
-						if (generated_identifiers_counter.contains (identifier)) {
-							counter = generated_identifiers_counter.get (identifier);
-						}
-						identifier = "_%s%d".printf (identifier, counter);
-						counter++;
-						generated_identifiers_counter.set (clazz.name.down (clazz.name.len ()), counter);
-					}
-
-					ClassDefinition class_definition = new ClassDefinition (source_reference, identifier, prefix_to_namespace (prefix), clazz, identifier_scope, state.class_definition);
-					foreach (XmlAttribute attr in attrs) {
-						if (attr.prefix == null) {
-							var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
-							class_definition.add_attribute (simple_attribute);
-						}
-					}
+					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
 					
-
+					ClassDefinition attribute_value_definition;
+					if (clazz != null) { //this is a member/container child object
+						attribute_value_definition = get_child_for_container (clazz, null, attrs, prefix);
+					} else {
+						Report.error (source_reference, "No class %s found".printf (localname));
+					}
+					ComplexAttribute attr = new ComplexAttribute (state.attribute_name, attribute_value_definition);
 					
-					//push next state
-					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, class_definition));
+					//add the attribute into the parent container
+					state.class_definition.add_attribute (attr);		
+					
+					if (Report.get_errors() > 0)  {
+						stop_parsing ();
+						return;
+					}
+					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, attribute_value_definition));
 					break;
 				}
 			default:
-				stderr.printf("Invalid state\n");
-				stop_parsing(); return;
+				Report.error( source_reference, "Invalid Gtkaml SAX Parser state");
+				stop_parsing(); 
+				return;
 		}
 		
 	}
@@ -241,6 +219,77 @@ public class Gtkaml.SAXParser : GLib.Object {
 			}
 		}
 		return null;
+	}
+
+	public RootClassDefinition get_root_definition (Class clazz, Gee.List<XmlAttribute> attrs, string prefix)
+	{
+		RootClassDefinition root_class_definition = new Gtkaml.RootClassDefinition (create_source_reference (), "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
+		root_class_definition.prefixes_namespaces = prefixes_namespaces;
+		foreach (XmlAttribute attr in attrs) {
+			if (attr.prefix != null && attr.prefix == gtkaml_prefix) {
+				switch (attr.localname) {
+					case "name":
+						root_class_definition.target_name = attr.value;
+						break;
+					case "namespace":
+						root_class_definition.target_namespace = attr.value;
+						break;
+					default:
+						Report.warning (create_source_reference (), "Unknown gtkaml attribute %s".printf (attr.localname));
+						break;
+				}
+			}
+			var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
+			root_class_definition.add_attribute (simple_attribute);
+		}
+		
+		if (root_class_definition.target_name == null) {
+			Report.error (create_source_reference (), "No class name specified: use %s:name for this".printf (gtkaml_prefix));
+		}
+		return root_class_definition;
+	}
+	
+	public ClassDefinition get_child_for_container (Class clazz, ClassDefinition! container_definition, Gee.List<XmlAttribute> attrs, string prefix)
+	{
+		string identifier = null;
+		DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;
+
+		foreach (XmlAttribute attr in attrs) {
+			if (attr.prefix!=null && attr.prefix==gtkaml_prefix && (attr.localname=="public" || attr.localname=="private")) {
+				if (identifier!=null) {
+					Report.error (create_source_reference (), "Cannot have multiple identifier names:%s".printf(attr.localname));
+					stop_parsing (); return null;
+				}
+				identifier = attr.value;
+				if (attr.localname == "public") {
+					identifier_scope = DefinitionScope.PUBLIC;
+				} else {
+					identifier_scope = DefinitionScope.PRIVATE;
+				}
+			}
+		}
+		
+		
+		int counter = 0;
+		if (identifier == null) {
+			//generate a name for the identifier
+			identifier = clazz.name.down (clazz.name.len ());
+			if (generated_identifiers_counter.contains (identifier)) {
+				counter = generated_identifiers_counter.get (identifier);
+			}
+			identifier = "_%s%d".printf (identifier, counter);
+			counter++;
+			generated_identifiers_counter.set (clazz.name.down (clazz.name.len ()), counter);
+		}
+
+		ClassDefinition class_definition = new ClassDefinition (create_source_reference (), identifier, prefix_to_namespace (prefix), clazz, identifier_scope, container_definition);
+		foreach (XmlAttribute attr in attrs) {
+			if (attr.prefix == null) {
+				var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
+				class_definition.add_attribute (simple_attribute);
+			}
+		}
+		return class_definition;
 	}
 	
 	

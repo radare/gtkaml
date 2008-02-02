@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Window xmlns="Gtk:gtk+-2.0" xmlns:GLib="GLib" xmlns:gtkaml="http://gtkaml.org/0.1" title="gtktest" destroy="Gtk.main_quit()">
+<Window xmlns="Gtk:gtk+-2.0" xmlns:GLib="GLib" xmlns:gtkaml="http://gtkaml.org/0.1" 
+	gtkaml:name="MyWindow" title="gtktest" destroy="{Gtk.main_quit}">
 	<VBox homogeneous="false" spacing="4">
         <Label expand="false" fill="true" padding="0" use_markup="true" label="&lt;b&gt;Dialog Box Title Here&lt;/b&gt;">
         </Label>
-        <Notebook expand="true" fill="true" padding="0" can_focus="false" tab_vborder="1">
+        <Notebook expand="true" fill="true" padding="0" can_focus="false" tab_vborder="1" gtkaml:private="my_notebook">
                 <Label label="gg">
                         
                 </Label>
@@ -22,7 +23,7 @@
 
 		static int main ( string [] args ) {
 			Gtk.init (ref args);
-			Gigel g = new Gigel();
+			MyWindow g = new MyWindow();
 			g.show_all ();
 			Gtk.main ();
 			return 0;	

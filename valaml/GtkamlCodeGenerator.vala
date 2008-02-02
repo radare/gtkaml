@@ -39,7 +39,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			foreach (string prefix in root_class_definition.prefixes_namespaces.get_keys ()) {
 				write_using (prefix_to_namespace (prefix));
 			}
-			write_root_class_definition (null/*class:namespace*/, "Gigel" /*class:name*/, root_class_definition.base_ns, root_class_definition.base_type.name );
+			write_root_class_definition (root_class_definition.target_namespace, root_class_definition.target_name, root_class_definition.base_ns, root_class_definition.base_type.name );
 		} else {
 			write_declaration (class_definition);
 			write_constructor (class_definition);

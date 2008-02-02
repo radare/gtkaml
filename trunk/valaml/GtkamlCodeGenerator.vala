@@ -186,7 +186,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 					Report.error( null, "Attribute %s not properly ended".printf (attr.name));
 				}
 			} else if (utype.type_name == "string") {
-				literal = "\"" + value + "\"";
+				literal = "\"" + value.escape (null) + "\"";
 			} else if (utype.type_name == "bool") {
 				if (value != "true" && value != "false") {
 					Report.error (null, "'%s' is not a boolean literal".printf (value));

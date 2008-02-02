@@ -94,21 +94,22 @@ public class Gtkaml.SAXParser : GLib.Object {
 					//Frist Tag! - that means, add "using" directives first
 					var nss = parse_namespaces (namespaces, nb_namespaces);
 					foreach (XmlNamespace ns in nss) {
-						if ( ns.prefix == null || ns.prefix != null && ns.prefix != gtkaml_prefix)
+						if ( null == ns.prefix || null != ns.prefix && ns.prefix != gtkaml_prefix)
 						{
 							string[] uri_definition = ns.URI.split_set(":");	
 							var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
 							source_file.add_using_directive (namespace_reference);
-							if (ns.prefix==null) {
+							if (null == ns.prefix) {
 								prefixes_namespaces.set ("", uri_definition[0]); 
 							} else {
 								prefixes_namespaces.set (ns.prefix, uri_definition[0]); 
 							}
 						}
 					}
-					
+					if (Report.get_errors() > 0) 
+						stop_parsing ();
 					//now generate the class definition
-					Class clazz = lookup_class (prefix, localname);
+					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
 					if (clazz == null) {
  						Report.error ( source_reference, "%s not a class".printf (localname));
 						stop_parsing (); 
@@ -118,10 +119,28 @@ public class Gtkaml.SAXParser : GLib.Object {
 					this.root_class_definition = new Gtkaml.RootClassDefinition (source_reference, "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
 					this.root_class_definition.prefixes_namespaces = prefixes_namespaces;
 					foreach (XmlAttribute attr in attrs) {
+						if (attr.prefix != null && attr.prefix == gtkaml_prefix) {
+							switch (attr.localname) {
+								case "name":
+									root_class_definition.target_name = attr.value;
+									break;
+								case "namespace":
+									root_class_definition.target_namespace = attr.value;
+									break;
+								default:
+									Report.warning (source_reference, "Unknown gtkaml attribute %s".printf (attr.localname));
+									break;
+							}
+						}
 						var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
 						root_class_definition.add_attribute (simple_attribute);
 					}
 					
+					if (root_class_definition.target_name == null) {
+						Report.error (source_reference, "No class name specified: use %s:name for this".printf (gtkaml_prefix));
+					}
+					if (Report.get_errors() > 0) 
+						stop_parsing ();
 					//push next state
 					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, root_class_definition));
 					break;
@@ -134,7 +153,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 					
 					int counter = 0;
 					
-					Class clazz = lookup_class (prefix, localname);
+					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
 					
 					foreach (XmlAttribute attr in attrs) {
 						if (attr.prefix!=null && attr.prefix==gtkaml_prefix && (attr.localname=="public" || attr.localname=="private")) {
@@ -214,7 +233,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	private Class lookup_class (string xmlNamespace, string name)
 	{
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
-			if ( (ns.name == null && xmlNamespace == null ) || ns.name == xmlNamespace) {
+			if ( (ns.name == null && xmlNamespace == null ) || (ns.name != null && xmlNamespace != null && ns.name == xmlNamespace)) {
 				Symbol s = ns.scope.lookup (name);
 				if (s is Class) {
 					return (s as Class);
@@ -257,7 +276,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 			ns.prefix = namespaces[walker];
 			ns.URI = namespaces[walker+1];
 			if (ns.URI != null && ns.URI.has_prefix ("http://gtkaml.org/")) {
-				gtkaml_prefix = ns.prefix;
+				if (ns.prefix != null) {
+					gtkaml_prefix = ns.prefix;
+				} else {
+					Report.error (create_source_reference (), "You cannot use the gtkaml namespace as default namespace");
+				}
 			}
 			namespace_list.add (ns);
 			walker += 2;

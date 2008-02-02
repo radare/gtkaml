@@ -3,10 +3,22 @@ Generates the following
 	- private/public data members
 	- blank constructors calls
 	- sets attributes (only from the direct class, not inherited ones): 
-			properies and fields.
+	  properies and fields.
 
 2008-01-29
 Added:
 	- signals (always wrapped in a lambda function)
 	- attributes from the whole hierarchy
 	- examples/ added to project
+2008-02-01
+	- finished rewrite so that we resolve the constructors and add methods for all widget tree, 
+	  and _then_ render all the source
+	- you can now use the name of a constructor as a boolean attribute to force using it 
+	  (e.g. with_mnemonic="true"). Otherwise, one is chosen for you
+	- the same with add methods: specify pack_start="true" on children of a Box 
+	  and you are prompted to enter the parameters
+	- signals are assigned ad-literam if the expression is in between {}
+2008-02-01
+	- gtkaml:name and gtkaml:namespace for specifying the resulting class name/namespace
+	- the gtkaml namespace name is considered the one with the URI starting with "http://gtkaml.org" 
+	  (e.g. you can use xmlns:class="http://gtkaml.org" and then 

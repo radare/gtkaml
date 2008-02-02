@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Gtk:VBox homogeneous="true" spacing="0"
+<Gtk:VBox gtkaml:name="MyVBox"
 	xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' 
 	xmlns:gtkaml="http://gtkaml.org/0.1"
 	>
@@ -12,7 +12,7 @@
 		<Gtk:Entry key_release_event="l2.set_label ( (target as Entry).text)"/>
 		<Gtk:Table n_rows="2" n_columns="2" homogeneous="true">
 			<Gtk:Button attach_defaults="true" left_attach="0" right_attach="1" top_attach="1" bottom_attach="2" label="in the table" />
-			<Gtk:Button left_attach="1"  top_attach="0" bottom_attach="1" label="where noone has gone before" />
+			<Gtk:Button left_attach="1" right_attach="2" top_attach="0" bottom_attach="1" label="where noone has gone before" />
 		</Gtk:Table>
 	</Gtk:VBox>
 <![CDATA[
@@ -23,7 +23,7 @@
 	static int main (string[] args) {
 		Gtk.init (ref args);
 		var w = new Gtk.Window (WindowType.TOPLEVEL);
-		var g = new Gigel();
+		var g = new MyVBox();
 	
 		g.destroy+=Gtk.main_quit;
 		g.show_all ();

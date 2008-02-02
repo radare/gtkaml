@@ -11,7 +11,10 @@
                 	</tab_label>
                 </Label>
                 <HBox homogeneous="false" spacing="4">
-                        <Label label="Nothing to see here, please move along" />
+                        <Label>
+                        	<label>Nothing to see here, 
+please move along</label>
+						</Label>
                 </HBox>
         </Notebook>
         <HButtonBox expand="false" fill="true" padding="0">

@@ -180,6 +180,28 @@ public class Gtkaml.SAXParser : GLib.Object {
 		
 	}
 	
+	public void characters (string data, int len)
+	{
+		State state = states.peek ();
+		string value = data.ndup (len);
+		value.strip ();
+		if (value != "") {
+			if (state.state_id == StateId.SAX_PARSER_ATTRIBUTE_STATE) {
+				if (state.attribute == null) {
+					state.attribute = new SimpleAttribute (state.attribute_name, value);
+					state.class_definition.add_attribute (state.attribute);
+				} else {
+					if (state.attribute is SimpleAttribute) {
+						(state.attribute as SimpleAttribute).value += "\n" + value;
+					} else {
+						Report.error (create_source_reference (), "Cannot mix a complex attribute definition with simple values like this: attribute %s".printf (state.attribute.name));
+						stop_parsing ();
+						return;
+					}
+				}
+			}
+		}
+	}
 	public void end_element (string localname, string prefix, string URI)
 	{
 		states.pop();
@@ -190,11 +212,25 @@ public class Gtkaml.SAXParser : GLib.Object {
 		State state = states.peek ();
 		if (state.state_id != StateId.SAX_PARSER_INITIAL_STATE){
 			State previous_state = states.peek (1);
-			if (state.state_id != StateId.SAX_PARSER_INITIAL_STATE) {
+			if (previous_state.state_id == StateId.SAX_PARSER_INITIAL_STATE) {
 				code_generator.add_code (cdata.ndup (len));
+			} else {
+				if (state.state_id == StateId.SAX_PARSER_ATTRIBUTE_STATE) {
+					if (state.attribute == null) {
+						state.attribute = new SimpleAttribute (state.attribute_name, cdata.ndup (len));
+						state.class_definition.add_attribute (state.attribute);
+					} else {
+						if (state.attribute is SimpleAttribute) {
+							(state.attribute as SimpleAttribute).value += "\n" + cdata.ndup (len);
+						} else {
+							Report.error (create_source_reference (), "Cannot mix a complex attribute definition with simple values like this: attribute %s".printf (state.attribute.name));
+							stop_parsing ();
+							return;
+						}
+					}
+				}
 			}
-		}
-
+		} 
 	}
 
 	private string prefix_to_namespace (string prefix)

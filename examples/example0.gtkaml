@@ -1,19 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Gtk:VBox homogeneous="true" spacing="0"
 	xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' 
 	xmlns:gtkaml="http://gtkaml.org/0.1"
 	>
-<![CDATA[
-	public int times_clicked = 0;
-]]>
-	<Gtk:HBox homogeneous="true" spacing="0">
-		<Gtk:Label label='_Gogu' with_mnemonic="true" angle="0.2" gtkaml:public="l1" />
-		<Gtk:Button label='gigel' clicked="clicked()" gtkaml:private="b1"/>
-		<Gtk:Label label='gigel' gtkaml:public="l2"/>
-	</Gtk:HBox>
+	<Gtk:VBox homogeneous="true" spacing="0">
+		<Gtk:HBox homogeneous="true" spacing="0">
+			<Gtk:Label label='_Gogu' with_mnemonic="true" angle="0.2" gtkaml:public="l1" />
+			<Gtk:Button label='gigel' clicked="clicked()" gtkaml:private="b1"/>
+			<Gtk:Label label='gigel' gtkaml:public="l2"/>
+		</Gtk:HBox>
+		<Gtk:Entry key_release_event="l2.set_label ( (target as Entry).text)"/>
+		<Gtk:Table n_rows="2" n_columns="2" homogeneous="true">
+			<Gtk:Button attach_defaults="true" left_attach="0" right_attach="1" top_attach="1" bottom_attach="2" label="in the table" />
+			<Gtk:Button left_attach="1"  top_attach="0" bottom_attach="1" label="where noone has gone before" />
+		</Gtk:Table>
+	</Gtk:VBox>
 <![CDATA[
 	static void clicked () {
 		message("clicked!\n");
 	}
+
 	static int main (string[] args) {
 		Gtk.init (ref args);
 		var w = new Gtk.Window (WindowType.TOPLEVEL);

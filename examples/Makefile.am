@@ -28,7 +28,7 @@ example0_LDADD = \
 	$(EXTRA_LDFLAGS)
 
 example0.stamp : $(example0_GTKAMLSOURCES)
-	../valaml/valamlc $(VALAFLAGS) --pkg gtk+-2.0 $^
+	../src/gtkamlc $(VALAFLAGS) --pkg gtk+-2.0 $^
 	touch $@
 
 ## Example 1
@@ -46,7 +46,7 @@ example1_LDADD = \
 	$(EXTRA_LDFLAGS)
 
 example1.stamp : $(example1_GTKAMLSOURCES)
-	../valaml/valamlc $(VALAFLAGS) --pkg gtk+-2.0 $^
+	../src/gtkamlc $(VALAFLAGS) --pkg gtk+-2.0 $^
 	touch $@
 
 

@@ -1,5 +1,4 @@
 SUBDIRS = src \
-	valaml \
 	examples
 
 gtkamldocdir = ${prefix}/doc/gtkaml

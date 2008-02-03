@@ -1,4 +1,6 @@
 SUBDIRS = src \
+	data \
+	vapi \
 	examples
 
 gtkamldocdir = ${prefix}/doc/gtkaml

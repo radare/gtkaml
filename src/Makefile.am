@@ -53,3 +53,5 @@ gtkamlc_LDADD = \
 	$(LIBXML2_LIBS)\
 	$(GLIB_LIBS) \
 	$(VALA_LIBS)
+
+EXTRA_DIST = $(gtkamlc_VALASOURCES)

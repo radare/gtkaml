@@ -10,7 +10,6 @@ AM_CFLAGS = \
 	 $(GTK_CFLAGS)
 
 BUILT_SOURCES = example0.stamp example1.stamp
-EXTRA_DIST = example0.stamp example1.stamp
 bin_PROGRAMS = example0 example1
 
 ## Example 0
@@ -49,5 +48,7 @@ example1.stamp : $(example1_GTKAMLSOURCES)
 	../src/gtkamlc $(VALAFLAGS) --pkg gtk+-2.0 $^
 	touch $@
 
-
-
+EXTRA_DIST = example0.stamp \
+	example1.stamp \
+	$(example0_GTKAMLSOURCES) \
+	$(example1_GTKAMLSOURCES)

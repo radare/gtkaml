@@ -184,8 +184,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 	{
 		State state = states.peek ();
 		string value = data.ndup (len);
-		value.strip ();
-		if (value != "") {
+		string stripped_value = value; stripped_value.strip ();
+		
+		if (stripped_value != "") {
 			if (state.state_id == StateId.SAX_PARSER_ATTRIBUTE_STATE) {
 				if (state.attribute == null) {
 					state.attribute = new SimpleAttribute (state.attribute_name, value);
@@ -202,6 +203,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 			}
 		}
 	}
+	
 	public void end_element (string localname, string prefix, string URI)
 	{
 		states.pop();

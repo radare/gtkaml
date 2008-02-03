@@ -176,25 +176,26 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 		
 		string value = (attr as SimpleAttribute).value;
+		string stripped_value = value; stripped_value.strip ();
 		if (type is UnresolvedType)
 		{
 			UnresolvedType utype = type as UnresolvedType;
-			if (value.has_prefix ("{")) {
-				if (value.has_suffix ("}")) {
-					literal = value.substring (1, value.len () - 2);
+			if (stripped_value.has_prefix ("{")) {
+				if (stripped_value.has_suffix ("}")) {
+					literal = value.substring (1, stripped_value.len () - 2);
 				} else {
 					Report.error( null, "Attribute %s not properly ended".printf (attr.name));
 				}
 			} else if (utype.type_name == "string") {
 				literal = "\"" + value.escape (null) + "\"";
 			} else if (utype.type_name == "bool") {
-				if (value != "true" && value != "false") {
+				if (stripped_value != "true" && stripped_value != "false") {
 					Report.error (null, "'%s' is not a boolean literal".printf (value));
 					return null;
 				}
-				literal = value;
+				literal = stripped_value;
 			} else {
-				literal = value;
+				literal = stripped_value;
 			}
 			return literal;
 		} else { 

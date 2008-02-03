@@ -1,15 +1,12 @@
-2008-01-25
-Generates the following:
-	- private/public data members
-	- blank constructors calls
-	- sets attributes (only from the direct class, not inherited ones): 
-	  properies and fields.
-
-2008-01-29
-Added:
-	- signals (always wrapped in a lambda function)
-	- attributes from the whole hierarchy
-	- examples/ added to project
+2008-02-02: 
+gtkaml 0.1 release
+	- gtkaml:name and gtkaml:namespace for specifying the resulting class name/namespace
+	- the gtkaml namespace name is considered the one with the URI starting with "http://gtkaml.org" 
+	  (e.g. you can use xmlns:class="http://gtkaml.org" and then 
+	- 'complex' attributes: tags that have the name of an attribute of the parent tag are used to 
+	  specify complex widget values (e.g. tab_label parameter of add_page ())
+	- 'simple' attributes as tags - the CDATA or text content is the literal;
+	
 2008-02-01
 Rewrite:
 	- finished rewrite so that we resolve the constructors and add methods for all widget tree, 
@@ -20,10 +17,18 @@ Rewrite:
 	  and you are prompted to enter the parameters
 	- signals are assigned ad-literam if the expression is in between {}
 
-2008-02-01: 0.1 RC1
-	- gtkaml:name and gtkaml:namespace for specifying the resulting class name/namespace
-	- the gtkaml namespace name is considered the one with the URI starting with "http://gtkaml.org" 
-	  (e.g. you can use xmlns:class="http://gtkaml.org" and then 
-	- 'complex' attributes: tags that have the name of an attribute of the parent tag are used to 
-	  specify complex widget values (e.g. tab_label parameter of add_page ())
-	- 'simple' attributes as tags - the CDATA or text content is the literal;
+2008-01-29
+Added:
+	- signals (always wrapped in a lambda function)
+	- attributes from the whole hierarchy
+	- examples/ added to project
+
+2008-01-25
+Generates the following:
+	- private/public data members
+	- blank constructors calls
+	- sets attributes (only from the direct class, not inherited ones): 
+	  properies and fields.
+
+
+

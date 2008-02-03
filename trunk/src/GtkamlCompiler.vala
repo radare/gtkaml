@@ -36,7 +36,6 @@ class Gtkaml.Compiler : Object
 	static string library;
 	[NoArrayLength ()]
 	static string[] packages;
-	static bool disable_memory_management;
 
 	static bool ccode_only;
 	static bool compile_only;
@@ -46,10 +45,13 @@ class Gtkaml.Compiler : Object
 	static int optlevel;
 	static bool disable_assert;
 	static bool disable_checking;
+	static bool non_null;
 	static string cc_command;
 	[NoArrayLength]
 	static string[] cc_options;
 	static bool save_temps;
+	[NoArrayLength]
+	static string[] defines;
 
 	private CodeContext context;
 
@@ -60,15 +62,16 @@ class Gtkaml.Compiler : Object
 		{ "basedir", 'b', 0, OptionArg.FILENAME, out basedir, "Base source directory", "DIRECTORY" },
 		{ "directory", 'd', 0, OptionArg.FILENAME, out directory, "Output directory", "DIRECTORY" },
 		{ "version", 0, 0, OptionArg.NONE, ref version, "Display version number", null },
-		{ "disable-memory-management", 0, 0, OptionArg.NONE, ref disable_memory_management, "Disable memory management", null },
 		{ "ccode", 'C', 0, OptionArg.NONE, ref ccode_only, "Output C code", null },
 		{ "compile", 'c', 0, OptionArg.NONE, ref compile_only, "Compile but do not link", null },
 		{ "output", 'o', 0, OptionArg.FILENAME, out output, "Place output in file FILE", "FILE" },
 		{ "debug", 'g', 0, OptionArg.NONE, ref debug, "Produce debug information", null },
 		{ "thread", 0, 0, OptionArg.NONE, ref thread, "Enable multithreading support", null },
 		{ "optimize", 'O', 0, OptionArg.INT, ref optlevel, "Optimization level", "OPTLEVEL" },
+		{ "define", 'D', 0, OptionArg.STRING_ARRAY, out defines, "Define SYMBOL", "SYMBOL..." },
 		{ "disable-assert", 0, 0, OptionArg.NONE, ref disable_assert, "Disable assertions", null },
 		{ "disable-checking", 0, 0, OptionArg.NONE, ref disable_checking, "Disable run-time checks", null },
+		{ "enable-non-null", 0, 0, OptionArg.NONE, ref non_null, "Enable non-null types", null },
 		{ "cc", 0, 0, OptionArg.STRING, out cc_command, "Use COMMAND as C compiler command", "COMMAND" },
 		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, out cc_options, "Pass OPTION to the C compiler", "OPTION..." },
 		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
@@ -98,7 +101,7 @@ class Gtkaml.Compiler : Object
 			}
 		}
 
-		string filename = Path.build_filename ("/usr/share/vala", "vapi", basename);
+		string filename = Path.build_filename (Config.PACKAGE_DATADIR, "vapi", basename);
 		if (FileUtils.test (filename, FileTest.EXISTS)) {
 			return filename;
 		}
@@ -162,9 +165,9 @@ class Gtkaml.Compiler : Object
 		}
 
 		context.library = library;
-		context.memory_management = !disable_memory_management;
 		context.assert = !disable_assert;
 		context.checking = !disable_checking;
+		context.non_null = non_null;
 
 		context.ccode_only = ccode_only;
 		context.compile_only = compile_only;
@@ -182,6 +185,12 @@ class Gtkaml.Compiler : Object
 		context.optlevel = optlevel;
 		context.save_temps = save_temps;
 
+		if (defines != null) {
+		   foreach (string define in defines) {
+				context.add_define (define);
+		   }
+		}
+
 		context.codegen = new CCodeGenerator ();
 
 		/* default package */
@@ -197,7 +206,6 @@ class Gtkaml.Compiler : Object
 			}
 			packages = null;
 		}
-		
 		
 		if (Report.get_errors () > 0) {
 			return quit ();
@@ -233,7 +241,6 @@ class Gtkaml.Compiler : Object
 		if (Report.get_errors () > 0) {
 			return quit ();
 		}
-		
 		
 		var attributeprocessor = new AttributeProcessor ();
 		attributeprocessor.process (context);
@@ -354,7 +361,7 @@ class Gtkaml.Compiler : Object
 		}
 		
 		if (version) {
-			stdout.printf ("Vala %s\n", "0.1.5");
+			stdout.printf ("Gtkaml %s (Based on Vala 0.1.6)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

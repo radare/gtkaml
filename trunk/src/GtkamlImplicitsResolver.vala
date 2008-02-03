@@ -37,7 +37,10 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	construct {
 		try {
 			key_file = new KeyFile ();
-			key_file.load_from_file ("../data/implicits.ini", KeyFileFlags.NONE);
+			string file_name = Path.build_filename (Config.PACKAGE_DATADIR, "", "implicits.ini");
+			if (!FileUtils.test (file_name, FileTest.EXISTS))
+				file_name = "../data/implicits.ini";
+			key_file.load_from_file (file_name, KeyFileFlags.NONE);
 		} catch (KeyFileError error) {
 			Report.error (null, error.message);
 		}

@@ -3,12 +3,13 @@ INCLUDES = \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" 
 
-AM_CFLAGS = \
+AM_CFLAGS = -I$(top_srcdir) \
 	-Wall \
 	-g \
 	$(LIBXML2_CFLAGS) \
 	$(GLIB_CFLAGS) \
-	$(VALA_CFLAGS)
+	$(VALA_CFLAGS) \
+	-DPACKAGE_DATADIR=\"$(pkgdatadir)\"
 
 
 bin_PROGRAMS = gtkamlc 
@@ -41,7 +42,7 @@ gtkamlc_SOURCES = \
 	GtkamlSAXParser_start_parsing.c
 
 gtkamlc.vala.stamp: $(gtkamlc_VALASOURCES)
-	$(VALAC) $(VALAFLAGS) --pkg libxml-2.0 --pkg vala-1.0 $^ 
+	$(VALAC) $(VALAFLAGS) --vapidir=../vapi --pkg config --pkg libxml-2.0 --pkg vala-1.0 $^ 
 	sed 's/GTKAML_DUMMY/VALA_CODE_VISITOR/g' < GtkamlParser.c > GtkamlParser.c.ed
 	mv -f GtkamlParser.c.ed GtkamlParser.c
 	sed 's/\tGtkamlDummy/\tValaParser/g' < GtkamlParser.h > GtkamlParser.h.ed

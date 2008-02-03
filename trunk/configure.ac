@@ -52,7 +52,6 @@ AC_SUBST(VALA_LIBS)
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
-valaml/Makefile
 examples/Makefile
 ])
 

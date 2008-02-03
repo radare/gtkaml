@@ -4,6 +4,7 @@
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.
 
+
 DIE=0
 
 if [ -n "$GNOME2_DIR" ]; then

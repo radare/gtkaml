@@ -219,6 +219,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		var the_signal = simple_attribute.target_type as Vala.Signal;
 		string parameters_joined = "";
 		string body = simple_attribute.value;
+		body.strip ();
 		
 		if ( body.has_prefix ("{") )
 		{
@@ -243,9 +244,9 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 				parameter_names[i] = p.name;
 			}
 			parameters_joined += ", " + string.joinv (",", parameter_names);
-			construct_body += "\t\t%s.%s += (%s) => { %s; };\n".printf (class_definition.identifier, signal_attr.name, parameters_joined, body);
+			construct_body += "\t\t%s.%s += (%s) => { %s; };\n".printf (class_definition.identifier, signal_attr.name, parameters_joined, simple_attribute.value);
 		} else {
-			construct_body += "\t\t%s.%s += %s => { %s; };\n".printf (class_definition.identifier, signal_attr.name, parameters_joined, body);
+			construct_body += "\t\t%s.%s += %s => { %s; };\n".printf (class_definition.identifier, signal_attr.name, parameters_joined, simple_attribute.value);
 		}
 		
 	}

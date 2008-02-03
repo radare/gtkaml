@@ -1,3 +1,6 @@
+	- configure.ac now specifies an exact version of vala which is required
+
+
 2008-02-02: 
 gtkaml 0.1 release
 	- gtkaml:name and gtkaml:namespace for specifying the resulting class name/namespace

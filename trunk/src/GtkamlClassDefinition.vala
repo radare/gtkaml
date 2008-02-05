@@ -62,7 +62,7 @@ public class Gtkaml.ClassDefinition : GLib.Object {
 	public ConstructMethod construct_method {get;set;}
 	public AddMethod add_method {get;set;}
 
-	public ClassDefinition (SourceReference source_reference, string! identifier, string base_ns, Vala.Class! base_type, 
+	public ClassDefinition (SourceReference source_reference, string! identifier, string! base_ns, Vala.Class! base_type, 
 		DefinitionScope! definition_scope, ClassDefinition parent_container = null)
 	{
 		this.source_reference = source_reference;

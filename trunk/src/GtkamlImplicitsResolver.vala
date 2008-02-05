@@ -32,7 +32,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	private string key_file_name {get;set;}
 	private Vala.CodeContext context {get;set;}
 	
-	public ImplicitsResolver (construct Vala.CodeContext context, construct string! key_file_name) {}
+	public ImplicitsResolver (construct Vala.CodeContext! context, construct string! key_file_name) {}
 	
 	construct {
 		try {
@@ -296,12 +296,26 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			return max_matches_method;
 	}	
 
-	public Gee.List<Vala.Method> lookup_container_add_methods (string! ns, Class container_class)
+	private bool has_key (string! group_name, string! key)
+	{
+		return key_file.has_key (group_name, key);
+	}
+	
+	private string[] get_string_list (string! group_name, string! key)
+	{
+		return key_file.get_string_list (group_name, key);
+	}
+
+	public Gee.List<Vala.Method> lookup_container_add_methods (string! ns, Class! container_class)
 	{
 		Gee.List<Vala.Method> methods = new Gee.ArrayList<Vala.Method> ();
-		if (key_file.has_key (ns + "." + container_class.name, "adds"))
+		//FIXME workaround to stop recursion at TypeInstance and Object
+		if (null == ns) 
+			return methods;
+
+		if (has_key (ns + "." + container_class.name, "adds"))
 		{
-			string[] add_methods = key_file.get_string_list (ns + "." + container_class.name, "adds");
+			string[] add_methods = get_string_list (ns + "." + container_class.name, "adds");
 			for (int i = 0; i < add_methods.length; i++) {
 				foreach (Vala.Method method in container_class.get_methods ())
 					if (method.name == add_methods[i]) {
@@ -313,9 +327,13 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		foreach (DataType dt in container_class.get_base_types ()) {
 			if (dt is UnresolvedType) {
-				Class c = lookup_class ((dt as UnresolvedType).namespace_name, (dt as UnresolvedType).type_name);
+				var ns = (dt as UnresolvedType).namespace_name;
+				if (ns == null) {
+					continue;
+				}
+				Class c = lookup_class (ns, (dt as UnresolvedType).type_name);
 				if (c != null) {
-					var otherMethods = lookup_container_add_methods ((dt as UnresolvedType).namespace_name, c);
+					var otherMethods = lookup_container_add_methods (ns, c);
 					foreach (Vala.Method method in otherMethods) {
 						methods.add (method);
 					}
@@ -330,12 +348,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	public Gee.List<string> determine_method_parameter_names(ClassDefinition! class_definition, Vala.Method! method)
 	{
 		var result = new Gee.ArrayList<string> (str_equal);
-		string method_name= method.name;
+		string method_name = method.name;
 		if (method.name.has_prefix (".new"))
 			method_name = method.name.substring(1, method.name.len () - 1);
-		if (key_file.has_key (class_definition.base_full_name, method_name))
+		if (has_key (class_definition.base_full_name, method_name))
 		{
-				string [] result_array = key_file.get_string_list (class_definition.base_full_name, method_name);
+			string [] result_array = get_string_list (class_definition.base_full_name, method_name);
 			for (int i = 0; i < result_array.length; i++)
 				result.add (result_array [i]);
 		} else {
@@ -356,7 +374,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		}
 	}
 	
-	public Member member_lookup_inherited (Class clazz, string! member) {
+	public Member member_lookup_inherited (Class! clazz, string! member) {
 		Member result = clazz.scope.lookup (member) as Member;
 		if (result != null)
 			return result;
@@ -374,7 +392,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		return null;
 	}								
 
-	private Class lookup_class (string xmlNamespace, string name)
+	private Class lookup_class (string! xmlNamespace, string! name)
 	{
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
 			if ( (ns.name == null && xmlNamespace == null ) || ns.name == xmlNamespace) {
@@ -388,7 +406,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	}
 
 
-	public Gee.List<Vala.Method> lookup_constructors (Class clazz) {
+	public Gee.List<Vala.Method> lookup_constructors (Class! clazz) {
 		var constructors = new Gee.ArrayList<Vala.Method> ();
 		foreach (Vala.Method m in clazz.get_methods ()) {
 			//todo: if m is ConstructMethod ?

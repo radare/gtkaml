@@ -202,8 +202,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				if (parameter == attr.name) {
 					new_method.parameter_attributes.add (attr);
 					to_remove.add (attr);
-					//bug?
-					attr.target_type = member_lookup_inherited (class_definition.base_type, attr.name);
+					//attr.target_type = member_lookup_inherited (class_definition.base_type, attr.name);
 					break;
 				}
 			}
@@ -220,6 +219,20 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("Constructor", class_definition.base_full_name, message));
 			return;
 		}
+		
+		
+		//determine attr.target_types directly from constructor signature
+		Gee.Collection<FormalParameter> constructor_parameters = determined_constructor.get_parameters ();
+		int i = 0;
+		foreach (FormalParameter formal_parameter in constructor_parameters)
+		{
+			if (!formal_parameter.ellipsis) {
+				var attr = new_method.parameter_attributes.get (i);
+				attr.target_type = formal_parameter;
+				i++;
+			}
+		}
+
 		
 		foreach (Gtkaml.Attribute attr in to_remove)
 			class_definition.attrs.remove (attr);

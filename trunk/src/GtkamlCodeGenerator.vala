@@ -185,6 +185,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		if (attr is ComplexAttribute) {
 			return (attr as ComplexAttribute).complex_type.identifier;
 		}
+		string value = (attr as SimpleAttribute).value;
+		
 		if (attr.target_type is Field) {
 			type = (attr.target_type as Field).type_reference;
 		} else if (attr.target_type is Property) {
@@ -192,11 +194,11 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		} else if (attr.target_type is FormalParameter) {
 			type = (attr.target_type as FormalParameter).type_reference;
 		} else {		
-			Report.error(null, "Don't know what to do with %s to a method".printf (attr.name));
+			Report.error(null, "The attribute %s with value %s is not Field, Property or FormalParameter".printf (attr.name, value));
 			return null;
 		}
 		
-		string value = (attr as SimpleAttribute).value;
+		
 		string stripped_value = value; stripped_value.strip ();
 		if (type is UnresolvedType)
 		{

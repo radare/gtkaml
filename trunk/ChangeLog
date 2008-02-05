@@ -1,4 +1,6 @@
 2008-02-05
+	- added the Gtk.MenuItem in implicits.ini with 'new' parameter 'label'
+	- fixed an issue when loooking up for constructor parameters' type
 	- fixed a bug (#1) which prevented a widget from a namespace to be 
 	  added into a container from another namespace (and viceversa)
 	- fixed an issue (#2) with gtkaml:name and gtkaml:namespace added as

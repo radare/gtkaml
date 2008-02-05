@@ -91,7 +91,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	 */	
 	public void determine_add_method (ClassDefinition! child_definition)
 	{
-		Gee.List<Vala.Method> adds = lookup_container_add_methods( child_definition.base_ns, child_definition.parent_container.base_type );
+		Gee.List<Vala.Method> adds = lookup_container_add_methods( child_definition.parent_container.base_ns, child_definition.parent_container.base_type );
 
 		Vala.Method determined_add = null;
 		Gtkaml.AddMethod new_method = new Gtkaml.AddMethod ();
@@ -113,7 +113,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_add == null) {
-			determined_add = implicit_method_choice (child_definition, adds, "container add method", first_parameter);
+			determined_add = implicit_method_choice (child_definition.parent_container, adds, "container add method", first_parameter);
 			if (determined_add == null) {
 				Report.error (child_definition.source_reference, "No matching container add method for adding %s into %s\n".printf (child_definition.base_full_name, child_definition.parent_container.base_full_name));
 				return;
@@ -230,9 +230,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	/**
 	 * the methods that brought this class (ImplicitResolver) to the world
 	 */
-	public Vala.Method implicit_method_choice (ClassDefinition !class_definition, Gee.List<Vala.Method>! methods, string! wording, Attribute first_parameter=null )
+	public Vala.Method implicit_method_choice (ClassDefinition !class_definition, Gee.List<Vala.Method>! methods, string! wording, ComplexAttribute first_parameter=null )
 	{
 			int min_params = 999;
+			ClassDefinition parameter_class = class_definition;
+			if (first_parameter != null)
+				parameter_class = first_parameter.complex_type;
 			Gee.List<string> min_param_names = null;
 			int max_matches = -1;
 			Vala.Method max_matches_method;
@@ -241,7 +244,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				var parameters = determine_method_parameter_names (class_definition, method);
 				int current_matches = 0;
 				foreach (string parameter in parameters) {
-					foreach (Gtkaml.Attribute attr in class_definition.attrs) {
+					foreach (Gtkaml.Attribute attr in parameter_class.attrs) {
 						if (parameter == attr.name) {
 							current_matches ++;
 							break;
@@ -280,7 +283,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 					}
 					if (i < min_param_names.size )
 						message += min_param_names.get (i);
-					Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf (wording, class_definition.base_full_name, message));
+					Report.error (parameter_class.source_reference, "No matching %s found for %s: specify at least: %s\n".printf (wording, class_definition.base_full_name, message));
 				}
 				return null;
 			}
@@ -310,9 +313,9 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		foreach (DataType dt in container_class.get_base_types ()) {
 			if (dt is UnresolvedType) {
-				Class c = lookup_class (ns, (dt as UnresolvedType).type_name);
+				Class c = lookup_class ((dt as UnresolvedType).namespace_name, (dt as UnresolvedType).type_name);
 				if (c != null) {
-					var otherMethods = lookup_container_add_methods (ns, c);
+					var otherMethods = lookup_container_add_methods ((dt as UnresolvedType).namespace_name, c);
 					foreach (Vala.Method method in otherMethods) {
 						methods.add (method);
 					}

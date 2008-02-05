@@ -285,21 +285,25 @@ public class Gtkaml.SAXParser : GLib.Object {
 		RootClassDefinition root_class_definition = new Gtkaml.RootClassDefinition (create_source_reference (), "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
 		root_class_definition.prefixes_namespaces = prefixes_namespaces;
 		foreach (XmlAttribute attr in attrs) {
-			if (attr.prefix != null && attr.prefix == gtkaml_prefix) {
-				switch (attr.localname) {
-					case "name":
-						root_class_definition.target_name = attr.value;
-						break;
-					case "namespace":
-						root_class_definition.target_namespace = attr.value;
-						break;
-					default:
-						Report.warning (create_source_reference (), "Unknown gtkaml attribute %s".printf (attr.localname));
-						break;
+			if (attr.prefix != null)
+			{ 
+				if (attr.prefix == gtkaml_prefix) {
+					switch (attr.localname) {
+						case "name":
+							root_class_definition.target_name = attr.value;
+							break;
+						case "namespace":
+							root_class_definition.target_namespace = attr.value;
+							break;
+						default:
+							Report.warning (create_source_reference (), "Unknown gtkaml attribute %s".printf (attr.localname));
+							break;
+					}
 				}
+			} else {
+				var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
+				root_class_definition.add_attribute (simple_attribute);
 			}
-			var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
-			root_class_definition.add_attribute (simple_attribute);
 		}
 		
 		if (root_class_definition.target_name == null) {

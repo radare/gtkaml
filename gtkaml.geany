@@ -6,11 +6,12 @@ description=
 run_cmd=C:\\msys\\1.0\\bin\\make.exe
 
 [files]
-current_page=5
-FILE_NAME_0=1739:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlClassDefinition.vala
-FILE_NAME_1=6332:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlSAXParser.vala
-FILE_NAME_2=513:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlState.vala
-FILE_NAME_3=536:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlRootClassDefinition.vala
-FILE_NAME_4=6065:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlCodeGenerator.vala
-FILE_NAME_5=6582:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlImplicitsResolver.vala
-FILE_NAME_6=315:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlMethod.vala
+current_page=3
+FILE_NAME_0=55:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlClassDefinition.vala
+FILE_NAME_1=0:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlSAXParser.vala
+FILE_NAME_2=705:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlRootClassDefinition.vala
+FILE_NAME_3=6334:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlCodeGenerator.vala
+FILE_NAME_4=2668:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlImplicitsResolver.vala
+FILE_NAME_5=44:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlMethod.vala
+FILE_NAME_6=239:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlComplexAttribute.vala
+FILE_NAME_7=26:30:E:\\vladwork\\gtkaml-trunk\\valaml\\GtkamlAttribute.vala

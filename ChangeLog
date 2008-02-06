@@ -1,4 +1,8 @@
+2008-02-06 
+	- changed , into ; in implicits.ini for TreeView
+
 2008-02-05
+gtkaml 0.1.1.0 release
 	- added the Gtk.MenuItem in implicits.ini with 'new' parameter 'label'
 	- fixed an issue when loooking up for constructor parameters' type
 	- fixed a bug (#1) which prevented a widget from a namespace to be 

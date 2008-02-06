@@ -361,7 +361,7 @@ class Gtkaml.Compiler : Object
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s (Based on Vala 0.1.6)\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s (based on Vala 0.1.6)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

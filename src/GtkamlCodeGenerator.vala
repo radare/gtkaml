@@ -62,16 +62,24 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			}
 			write_root_class_definition (root_class_definition.target_namespace, root_class_definition.target_name, root_class_definition.base_ns, root_class_definition.base_type.name );
 			write_complex_attributes (root_class_definition);
+			write_setters (class_definition);
+		} else if (class_definition is ReferenceClassDefinition) {
+			write_add (class_definition);			
 		} else {
 			write_declaration (class_definition);
-			write_complex_attributes (class_definition);//this should really go before the constructor
+			write_complex_attributes (class_definition);//this must really go before the constructor
 			write_constructor (class_definition);
-		}
-		write_setters (class_definition);
-		if (class_definition.parent_container != null)
+			write_setters (class_definition);
 			write_add (class_definition);
-		foreach (ClassDefinition child in class_definition.children)
-			generate (child);
+		}
+		generate_children (class_definition);
+	}
+
+	public void generate_children (ClassDefinition! class_definition)
+	{
+		if (!(class_definition is ReferenceClassDefinition))
+			foreach (ClassDefinition child in class_definition.children)
+				generate (child);
 	}
 
 	public void write_complex_attributes (ClassDefinition! class_definition)
@@ -137,6 +145,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	}
 	
 	public void write_add (ClassDefinition! child_definition) {
+		if (child_definition.parent_container == null)
+			return;
 		construct_body += "\t\t%s.%s (".printf (child_definition.parent_container.identifier, child_definition.add_method.name);
 		int i = 0;
 		for (; i < child_definition.add_method.parameter_attributes.size - 1 ; i++) {
@@ -145,7 +155,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 		if (i < child_definition.add_method.parameter_attributes.size)
 			construct_body += generate_literal (child_definition.add_method.parameter_attributes.get (i));
-		construct_body += ");\n\n";		
+		construct_body += ");\n";		
 			
 	}
 	

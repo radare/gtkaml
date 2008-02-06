@@ -295,6 +295,10 @@ public class Gtkaml.SAXParser : GLib.Object {
 						case "namespace":
 							root_class_definition.target_namespace = attr.value;
 							break;
+						case "public":
+						case "private":
+							Report.error (create_source_reference (), "public or private not allowed on root tag");
+							break;
 						default:
 							Report.warning (create_source_reference (), "Unknown gtkaml attribute %s".printf (attr.localname));
 							break;
@@ -316,36 +320,51 @@ public class Gtkaml.SAXParser : GLib.Object {
 	{
 		string identifier = null;
 		DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;
+		string reference = null;
 
 		foreach (XmlAttribute attr in attrs) {
-			if (attr.prefix!=null && attr.prefix==gtkaml_prefix && (attr.localname=="public" || attr.localname=="private")) {
-				if (identifier!=null) {
-					Report.error (create_source_reference (), "Cannot have multiple identifier names:%s".printf(attr.localname));
-					stop_parsing (); return null;
-				}
-				identifier = attr.value;
-				if (attr.localname == "public") {
-					identifier_scope = DefinitionScope.PUBLIC;
-				} else {
-					identifier_scope = DefinitionScope.PRIVATE;
+			if (attr.prefix!=null && attr.prefix==gtkaml_prefix) {
+				if ((attr.localname=="public" || attr.localname=="private")) {
+					if (identifier!=null) {
+						Report.error (create_source_reference (), "Cannot have multiple identifier names:%s".printf(attr.localname));
+						stop_parsing (); return null;
+					}
+					identifier = attr.value;
+					if (attr.localname == "public") {
+						identifier_scope = DefinitionScope.PUBLIC;
+					} else {
+						identifier_scope = DefinitionScope.PRIVATE;
+					}
+				} if (attr.localname=="reference") {
+					reference = attr.value;
 				}
 			}
 		}
 		
-		
-		int counter = 0;
-		if (identifier == null) {
-			//generate a name for the identifier
-			identifier = clazz.name.down (clazz.name.len ());
-			if (generated_identifiers_counter.contains (identifier)) {
-				counter = generated_identifiers_counter.get (identifier);
+		if (identifier != null && reference != null) {
+			Report.error (create_source_reference (), "Cannot specify both reference and a new identifier name");
+			stop_parsing ();
+			return null;
+		}
+		ClassDefinition class_definition=null;
+		if (reference == null) {
+			int counter = 0;
+			if (identifier == null) {
+				//generate a name for the identifier
+				identifier = clazz.name.down (clazz.name.len ());
+				if (generated_identifiers_counter.contains (identifier)) {
+					counter = generated_identifiers_counter.get (identifier);
+				}
+				identifier = "_%s%d".printf (identifier, counter);
+				counter++;
+				generated_identifiers_counter.set (clazz.name.down (clazz.name.len ()), counter);
 			}
-			identifier = "_%s%d".printf (identifier, counter);
-			counter++;
-			generated_identifiers_counter.set (clazz.name.down (clazz.name.len ()), counter);
+
+			class_definition = new ClassDefinition (create_source_reference (), identifier, prefix_to_namespace (prefix), clazz, identifier_scope, container_definition);
+		} else {
+			class_definition = new ReferenceClassDefinition (create_source_reference (), reference, prefix_to_namespace (prefix), clazz, container_definition);
 		}
 
-		ClassDefinition class_definition = new ClassDefinition (create_source_reference (), identifier, prefix_to_namespace (prefix), clazz, identifier_scope, container_definition);
 		foreach (XmlAttribute attr in attrs) {
 			if (attr.prefix == null) {
 				var simple_attribute = new SimpleAttribute (attr.localname, attr.value);

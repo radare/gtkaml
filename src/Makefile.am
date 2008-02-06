@@ -27,6 +27,7 @@ gtkamlc_VALASOURCES = \
 	GtkamlStateStack.vala \
 	GtkamlClassDefinition.vala \
 	GtkamlRootClassDefinition.vala \
+	GtkamlReferenceClassDefinition.vala \
 	GtkamlAttribute.vala \
 	GtkamlSimpleAttribute.vala \
 	GtkamlComplexAttribute.vala \

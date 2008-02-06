@@ -51,12 +51,21 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		if (!(class_definition is RootClassDefinition))
 		{
 			//first determine which constructor shall we use
-			determine_construct_method (class_definition);
-			if (class_definition.construct_method == null) 
-				return;
+			//References don't have to be constructed
+			if (!(class_definition is ReferenceClassDefinition)) {
+				determine_construct_method (class_definition);
+				if (class_definition.construct_method == null) 
+					return;//something went wrong
+			}
 			//then determine the .add function, if applyable
 			if (class_definition.parent_container != null)
 				determine_add_method (class_definition);
+			//References should have no 'rest attributes'
+			if (class_definition is ReferenceClassDefinition && class_definition.attrs.size != 0) {
+				Report.error (class_definition.source_reference, "No attributes other than the container add parameters are allowed on references");
+				return;
+			}
+			
 			resolve_complex_attributes (class_definition);
 		}
 		//resolve the rest of the attr types
@@ -119,7 +128,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				return;
 			}
 		}
-
+		
 		new_method.name = determined_add.name;
 		new_method.parameter_attributes.add (first_parameter);
 		//move the attributes from class definition to construct method

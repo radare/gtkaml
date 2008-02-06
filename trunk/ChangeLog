@@ -1,5 +1,7 @@
-2008-02-06 
-	- changed , into ; in implicits.ini for TreeView
+2008-02-06
+  - added TreeViewColumn 'adds' in implicits.ini  
+	- added reference tags (see goals for 0.2)	
+	- changed ',' into ';' in implicits.ini for TreeView
 
 2008-02-05
 gtkaml 0.1.1.0 release

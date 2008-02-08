@@ -274,7 +274,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		if (parameters.size > 0) {
 			parameter_names.resize (parameters.size+1);
 			foreach (FormalParameter p in parameters) {
-				parameter_names[i] = p.name;
+				parameter_names[i++] = p.name;
 			}
 			parameter_names[ parameters.size ] = null;
 			parameters_joined += ", " + string.joinv (",", parameter_names);

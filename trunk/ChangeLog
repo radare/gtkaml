@@ -1,5 +1,6 @@
 2008-02-08
   - fixed a segfault where a g_strjoinv () was called without a last NULL
+  - fixed bug with signals handling that missed most parameters
 
 2008-02-06
   - added TreeViewColumn 'adds' in implicits.ini  

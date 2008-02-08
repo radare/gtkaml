@@ -1,3 +1,6 @@
+2008-02-08
+  - fixed a segfault where a g_strjoinv () was called without a last NULL
+
 2008-02-06
   - added TreeViewColumn 'adds' in implicits.ini  
 	- added reference tags (see goals for 0.2)	

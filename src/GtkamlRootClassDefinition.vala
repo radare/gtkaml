@@ -22,12 +22,14 @@
 using GLib;
 using Vala;
 
+/** represents the definition of the root tag */
 public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
 	public Gee.Map<string,string> prefixes_namespaces {set;get;}
 	public string target_name {get;set;}
 	public string target_namespace {get;set;}
+	public Gee.List<string> code {get;set;}
 	
-	public RootClassDefinition (SourceReference source_reference, string! identifier, string base_ns, Vala.Class! base_type, 
+	public RootClassDefinition (SourceReference! source_reference, string! identifier, string base_ns, Vala.Class! base_type, 
 		DefinitionScope! definition_scope, Gtkaml.ClassDefinition parent_container = null)
 	{
 		this.source_reference = source_reference;
@@ -39,7 +41,9 @@ public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
 		this.attrs = new Gee.ArrayList<Gtkaml.Attribute> ();
 		this.construct_method = null;
 		this.children = new Gee.ArrayList<ClassDefinition> ();
+		this.code = new Gee.ArrayList<string> ();
 	}
+	
 	
 	 
 }

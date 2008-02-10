@@ -1,6 +1,7 @@
 <Gtk:VBox gtkaml:name="MyVBox"
 	xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' 
 	xmlns:gtkaml="http://gtkaml.org/0.1"
+	homogeneous="false" spacing="0"
 	>
 	<Gtk:VBox homogeneous="true" spacing="0">
 		<Gtk:HBox homogeneous="true" spacing="0">

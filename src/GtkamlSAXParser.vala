@@ -29,12 +29,11 @@ using Gee;
 public class Gtkaml.SAXParser : GLib.Object {
 	/** the only reason this is public is to be accessible from the [Import]s */
 	public pointer xmlCtxt;
-	private CodeContext context {get;set;}
-	private SourceFile source_file {get;set;}
+	private CodeContext context {get;construct;}
+	private weak SourceFile source_file {get;construct;}
 	private StateStack states {get;set;}
 	private Map<string,int> generated_identifiers_counter = new HashMap<string,int> (str_hash, str_equal);
 	private Collection<string> used_identifiers = new ArrayList<string> (str_equal);
-	private Gtkaml.CodeGenerator code_generator {get;set;}	
 	/** prefix/vala.namespace pair */
 	private Gee.Map<string,string> prefixes_namespaces {get;set;}
 
@@ -42,18 +41,18 @@ public class Gtkaml.SAXParser : GLib.Object {
 	public string gtkaml_prefix="gtkaml";
 	
 	
-	public SAXParser( construct Vala.CodeContext context, construct Vala.SourceFile source_file) {
-		
+	public SAXParser( Vala.CodeContext! context, Vala.SourceFile! source_file) {
+		this.context = context;
+		this.source_file = source_file;
 	}
 	
 	construct {
 		states = new StateStack ();	
 		prefixes_namespaces = new Gee.HashMap<string,string> (str_hash, str_equal, str_equal);
 		root_class_definition = null;
-		code_generator = new Gtkaml.CodeGenerator (context);
 	}
 	
-	public virtual string parse ()
+	public virtual RootClassDefinition parse ()
 	{
 		string contents;
 		ulong length;
@@ -68,23 +67,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		State initial_state = new State (StateId.SAX_PARSER_INITIAL_STATE, null);
 		states.push (initial_state); 
 		start_parsing (contents, length);
-
-		if (Report.get_errors() != 0)
-			return null;
-
-		var implicitsResolver = new ImplicitsResolver (context, "key-file-name"); 
-		implicitsResolver.resolve (root_class_definition);
-		
-		if (Report.get_errors() != 0)
-			return null;
-
-		
-		code_generator.generate (root_class_definition);
-
-		if (Report.get_errors() != 0)
-			return null;
-		
-		return code_generator.yield ();
+		return root_class_definition;
 	}
 	
 	[Import]
@@ -136,7 +119,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 					}
 
 					this.root_class_definition = get_root_definition (clazz, attrs, prefix);
-										
+															
 					if (Report.get_errors() > 0)  {
 						stop_parsing ();
 						return;
@@ -236,7 +219,8 @@ public class Gtkaml.SAXParser : GLib.Object {
 		if (state.state_id != StateId.SAX_PARSER_INITIAL_STATE){
 			State previous_state = states.peek (1);
 			if (previous_state.state_id == StateId.SAX_PARSER_INITIAL_STATE) {
-				code_generator.add_code (cdata.ndup (len));
+				RootClassDefinition root_class = state.class_definition as RootClassDefinition;
+				root_class.code.add (cdata.ndup (len));
 			} else {
 				if (state.state_id == StateId.SAX_PARSER_ATTRIBUTE_STATE) {
 					if (state.attribute == null) {

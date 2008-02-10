@@ -1,3 +1,9 @@
+2008-02-10
+  - bumped version to 0.2.0.0
+  - removed dependency between SAXParser and CodeGenerator (moved
+    the parse/resolve/generate 'process' in Gtkaml.Parser)
+  - enforced specifying the constructor parameters for the root tag
+
 2008-02-08
   - fixed a segfault where a g_strjoinv () was called without a last NULL
   - fixed bug with signals handling that missed most parameters

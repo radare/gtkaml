@@ -1,5 +1,5 @@
 <Window xmlns="Gtk:gtk+-2.0" xmlns:GLib="GLib" xmlns:gtkaml="http://gtkaml.org/0.1" 
-	gtkaml:name="MyWindow" title="gtktest" destroy="{Gtk.main_quit}">
+	gtkaml:name="MyWindow" title="gtktest" type="{WindowType.TOPLEVEL}" destroy="{Gtk.main_quit}">
 	<VBox homogeneous="false" spacing="4">
         <Label expand="false" fill="true" padding="0" use_markup="true" label="&lt;b&gt;Dialog Box Title Here&lt;/b&gt;">
         </Label>

@@ -39,7 +39,6 @@ gtkamlc_SOURCES = \
 	gtkamlc.vala.stamp \
 	$(gtkamlc_VALASOURCES:.vala=.c) \
 	$(gtkamlc_VALASOURCES:.vala=.h) \
-	GtkamlParser_resume_parsing.c \
 	GtkamlSAXParser_start_parsing.c
 
 gtkamlc.vala.stamp: $(gtkamlc_VALASOURCES)

@@ -48,26 +48,23 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	
 	public void resolve (ClassDefinition !class_definition)
 	{
-		if (!(class_definition is RootClassDefinition))
-		{
-			//first determine which constructor shall we use
-			//References don't have to be constructed
-			if (!(class_definition is ReferenceClassDefinition)) {
-				determine_construct_method (class_definition);
-				if (class_definition.construct_method == null) 
-					return;//something went wrong
-			}
-			//then determine the .add function, if applyable
-			if (class_definition.parent_container != null)
-				determine_add_method (class_definition);
-			//References should have no 'rest attributes'
-			if (class_definition is ReferenceClassDefinition && class_definition.attrs.size != 0) {
-				Report.error (class_definition.source_reference, "No attributes other than the container add parameters are allowed on references");
-				return;
-			}
-			
-			resolve_complex_attributes (class_definition);
+		//first determine which constructor shall we use
+		//References don't have to be constructed
+		if (!(class_definition is ReferenceClassDefinition)) {
+			determine_construct_method (class_definition);
+			if (class_definition.construct_method == null) 
+				return;//something went wrong
 		}
+		//then determine the .add function, if applyable
+		if (class_definition.parent_container != null)
+			determine_add_method (class_definition);
+		//References should have no 'rest attributes'
+		if (class_definition is ReferenceClassDefinition && class_definition.attrs.size != 0) {
+			Report.error (class_definition.source_reference, "No attributes other than the container add parameters are allowed on references");
+			return;
+		}
+		
+		resolve_complex_attributes (class_definition);
 		//resolve the rest of the attr types
 		determine_attribute_types (class_definition);
 		foreach (ClassDefinition child in class_definition.children)
@@ -124,7 +121,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		if (determined_add == null) {
 			determined_add = implicit_method_choice (child_definition.parent_container, adds, "container add method", first_parameter);
 			if (determined_add == null) {
-				Report.error (child_definition.source_reference, "No matching container add method for adding %s into %s\n".printf (child_definition.base_full_name, child_definition.parent_container.base_full_name));
 				return;
 			}
 		}
@@ -198,7 +194,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		if (determined_constructor == null) {
 			determined_constructor = implicit_method_choice (class_definition, constructors, "constructor");
 			if (determined_constructor == null) {
-				Report.error (class_definition.source_reference, "No matching constructor for %s\n".printf (class_definition.base_full_name));
 				return;
 			}
 		}
@@ -225,7 +220,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				message += parameters.get (i) + ",";
 			if (parameters.size > 0)
 				message += parameters.get (i);
-			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("Constructor", class_definition.base_full_name, message));
+			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("creation method", class_definition.base_full_name, message));
 			return;
 		}
 		

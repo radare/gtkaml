@@ -60,7 +60,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			foreach (string prefix in root_class_definition.prefixes_namespaces.get_keys ()) {
 				write_using (prefix_to_namespace (prefix));
 			}
-			write_root_class_definition (root_class_definition.target_namespace, root_class_definition.target_name, root_class_definition.base_ns, root_class_definition.base_type.name );
+			write_root_class_definition (root_class_definition);
+			write_root_constructor_parameters (root_class_definition);
 			write_complex_attributes (root_class_definition);
 			write_setters (class_definition);
 		} else if (class_definition is ReferenceClassDefinition) {
@@ -103,14 +104,23 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			}						
 	}
 	
-	private void write_root_class_definition (string ns, string!name, string base_ns, string! base_name)
+	private void write_root_class_definition (RootClassDefinition root_class_definition)
 	{
+		string ns = root_class_definition.target_namespace;
+		string name = root_class_definition.target_name;
+		string base_ns = root_class_definition.base_ns;
+		string base_name = root_class_definition.base_type.name;
+		
 		class_start += "public class ";
 		if (ns!=null) class_start += ns + ".";
 		class_start += name + " : ";
 		if (base_ns!=null) class_start += base_ns + ".";
 		class_start += base_name + "\n{\n";
 		class_end += "}\n";
+		
+		foreach (string code in root_class_definition.code) {
+			add_code (code);
+		}
 	}
 
 	public void write_declaration (ClassDefinition! class_definition)
@@ -128,6 +138,13 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}	
 		
+	public void write_root_constructor_parameters (RootClassDefinition! class_definition)
+	{
+		foreach (Attribute attr in class_definition.construct_method.parameter_attributes)
+		{
+			write_setter (class_definition, attr);
+		}
+	}
 	
 	public void write_constructor (ClassDefinition! class_definition)
 	{

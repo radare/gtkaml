@@ -249,7 +249,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			UnresolvedType utype = type as UnresolvedType;
 			if (stripped_value.has_prefix ("{")) {
 				if (stripped_value.has_suffix ("}")) {
-					literal = value.substring (1, stripped_value.len () - 2);
+					literal = stripped_value.substring (1, stripped_value.len () - 2);
 				} else {
 					Report.error( null, "Attribute %s not properly ended".printf (attr.name));
 				}

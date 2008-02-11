@@ -6,6 +6,4 @@ description=
 run_cmd=C:\\msys\\1.0\\bin\\make.exe
 
 [files]
-current_page=1
-FILE_NAME_0=0:30:E:\\vladwork\\giocommander\\src\\GiocmdPanel.vala
-FILE_NAME_1=22:30:E:\\vladwork\\giocommander\\src\\GiocmdFileModel.vala
+current_page=-1

@@ -35,27 +35,28 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	public ImplicitsResolver (construct Vala.CodeContext! context, construct string! key_file_name) {}
 	
 	construct {
+		string file_name;
 		try {
 			key_file = new KeyFile ();
-			string file_name = Path.build_filename (Config.PACKAGE_DATADIR, "implicits", "implicits.ini");
+			file_name = Path.build_filename (Config.PACKAGE_DATADIR, "implicits", "implicits.ini");
 			if (!FileUtils.test (file_name, FileTest.EXISTS))
 				file_name = "../data/implicits.ini";
 			key_file.load_from_file (file_name, KeyFileFlags.NONE);
-		} catch (KeyFileError error) {
-			Report.error (null, error.message);
+		} catch (Error error) {
+			Report.error (null, "Error while opening %s:%s".printf (file_name, error.message));
 		}
 	}
 	
 	public void resolve (ClassDefinition !class_definition)
 	{
-		//first determine which constructor shall we use
-		//References don't have to be constructed
+		//determine which constructor shall we use
+		//references don't have to be constructed
 		if (!(class_definition is ReferenceClassDefinition)) {
 			determine_construct_method (class_definition);
 			if (class_definition.construct_method == null) 
-				return;//something went wrong
+				return;
 		}
-		//then determine the .add function, if applyable
+		//then determine the container add function, if applicable
 		if (class_definition.parent_container != null)
 			determine_add_method (class_definition);
 		//References should have no 'rest attributes'
@@ -64,8 +65,8 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			return;
 		}
 		
-		resolve_complex_attributes (class_definition);
 		//resolve the rest of the attr types
+		resolve_complex_attributes (class_definition);
 		determine_attribute_types (class_definition);
 		foreach (ClassDefinition child in class_definition.children)
 			resolve (child); 

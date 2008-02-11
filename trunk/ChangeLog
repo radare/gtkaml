@@ -1,3 +1,10 @@
+2008-02-11
+  - added support for gtkaml:construct and gtkaml:preconstruct attrs
+    Construct goes after all the children have been added, and
+    preconstruct goes right after the element has been created 
+    (or, in the case of root, right after setting the minimum
+    attributes of the base creation method)
+
 2008-02-10
   - bumped version to 0.2.0.0
   - removed dependency between SAXParser and CodeGenerator (moved

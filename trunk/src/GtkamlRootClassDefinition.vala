@@ -41,6 +41,11 @@ public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
 		this.attrs = new Gee.ArrayList<Gtkaml.Attribute> ();
 		this.construct_method = null;
 		this.children = new Gee.ArrayList<ClassDefinition> ();
+		this.construct_code = null;
+		this.preconstruct_code = null;
+
+		this.target_name = null;
+		this.target_namespace = null;
 		this.code = new Gee.ArrayList<string> ();
 	}
 	

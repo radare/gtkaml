@@ -61,6 +61,8 @@ public class Gtkaml.ClassDefinition : GLib.Object {
 	public DefinitionScope definition_scope {get;set;}
 	public ConstructMethod construct_method {get;set;}
 	public AddMethod add_method {get;set;}
+	public string construct_code{get;set;}
+	public string preconstruct_code{get;set;}
 
 	public ClassDefinition (SourceReference! source_reference, string! identifier, string! base_ns, Vala.Class! base_type, 
 		DefinitionScope! definition_scope, ClassDefinition parent_container = null)
@@ -74,6 +76,8 @@ public class Gtkaml.ClassDefinition : GLib.Object {
 		this.attrs = new Gee.ArrayList<Gtkaml.Attribute> ();
 		this.construct_method = null;
 		this.children = new Gee.ArrayList<ClassDefinition> ();
+		this.construct_code = null;
+		this.preconstruct_code = null;
 	}
 	
 	public void add_attribute (Gtkaml.Attribute attr) {

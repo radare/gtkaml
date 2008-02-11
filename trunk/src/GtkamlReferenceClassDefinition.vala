@@ -20,6 +20,8 @@ public class Gtkaml.ReferenceClassDefinition : Gtkaml.ClassDefinition
 		this.attrs = new Gee.ArrayList<Gtkaml.Attribute> ();
 		this.construct_method = null;
 		this.children = new Gee.ArrayList<ClassDefinition> ();
+		this.construct_code = null;
+		this.preconstruct_code = null;
 	}
 	
 }

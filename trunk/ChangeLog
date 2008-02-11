@@ -1,8 +1,8 @@
 2008-02-11
   - added support for gtkaml:construct and gtkaml:preconstruct attrs
     Construct goes after all the children have been added, and
-    preconstruct goes right after the element has been created 
-    (or, in the case of root, right after setting the minimum
+    preconstruct goes right before the element has been created 
+    (or, in the case of root, right before setting the minimum
     attributes of the base creation method)
 
 2008-02-10

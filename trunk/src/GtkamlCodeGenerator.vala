@@ -61,8 +61,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 				write_using (prefix_to_namespace (prefix));
 			}
 			write_root_class_definition (root_class_definition);
-			write_root_constructor_parameters (root_class_definition);
 			write_preconstruct (root_class_definition);
+			write_root_constructor_parameters (root_class_definition);
 			write_complex_attributes (root_class_definition);
 			write_setters (class_definition);
 		} else if (class_definition is ReferenceClassDefinition) {
@@ -70,8 +70,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		} else {
 			write_declaration (class_definition);
 			write_complex_attributes (class_definition);//this must really go before the constructor
-			write_constructor (class_definition);
 			write_preconstruct (class_definition);
+			write_constructor (class_definition);
 			write_setters (class_definition);
 			write_add (class_definition);
 		}
@@ -89,7 +89,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	public void write_preconstruct (ClassDefinition! class_definition)
 	{
 		if (class_definition.preconstruct_code != null) {
-			construct_body += "//preconstruct of %s\n".printf (class_definition.identifier) + class_definition.preconstruct_code + "\n";
+			constructors += "//preconstruct of %s\n".printf (class_definition.identifier) + class_definition.preconstruct_code + "\n";
 		}
 	}
 	

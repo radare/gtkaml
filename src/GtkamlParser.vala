@@ -46,7 +46,10 @@ public class Gtkaml.Parser : Gtkaml.Dummy {
 	public virtual void parse_gtkaml_file (SourceFile! gtkaml_source_file) {
 		if (FileUtils.test (gtkaml_source_file.filename, FileTest.EXISTS)) {
 			try {
-				RootClassDefinition root_class_definition = call_sax_parser (this.context, gtkaml_source_file);
+				SourceFile dummy_file = new SourceFile( context, gtkaml_source_file.filename );
+				
+				var parser = new SAXParser (context, dummy_file); 
+				RootClassDefinition root_class_definition = parser.parse();
 				if (Report.get_errors() != 0)
 					return;
 
@@ -74,13 +77,6 @@ public class Gtkaml.Parser : Gtkaml.Dummy {
 		} else {
 			Report.error (null, "%s not found".printf(gtkaml_source_file.filename));
 		} 
-	}
-		
-	private RootClassDefinition call_sax_parser( CodeContext! context, SourceFile source_file )
-	{
-		SourceFile dummy_file = new SourceFile( context, source_file.filename );
-		SAXParser parser = new SAXParser (context, dummy_file); 
-		return parser.parse();
 	}
 	
 }

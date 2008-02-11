@@ -132,13 +132,18 @@ public class Gtkaml.SAXParser : GLib.Object {
 				{
 					
 					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
+					string fqan;
 					
 					if (clazz != null) { //this is a member/container child object
 						ClassDefinition class_definition = get_child_for_container (clazz, state.class_definition, attrs, prefix);
 						states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, class_definition));
 					} else { //no class with this name found, assume it's an attribute
 						ClassDefinition attribute_parent_class_definition = state.class_definition;
-						states.push (new State (StateId.SAX_PARSER_ATTRIBUTE_STATE, attribute_parent_class_definition, null, localname));
+						if (prefix != null) 
+							fqan = prefix + "." + localname;
+						else 
+							fqan = localname;
+						states.push (new State (StateId.SAX_PARSER_ATTRIBUTE_STATE, attribute_parent_class_definition, null, fqan));
 					}
 					if (Report.get_errors() > 0)  {
 						stop_parsing ();
@@ -191,20 +196,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		string stripped_value = value; stripped_value.strip ();
 		
 		if (stripped_value != "") {
-			if (state.state_id == StateId.SAX_PARSER_ATTRIBUTE_STATE) {
-				if (state.attribute == null) {
-					state.attribute = new SimpleAttribute (state.attribute_name, value);
-					state.class_definition.add_attribute (state.attribute);
-				} else {
-					if (state.attribute is SimpleAttribute) {
-						(state.attribute as SimpleAttribute).value += "\n" + value;
-					} else {
-						Report.error (create_source_reference (), "Cannot mix a complex attribute definition with simple values like this: attribute %s".printf (state.attribute.name));
-						stop_parsing ();
-						return;
-					}
-				}
-			}
+			parse_attribute_content_as_text (state, value);
 		}
 	}
 	
@@ -222,24 +214,48 @@ public class Gtkaml.SAXParser : GLib.Object {
 				RootClassDefinition root_class = state.class_definition as RootClassDefinition;
 				root_class.code.add (cdata.ndup (len));
 			} else {
-				if (state.state_id == StateId.SAX_PARSER_ATTRIBUTE_STATE) {
-					if (state.attribute == null) {
-						state.attribute = new SimpleAttribute (state.attribute_name, cdata.ndup (len));
-						state.class_definition.add_attribute (state.attribute);
-					} else {
-						if (state.attribute is SimpleAttribute) {
-							(state.attribute as SimpleAttribute).value += "\n" + cdata.ndup (len);
-						} else {
-							Report.error (create_source_reference (), "Cannot mix a complex attribute definition with simple values like this: attribute %s".printf (state.attribute.name));
-							stop_parsing ();
-							return;
-						}
-					}
-				}
+				parse_attribute_content_as_text (state, cdata.ndup (len));
 			}
 		} 
 	}
 
+	private void parse_attribute_content_as_text (State! state, string content)
+	{
+		if (state.state_id == StateId.SAX_PARSER_ATTRIBUTE_STATE) {
+			if (state.attribute_name == gtkaml_prefix+".preconstruct") {
+				if (state.class_definition.preconstruct_code != null) {
+					Report.error (create_source_reference (), "A preconstruct attribute already exists for %s".printf (state.class_definition.identifier));
+					stop_parsing ();
+					return;
+				}
+				state.class_definition.preconstruct_code = content;
+			} else if (state.attribute_name == gtkaml_prefix+".construct") {
+				if (state.class_definition.construct_code != null) {
+					Report.error (create_source_reference (), "A construct attribute already exists for %s".printf (state.class_definition.identifier));
+					stop_parsing ();
+					return;
+				}
+				state.class_definition.construct_code = content;
+			} else {
+				if (state.attribute == null) {
+					state.attribute = new SimpleAttribute (state.attribute_name, content);
+					state.class_definition.add_attribute (state.attribute);
+				} else {
+					if (state.attribute is SimpleAttribute) {
+						(state.attribute as SimpleAttribute).value += "\n" + content;
+					} else {
+						Report.error (create_source_reference (), "Cannot mix a complex attribute definition with simple values like this: attribute %s".printf (state.attribute.name));
+						stop_parsing ();
+						return;
+					}
+				}
+			}
+		} else {
+			Report.error (create_source_reference (), "Invalid non-whitespace text found");
+			stop_parsing ();
+			return;
+		}
+	}
 	private string prefix_to_namespace (string prefix)
 	{
 		if (prefix==null)
@@ -273,20 +289,44 @@ public class Gtkaml.SAXParser : GLib.Object {
 			{ 
 				if (attr.prefix == gtkaml_prefix) {
 					switch (attr.localname) {
+						case "public":
 						case "name":
+							if (root_class_definition.target_name != null) {
+								Report.error (create_source_reference (), "A name for the class already exists ('%s')".printf (root_class_definition.target_name));
+								stop_parsing ();
+								return null;
+							}
 							root_class_definition.target_name = attr.value;
 							break;
 						case "namespace":
 							root_class_definition.target_namespace = attr.value;
 							break;
-						case "public":
 						case "private":
-							Report.error (create_source_reference (), "public or private not allowed on root tag");
-							break;
+							Report.error (create_source_reference (), "'private' not allowed on root tag.");
+							stop_parsing ();
+							return null;
+						case "construct":
+							if (root_class_definition.construct_code != null) {
+								Report.error (create_source_reference (), "A construct attribute already exists for the root class");
+								stop_parsing ();
+								return null;
+							}
+							root_class_definition.construct_code = attr.value;
+						case "preconstruct":
+							if (root_class_definition.preconstruct_code != null) {
+								Report.error (create_source_reference (), "A preconstruct attribute already exists for the root class");
+								stop_parsing ();
+								return null;
+							}
+							root_class_definition.preconstruct_code = attr.value;
 						default:
-							Report.warning (create_source_reference (), "Unknown gtkaml attribute %s".printf (attr.localname));
+							Report.warning (create_source_reference (), "Unknown gtkaml attribute '%s'.".printf (attr.localname));
 							break;
 					}
+				} else  {
+					Report.error (create_source_reference (), "'%s' is the only allowed prefix for attributes. Other attributes must be left unprefixed".printf (gtkaml_prefix));
+					stop_parsing ();
+					return null;
 				}
 			} else {
 				var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
@@ -305,6 +345,8 @@ public class Gtkaml.SAXParser : GLib.Object {
 		string identifier = null;
 		DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;
 		string reference = null;
+		string construct_code = null;
+		string preconstruct_code = null;
 
 		foreach (XmlAttribute attr in attrs) {
 			if (attr.prefix!=null && attr.prefix==gtkaml_prefix) {
@@ -319,9 +361,17 @@ public class Gtkaml.SAXParser : GLib.Object {
 					} else {
 						identifier_scope = DefinitionScope.PRIVATE;
 					}
-				} if (attr.localname=="reference") {
+				} else if (attr.localname=="reference") {
 					reference = attr.value;
+				} else if (attr.localname=="construct") {
+					construct_code = attr.value;
+				} else if (attr.localname=="preconstruct") {
+					preconstruct_code = attr.value;
 				}
+			} else if (attr.prefix != null) {
+				Report.error (create_source_reference (), "%s is the only allowed prefix for attributes. Other attributes must be left unprefixed".printf (gtkaml_prefix));
+				stop_parsing ();
+				return null;
 			}
 		}
 		
@@ -345,9 +395,18 @@ public class Gtkaml.SAXParser : GLib.Object {
 			}
 
 			class_definition = new ClassDefinition (create_source_reference (), identifier, prefix_to_namespace (prefix), clazz, identifier_scope, container_definition);
+			class_definition.construct_code = construct_code;
+			class_definition.preconstruct_code = preconstruct_code;
 		} else {
+			if (construct_code != null || preconstruct_code != null) {
+				Report.error (create_source_reference (), "Cannot specify 'construct' or 'preconstruct' code for references");
+				stop_parsing ();
+				return null;
+			}
 			class_definition = new ReferenceClassDefinition (create_source_reference (), reference, prefix_to_namespace (prefix), clazz, container_definition);
 		}
+		
+		
 
 		foreach (XmlAttribute attr in attrs) {
 			if (attr.prefix == null) {

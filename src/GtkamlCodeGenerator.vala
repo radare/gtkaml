@@ -62,6 +62,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			}
 			write_root_class_definition (root_class_definition);
 			write_root_constructor_parameters (root_class_definition);
+			write_preconstruct (root_class_definition);
 			write_complex_attributes (root_class_definition);
 			write_setters (class_definition);
 		} else if (class_definition is ReferenceClassDefinition) {
@@ -70,10 +71,12 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			write_declaration (class_definition);
 			write_complex_attributes (class_definition);//this must really go before the constructor
 			write_constructor (class_definition);
+			write_preconstruct (class_definition);
 			write_setters (class_definition);
 			write_add (class_definition);
 		}
 		generate_children (class_definition);
+		write_construct (class_definition);
 	}
 
 	public void generate_children (ClassDefinition! class_definition)
@@ -81,6 +84,20 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		if (!(class_definition is ReferenceClassDefinition))
 			foreach (ClassDefinition child in class_definition.children)
 				generate (child);
+	}
+
+	public void write_preconstruct (ClassDefinition! class_definition)
+	{
+		if (class_definition.preconstruct_code != null) {
+			construct_body += "//preconstruct of %s\n".printf (class_definition.identifier) + class_definition.preconstruct_code + "\n";
+		}
+	}
+	
+	public void write_construct (ClassDefinition! class_definition)
+	{
+		if (class_definition.construct_code != null) {
+			construct_body += "//construct of %s\n".printf (class_definition.identifier) + class_definition.construct_code + "\n";
+		}
 	}
 
 	public void write_complex_attributes (ClassDefinition! class_definition)

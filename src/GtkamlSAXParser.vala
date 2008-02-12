@@ -305,6 +305,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 							Report.error (create_source_reference (), "'private' not allowed on root tag.");
 							stop_parsing ();
 							return null;
+							break;
 						case "construct":
 							if (root_class_definition.construct_code != null) {
 								Report.error (create_source_reference (), "A construct attribute already exists for the root class");
@@ -312,6 +313,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 								return null;
 							}
 							root_class_definition.construct_code = attr.value;
+							break;
 						case "preconstruct":
 							if (root_class_definition.preconstruct_code != null) {
 								Report.error (create_source_reference (), "A preconstruct attribute already exists for the root class");
@@ -319,6 +321,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 								return null;
 							}
 							root_class_definition.preconstruct_code = attr.value;
+							break;
 						default:
 							Report.warning (create_source_reference (), "Unknown gtkaml attribute '%s'.".printf (attr.localname));
 							break;

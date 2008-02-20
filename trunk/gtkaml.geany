@@ -6,4 +6,18 @@ description=
 run_cmd=C:\\msys\\1.0\\bin\\make.exe
 
 [files]
-current_page=-1
+current_page=8
+FILE_NAME_0=2348:0:E:\\vladwork\\glib-2.15.4\\gio\\win32\\gwin32directorymonitor.h
+FILE_NAME_1=1717:0:E:\\vladwork\\glib-2.15.4\\gio\\fam\\gfamdirectorymonitor.c
+FILE_NAME_2=924:0:E:\\vladwork\\glib-2.15.4\\gio\\fam\\fam-module.c
+FILE_NAME_3=930:0:E:\\vladwork\\glib-2.15.4\\gio\\win32\\gwin32module.c
+FILE_NAME_4=1199:0:E:\\vladwork\\glib-2.15.4\\gio\\fam\\gfamdirectorymonitor.h
+FILE_NAME_5=357:11:E:\\vladwork\\glib-2.15.4\\gio\\win32\\Makefile.am
+FILE_NAME_6=238:11:E:\\vladwork\\glib-2.15.4\\gio\\fam\\Makefile.am
+FILE_NAME_7=1303:5:E:\\vladwork\\giocommander\\src\\GiocmdPanel.gtkaml
+FILE_NAME_8=2990:30:E:\\vladwork\\giocommander\\src\\GiocmdFileModel.vala
+FILE_NAME_9=2976:5:E:\\vladwork\\giocommander\\src\\GiocmdMainView.gtkaml
+FILE_NAME_10=4261:0:E:\\vladwork\\glib-2.15.4\\gio\\win32\\gwin32directorymonitor.c
+FILE_NAME_11=11310:0:E:\\vladwork\\glib-2.15.4\\glib\\gmain.c
+FILE_NAME_12=14578:20:E:\\vladwork\\vala\\vapi\\gio-2.0.vapi
+FILE_NAME_13=248508:20:E:\\vladwork\\vala\\vapi\\gtk+-2.0.vapi

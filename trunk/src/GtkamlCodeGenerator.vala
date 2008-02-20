@@ -29,6 +29,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	private string class_start = new string();
 	private string members_declarations = new string();
 	private string code = new string();
+	private string construct_signals = new string ();
 	private string constructors = new string();
 	private string construct_body_locals = new string();
 	private string construct_body = new string();
@@ -45,6 +46,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		       class_start + "\n" +
 		       members_declarations + "\n" +
 		       code + "\n" +
+		       construct_signals + "\n" +
 		       "\tconstruct {\n" + 
 		           construct_body_locals + "\n" + 
 		           constructors + "\n" + 
@@ -65,18 +67,20 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			write_root_constructor_parameters (root_class_definition);
 			write_complex_attributes (root_class_definition);
 			write_setters (class_definition);
+			generate_children (class_definition);
+			write_construct (class_definition);
 		} else if (class_definition is ReferenceClassDefinition) {
 			write_add (class_definition);			
 		} else {
 			write_declaration (class_definition);
-			write_complex_attributes (class_definition);//this must really go before the constructor
-			write_preconstruct (class_definition);
+			write_complex_attributes (class_definition);//this must *really* go before the constructor
 			write_constructor (class_definition);
+			write_preconstruct (class_definition);
 			write_setters (class_definition);
+			generate_children (class_definition);
+			write_construct (class_definition);
 			write_add (class_definition);
 		}
-		generate_children (class_definition);
-		write_construct (class_definition);
 	}
 
 	public void generate_children (ClassDefinition! class_definition)
@@ -89,16 +93,42 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	public void write_preconstruct (ClassDefinition! class_definition)
 	{
 		if (class_definition.preconstruct_code != null) {
-			constructors += "//preconstruct of %s\n".printf (class_definition.identifier) + class_definition.preconstruct_code + "\n";
+			write_construct_call (class_definition.identifier, class_definition.base_full_name, "preconstruct", class_definition.preconstruct_code);
 		}
 	}
 	
 	public void write_construct (ClassDefinition! class_definition)
 	{
 		if (class_definition.construct_code != null) {
-			construct_body += "//construct of %s\n".printf (class_definition.identifier) + class_definition.construct_code + "\n";
+			write_construct_call (class_definition.identifier, class_definition.base_full_name, "construct", class_definition.construct_code);
 		}
 	}
+
+	private void write_construct_call (string identifier, string identifier_type, string construct_type, string construct_code )
+	{
+		string construct_signal = identifier + "_" + construct_type;
+		string real_construct_code = construct_code;
+		real_construct_code.strip ();
+		if (real_construct_code.has_prefix ("{"))
+		{
+			if (real_construct_code.has_suffix ("}")) {
+				real_construct_code = real_construct_code.substring (1, real_construct_code.len () - 2);
+			} else {
+				Report.error (null, "%s for %s not properly ended".printf (construct_type, identifier));
+			}
+			
+		}
+		else 
+			real_construct_code = " target => { %s; }".printf (construct_code);
+		this.construct_signals += "\tprivate signal void %s (%s target);\n".printf (construct_signal, identifier_type);
+		string to_append = "\t\t%s += %s;\n".printf (construct_signal, real_construct_code)
+			+ "\t\t" + construct_signal + " (" + identifier + ");\n";
+		if (construct_type == "preconstruct")
+			this.constructors += to_append;
+		else
+			this.construct_body += to_append;
+	}
+		
 
 	public void write_complex_attributes (ClassDefinition! class_definition)
 	{	

@@ -1,3 +1,6 @@
+2008-02-20
+  - changed gtkaml:construct and preconstruct behaviour to match signals'
+
 2008-02-11
   - added support for gtkaml:construct and gtkaml:preconstruct attrs
     Construct goes after all the children have been added, and

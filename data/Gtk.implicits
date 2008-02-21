@@ -1,4 +1,4 @@
-[Gtk.Label]
+[Label]
 ## For each constructor(new), we point to the required attribute(s)
 ## (only if they cannot be inferred from the FormalParameters names)
 new = label

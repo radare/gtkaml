@@ -44,7 +44,7 @@ public class Gtkaml.ImplicitsStore : Object
 			foreach (string implicits_dir in this.implicits_dirs) {
 				var file_name = Path.build_filename (implicits_dir, ns + ".implicits");
 				if (FileUtils.test (file_name, FileTest.EXISTS)) {
-					message ("Found %s.implicits in %s", ns, implicits_dir);
+					//message ("Found %s.implicits in %s", ns, implicits_dir);
 					var key_file_wrapper = new KeyFileWrapper ();
 					try {
 						key_file_wrapper.key_file.load_from_file (file_name, KeyFileFlags.NONE);

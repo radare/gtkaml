@@ -1,4 +1,4 @@
 implicitsdir = $(pkgdatadir)/implicits
 
-dist_implicits_DATA = implicits.ini
+dist_implicits_DATA = implicits.ini Gtk.implicits
 

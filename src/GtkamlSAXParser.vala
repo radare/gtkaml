@@ -169,7 +169,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 					} else {
 						Report.error (source_reference, "No class %s found".printf (localname));
 					}
-					ComplexAttribute attr = new ComplexAttribute (state.attribute_name, attribute_value_definition);
+					ComplexAttribute attr = new ComplexAttribute (strip_attribute_hyphens (state.attribute_name), attribute_value_definition);
 					
 					//add the attribute into the parent container
 					state.class_definition.add_attribute (attr);		
@@ -238,7 +238,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 				state.class_definition.construct_code = content;
 			} else {
 				if (state.attribute == null) {
-					state.attribute = new SimpleAttribute (state.attribute_name, content);
+					state.attribute = new SimpleAttribute (strip_attribute_hyphens (state.attribute_name), content);
 					state.class_definition.add_attribute (state.attribute);
 				} else {
 					if (state.attribute is SimpleAttribute) {
@@ -278,6 +278,13 @@ public class Gtkaml.SAXParser : GLib.Object {
 			}
 		}
 		return null;
+	}
+
+	private string strip_attribute_hyphens (string! attrname)
+	{
+		//see TDWTF, "The Hard Way"
+		var tokens = attrname.split ("-");
+		return string.joinv ("_", tokens);
 	}
 
 	public RootClassDefinition get_root_definition (Class clazz, Gee.List<XmlAttribute> attrs, string prefix)
@@ -332,7 +339,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 					return null;
 				}
 			} else {
-				var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
+				var simple_attribute = new SimpleAttribute (strip_attribute_hyphens (attr.localname), attr.value);
 				root_class_definition.add_attribute (simple_attribute);
 			}
 		}
@@ -413,7 +420,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 
 		foreach (XmlAttribute attr in attrs) {
 			if (attr.prefix == null) {
-				var simple_attribute = new SimpleAttribute (attr.localname, attr.value);
+				var simple_attribute = new SimpleAttribute (strip_attribute_hyphens (attr.localname), attr.value);
 				class_definition.add_attribute (simple_attribute);
 			}
 		}

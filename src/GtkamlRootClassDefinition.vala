@@ -28,6 +28,7 @@ public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
 	public string target_name {get;set;}
 	public string target_namespace {get;set;}
 	public Gee.List<string> code {get;set;}
+	public string implements {get;set;}
 	
 	public RootClassDefinition (SourceReference! source_reference, string! identifier, string base_ns, Vala.Class! base_type, 
 		DefinitionScope! definition_scope, Gtkaml.ClassDefinition parent_container = null)
@@ -47,6 +48,7 @@ public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
 		this.target_name = null;
 		this.target_namespace = null;
 		this.code = new Gee.ArrayList<string> ();
+		this.implements = null;
 	}
 	
 	

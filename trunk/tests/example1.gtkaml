@@ -5,9 +5,9 @@
         </Label>
         <Notebook expand="true" fill="true" padding="0" can_focus="false" tab_vborder="1" gtkaml:private="my_notebook">
                 <Label label="gg">
-                	<tab_label>
+                	<tab-label>
                 		<Label label="Yes!" />
-                	</tab_label>
+                	</tab-label>
                 </Label>
                 <HBox homogeneous="false" spacing="4">
                         <Label>

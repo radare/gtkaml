@@ -1,27 +1,22 @@
 <Gtk:VBox gtkaml:name="MyVBox"
 	xmlns='GLib' xmlns:Gtk='Gtk:gtk+-2.0' 
 	xmlns:gtkaml="http://gtkaml.org/0.1"
-	homogeneous="false" spacing="0" gtkaml:preconstruct="//rootpreconstruct"
-	>
-	<gtkaml:construct>
+	homogeneous="false" spacing="0">
+	<gtkaml:preconstruct>
 	<![CDATA[
-		//gg
-		//asdfasdf
-		stderr.printf ("test");
+		message ("root preconstruct code");
 	]]>
-	</gtkaml:construct>
+	</gtkaml:preconstruct>
 	<Gtk:VBox homogeneous="true" spacing="0">
 		<Gtk:HBox homogeneous="true" spacing="0">
-			<Gtk:Label label='_Gogu' with_mnemonic="true" angle="0.2" gtkaml:public="l1" gtkaml:construct="//l1preconstruct">
-				<gtkaml:preconstruct><![CDATA[//zz]]></gtkaml:preconstruct>
-			</Gtk:Label>
+			<Gtk:Label label='_Gogu' with-mnemonic="true" angle="0.2" gtkaml:public="l1" />
 			<Gtk:Button label='gigel' clicked="clicked()" gtkaml:private="b1"/>
 			<Gtk:Label label='gigel' gtkaml:public="l2"/>
 		</Gtk:HBox>
 		<Gtk:Entry/>
-		<Gtk:Table n_rows="2" n_columns="2" homogeneous="true">
+		<Gtk:Table n-rows="2" n_columns="2" homogeneous="true">
 			<Gtk:Button attach_defaults="true" left_attach="0" right_attach="1" top_attach="1" bottom_attach="2" label="in the table" />
-			<Gtk:Button left_attach="1" right_attach="2" top_attach="0" bottom_attach="1" label="where noone has gone before" />
+			<Gtk:Button left_attach="1" right_attach="2" top-attach="0" bottom_attach="1" label="where noone has gone before" />
 		</Gtk:Table>
 	</Gtk:VBox>
 <![CDATA[

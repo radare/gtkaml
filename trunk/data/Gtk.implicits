@@ -1,0 +1,43 @@
+[Gtk.Label]
+## For each constructor(new), we point to the required attribute(s)
+## (only if they cannot be inferred from the FormalParameters names)
+new = label
+## This constructor is called when there's an attribute with_mnemonic="true"
+new.with_mnemonic = label
+[MenuItem]
+new.with_label = label
+new.with_mnemonic = label
+##Containers' add functions
+[Container]
+adds=add_with_properties
+[Box]
+## These 'adds' can be triggered manually by specifying e.g. pack_start="true" in the child
+## or automatically by specifiying one of the introduced attributes (?)
+adds = pack_start;pack_end;pack_start_defaults;pack_end_defaults
+## This is the name of the introduced attributes to give them
+add.pack_start = expand;fill;padding
+add.pack_end   = expand;fill;padding
+[Fixed]
+adds = put
+[Paned]
+adds = add1;add2;pack1;pack2
+[Layout]
+adds = put
+
+[MenuShell]
+adds = append;prepend;insert; 
+add.insert = position
+[Notebook]
+adds = append_page;append_page_menu;prepend_page;prepend_page_menu;insert_page;insert_page_menu
+[Socket]
+adds = add_id
+[Table]
+new = n_rows;n_columns;homogeneous
+adds = attach;attach_defaults; 
+[Toolbar]
+adds = insert
+#todo: support <void> for adding space no-childers?
+[TreeView]
+adds = append_column;remove_column;insert_column
+[TreeViewColumn]
+adds = pack_start;pack_end;add_attribute;

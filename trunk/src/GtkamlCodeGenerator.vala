@@ -162,7 +162,12 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		if (ns!=null) class_start += ns + ".";
 		class_start += name + " : ";
 		if (base_ns!=null) class_start += base_ns + ".";
-		class_start += base_name + "\n{\n";
+		class_start += base_name;
+		
+		if (root_class_definition.implements != null)
+		 	class_start += ", " + root_class_definition.implements;
+		
+		class_start += "\n{\n";
 		class_end += "}\n";
 		
 		foreach (string code in root_class_definition.code) {

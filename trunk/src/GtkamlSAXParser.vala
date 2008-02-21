@@ -329,6 +329,12 @@ public class Gtkaml.SAXParser : GLib.Object {
 							}
 							root_class_definition.preconstruct_code = attr.value;
 							break;
+						case "implements":
+							var implementsv = attr.value.split (",");
+							for (int i = 0; implementsv[i]!=null; i++)
+								implementsv[i].strip ();
+							root_class_definition.implements = string.joinv (", ", implementsv);
+							break;
 						default:
 							Report.warning (create_source_reference (), "Unknown gtkaml attribute '%s'.".printf (attr.localname));
 							break;

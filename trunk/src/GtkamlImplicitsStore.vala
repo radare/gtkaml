@@ -65,10 +65,13 @@ public class Gtkaml.ImplicitsStore : Object
 		Gee.List<string> adds = new Gee.ArrayList<string> ();
 		var kf_ns = get_ns (ns);
 		foreach (KeyFileWrapper kfw in kf_ns) {
-			if (kfw.key_file.has_key (class_name, "adds")) {
+			if (kfw.key_file.has_key (class_name, "adds")) 
+			try {
 				var kf_adds = kfw.key_file.get_string_list (class_name, "adds");
 				foreach (string add in kf_adds)
 					adds.add (add);
+			} catch (Error e) {
+				Report.error (null, "Error: %s".printf (e.message));
 			}
 		}
 		return adds;
@@ -78,7 +81,8 @@ public class Gtkaml.ImplicitsStore : Object
 	{
 		Gee.List<ImplicitsParameter> parameters = new Gee.ArrayList<ImplicitsParameter> ();
 		foreach (KeyFileWrapper kfw in get_ns (ns)) {
-			if (kfw.key_file.has_key (class_name, method_name)) {
+			if (kfw.key_file.has_key (class_name, method_name)) 
+			try {
 				var kf_parameters = kfw.key_file.get_string_list (class_name, method_name);
 				foreach (string parameter in kf_parameters) {
 					var implicits_parameter = new ImplicitsParameter ();
@@ -86,6 +90,8 @@ public class Gtkaml.ImplicitsStore : Object
 					parameters.add (implicits_parameter);
 				}
 				return parameters;
+			} catch (Error e) {
+				Report.error (null, "Error: %s".printf (e.message));
 			}
 		}
 		return /*empty*/ parameters;

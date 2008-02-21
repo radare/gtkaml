@@ -54,7 +54,7 @@ Makefile
 src/Makefile
 data/Makefile
 vapi/Makefile
-examples/Makefile
+tests/Makefile
 ])
 
 AC_OUTPUT

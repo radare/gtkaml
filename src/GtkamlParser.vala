@@ -29,8 +29,20 @@ public class Gtkaml.Parser : Gtkaml.Dummy {
 	private CodeContext context;
 	private SourceFile current_source_file;
 	
-	public void parse( CodeContext! context )
+	private ImplicitsStore implicits_store = new ImplicitsStore ();
+	
+	public Parser ()
 	{
+		
+	}
+	
+	[NoArrayLength]
+	public void parse (CodeContext! context, string[] implicits_directories = null)
+	{
+		if (implicits_directories != null)
+			foreach (string implicits_dirs in implicits_directories)
+				implicits_store.add_implicits_dir (implicits_dirs);
+
 		this.context = context;
 		base.parse( context );
 	}
@@ -48,12 +60,12 @@ public class Gtkaml.Parser : Gtkaml.Dummy {
 			try {
 				SourceFile dummy_file = new SourceFile( context, gtkaml_source_file.filename );
 				
-				var parser = new SAXParser (context, dummy_file); 
-				RootClassDefinition root_class_definition = parser.parse();
+				var sax_parser = new SAXParser (context, dummy_file); 
+				RootClassDefinition root_class_definition = sax_parser.parse();
 				if (Report.get_errors() != 0)
 					return;
 
-				var implicitsResolver = new ImplicitsResolver (context, "key-file-name"); 
+				var implicitsResolver = new ImplicitsResolver (context, implicits_store); 
 				implicitsResolver.resolve (root_class_definition);
 				if (Report.get_errors() != 0)
 					return;

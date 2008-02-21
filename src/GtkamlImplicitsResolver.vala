@@ -28,12 +28,15 @@ using Vala;
 public class Gtkaml.ImplicitsResolver : GLib.Object 
 {
 	/** configuration file with some hints*/
-	private KeyFile key_file;
-	private string key_file_name {get;set;}
+	private ImplicitsStore implicits_store {get;construct;}
 	private Vala.CodeContext context {get;set;}
 	
-	public ImplicitsResolver (construct Vala.CodeContext! context, construct string! key_file_name) {}
+	public ImplicitsResolver (construct Vala.CodeContext! context, construct ImplicitsStore! implicits_store) 
+	{
+		
+	}
 	
+	/*
 	construct {
 		string file_name;
 		try {
@@ -46,6 +49,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			Report.error (null, "Error while opening %s:%s".printf (file_name, error.message));
 		}
 	}
+	*/
 	
 	public void resolve (ClassDefinition !class_definition)
 	{
@@ -314,6 +318,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			return max_matches_method;
 	}	
 
+	/*
 	private bool has_key (string! group_name, string! key)
 	{
 		return key_file.has_key (group_name, key);
@@ -323,7 +328,8 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	{
 		return key_file.get_string_list (group_name, key);
 	}
-
+	*/
+	
 	public Gee.List<Vala.Method> lookup_container_add_methods (string! ns, Class! container_class)
 	{
 		Gee.List<Vala.Method> methods = new Gee.ArrayList<Vala.Method> ();
@@ -331,12 +337,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		if (null == ns) 
 			return methods;
 
-		if (has_key (ns + "." + container_class.name, "adds"))
+		var add_methods = implicits_store.get_adds (ns, container_class.name);
+		if (add_methods.size != 0)
 		{
-			string[] add_methods = get_string_list (ns + "." + container_class.name, "adds");
-			for (int i = 0; i < add_methods.length; i++) {
+			foreach (string add_method in add_methods) {
 				foreach (Vala.Method method in container_class.get_methods ())
-					if (method.name == add_methods[i]) {
+					if (method.name == add_method) {
 						methods.add (method);
 						break;
 					}
@@ -369,11 +375,11 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		string method_name = method.name;
 		if (method.name.has_prefix (".new"))
 			method_name = method.name.substring(1, method.name.len () - 1);
-		if (has_key (class_definition.base_full_name, method_name))
+		var result_array = implicits_store.get_method_parameters (class_definition.base_ns, class_definition.base_type.name, method_name);
+		if (result_array.size != 0)
 		{
-			string [] result_array = get_string_list (class_definition.base_full_name, method_name);
-			for (int i = 0; i < result_array.length; i++)
-				result.add (result_array [i]);
+			foreach (ImplicitsParameter result_item in result_array)
+				result.add (result_item.name);
 		} else {
 			foreach (FormalParameter p in method.get_parameters ())
 				if (!p.ellipsis)result.add (p.name);

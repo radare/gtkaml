@@ -33,6 +33,7 @@ gtkamlc_VALASOURCES = \
 	GtkamlComplexAttribute.vala \
 	GtkamlMethod.vala \
 	GtkamlImplicitsResolver.vala \
+	GtkamlImplicitsStore.vala \
 	GtkamlDummyParser.vala
 
 gtkamlc_SOURCES = \

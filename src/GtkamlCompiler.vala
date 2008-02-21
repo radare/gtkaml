@@ -36,6 +36,8 @@ class Gtkaml.Compiler : Object
 	static string library;
 	[NoArrayLength ()]
 	static string[] packages;
+	//gtkaml specific
+	static string[] implicits_directories; 
 
 	static bool ccode_only;
 	static bool compile_only;
@@ -75,6 +77,8 @@ class Gtkaml.Compiler : Object
 		{ "cc", 0, 0, OptionArg.STRING, out cc_command, "Use COMMAND as C compiler command", "COMMAND" },
 		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, out cc_options, "Pass OPTION to the C compiler", "OPTION..." },
 		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
+		//gtkaml specific
+		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, out implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
 		{ "", 0, 0, OptionArg.FILENAME_ARRAY, out sources, null, "FILE..." },
 		{ null }
 	};
@@ -216,6 +220,7 @@ class Gtkaml.Compiler : Object
 				var rpath = realpath (source);
 				if (source.has_suffix (".vala")) {
 					context.add_source_file (new SourceFile (context, rpath));
+				//gtkaml specific
 				} else if (source.has_suffix (".gtkaml")) {
 					context.add_source_file (new SourceFile (context, rpath));
 				} else if (source.has_suffix (".vapi")) {
@@ -235,8 +240,9 @@ class Gtkaml.Compiler : Object
 			return quit ();
 		}
 		
+		//gtkaml specific
 		var parser = new Gtkaml.Parser ();
-		parser.parse (context);
+		parser.parse (context, implicits_directories);
 		
 		if (Report.get_errors () > 0) {
 			return quit ();

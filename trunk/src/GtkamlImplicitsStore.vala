@@ -13,6 +13,23 @@ private class Gtkaml.KeyFileWrapper : Object {
 	{
 		this.key_file = new KeyFile ();
 	}
+	
+	public bool has_key (string !group, string! key)
+	{
+		try {
+			return key_file.has_key (group, key);
+		} catch (Error e) {
+			return false;
+		}
+	}
+	public string[] get_string_list (string !group, string! key)
+	{
+		try {
+			return key_file.get_string_list (group, key);
+		} catch (Error e) {
+			return null;
+		}
+	}		
 }
 
 /** collects $(ns).implicits key files and provides key information from all of them*/
@@ -44,7 +61,6 @@ public class Gtkaml.ImplicitsStore : Object
 			foreach (string implicits_dir in this.implicits_dirs) {
 				var file_name = Path.build_filename (implicits_dir, ns + ".implicits");
 				if (FileUtils.test (file_name, FileTest.EXISTS)) {
-					//message ("Found %s.implicits in %s", ns, implicits_dir);
 					var key_file_wrapper = new KeyFileWrapper ();
 					try {
 						key_file_wrapper.key_file.load_from_file (file_name, KeyFileFlags.NONE);
@@ -65,13 +81,10 @@ public class Gtkaml.ImplicitsStore : Object
 		Gee.List<string> adds = new Gee.ArrayList<string> ();
 		var kf_ns = get_ns (ns);
 		foreach (KeyFileWrapper kfw in kf_ns) {
-			if (kfw.key_file.has_key (class_name, "adds")) 
-			try {
-				var kf_adds = kfw.key_file.get_string_list (class_name, "adds");
+			if (kfw.has_key (class_name, "adds")) {
+				var kf_adds = kfw.get_string_list (class_name, "adds");
 				foreach (string add in kf_adds)
 					adds.add (add);
-			} catch (Error e) {
-				Report.error (null, "Error: %s".printf (e.message));
 			}
 		}
 		return adds;
@@ -81,17 +94,14 @@ public class Gtkaml.ImplicitsStore : Object
 	{
 		Gee.List<ImplicitsParameter> parameters = new Gee.ArrayList<ImplicitsParameter> ();
 		foreach (KeyFileWrapper kfw in get_ns (ns)) {
-			if (kfw.key_file.has_key (class_name, method_name)) 
-			try {
-				var kf_parameters = kfw.key_file.get_string_list (class_name, method_name);
+			if (kfw.has_key (class_name, method_name)) {
+				var kf_parameters = kfw.get_string_list (class_name, method_name);
 				foreach (string parameter in kf_parameters) {
 					var implicits_parameter = new ImplicitsParameter ();
 					implicits_parameter.name = parameter;
 					parameters.add (implicits_parameter);
 				}
 				return parameters;
-			} catch (Error e) {
-				Report.error (null, "Error: %s".printf (e.message));
 			}
 		}
 		return /*empty*/ parameters;

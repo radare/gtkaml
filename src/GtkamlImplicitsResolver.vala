@@ -132,11 +132,11 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		new_method.name = determined_add.name;
 		new_method.parameter_attributes.add (first_parameter);
-		//move the attributes from class definition to construct method
-		Gee.List<string> parameters = determine_method_parameter_names (child_definition.parent_container, determined_add);
-		foreach (string parameter in parameters) {
+		//move the attributes from class definition to add method
+		Gee.List<ImplicitsParameter> parameters = determine_parameter_names_and_default_values (child_definition.parent_container, determined_add);
+		foreach (ImplicitsParameter parameter in parameters) {
 			foreach (Gtkaml.Attribute attr in child_definition.attrs) {
-				if (parameter == attr.name) {
+				if (parameter.name == attr.name) {
 					new_method.parameter_attributes.add (attr);
 					to_remove.add (attr);
 					break;
@@ -148,11 +148,11 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		{
 			string message = "";
 			int i = 0;
-			if (first_parameter!=null) i = 1;
+			if (first_parameter!=null) i = 1;//skip child
 			for (; i < parameters.size -1; i++)
-				message += parameters.get (i) + ",";
+				message += parameters.get (i).name + ",";
 			if (i < parameters.size)
-				message += parameters.get (i);
+				message += parameters.get (i).name;
 			Report.error (child_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("add method", child_definition.parent_container.base_full_name, message));
 			return;
 		}
@@ -205,13 +205,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		new_method.name = determined_constructor.name;
 		//move the attributes from class definition to construct method
-		Gee.List<string> parameters = determine_method_parameter_names (class_definition, determined_constructor);
-		foreach (string parameter in parameters) {
+		Gee.List<ImplicitsParameter> parameters = determine_parameter_names_and_default_values (class_definition, determined_constructor);
+		foreach (ImplicitsParameter parameter in parameters) {
 			foreach (Gtkaml.Attribute attr in class_definition.attrs) {
-				if (parameter == attr.name) {
+				if (parameter.name == attr.name) {
 					new_method.parameter_attributes.add (attr);
 					to_remove.add (attr);
-					//attr.target_type = member_lookup_inherited (class_definition.base_type, attr.name);
 					break;
 				}
 			}
@@ -222,9 +221,9 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			string message = "";
 			int i = 0;
 			for (i = 0; i < parameters.size -1; i++)
-				message += parameters.get (i) + ",";
+				message += parameters.get (i).name + ",";
 			if (parameters.size > 0)
-				message += parameters.get (i);
+				message += parameters.get (i).name;
 			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("creation method", class_definition.base_full_name, message));
 			return;
 		}
@@ -250,33 +249,52 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	}
 	
 	/**
-	 * the methods that brought this class (ImplicitResolver) to the world
+	 * the method that brought this class (ImplicitsResolver) to the world
+	 * @first_parameter is used to discern between add methods (first_parameter=child widget) and creation methods (first_parameter=null)
+	 * @wording contains a display name for the type of method
 	 */
 	public Vala.Method implicit_method_choice (ClassDefinition !class_definition, Gee.List<Vala.Method>! methods, string! wording, ComplexAttribute first_parameter=null )
 	{
-			int min_params = 999;
+			/** the minimum number of parameters */ 
+			int min_params = 999; /* use MAX_INT? */
+			/** the least you would need to call that minimal method */
+			Gee.List<string> min_param_names = null;
+			/** the number of maximum matched parameters */
+			int max_matches = -1;
+			/** the method most matched */
+			Vala.Method max_matches_method;
+			/** if there are more methods that match for the same parameters, this is > 1 */
+			int count_with_max_match = 0;
 			ClassDefinition parameter_class = class_definition;
+			Gee.List<ImplicitsParameter> defaulted_parameters;
+
 			if (first_parameter != null)
 				parameter_class = first_parameter.complex_type;
-			Gee.List<string> min_param_names = null;
-			int max_matches = -1;
-			Vala.Method max_matches_method;
-			int count_with_max_match = 0;
+
 			foreach (Vala.Method method in methods) {
-				var parameters = determine_method_parameter_names (class_definition, method);
+				var parameters = determine_parameter_names_and_default_values (class_definition, method);
 				int current_matches = 0;
-				foreach (string parameter in parameters) {
+				int current_defaulted_parameter_matches = 0;
+				Gee.List<ImplicitsParameter> current_defaulted_parameters = new Gee.ArrayList<ImplicitsParameter> ();
+				 
+				foreach (ImplicitsParameter parameter in parameters) {
+					int flag_current_matches_modified = current_matches;
 					foreach (Gtkaml.Attribute attr in parameter_class.attrs) {
-						if (parameter == attr.name) {
+						if (parameter.name == attr.name) {
 							current_matches ++;
 							break;
 						}
 					}
+					if (flag_current_matches_modified != current_matches && parameter.default_value != null) {
+						current_defaulted_parameter_matches++;
+						current_defaulted_parameters.add (parameter);
+					}
 				}
-				if (first_parameter != null)
+				if (first_parameter != null) //child widget
 				{
 					current_matches++;
 				} 
+				
 				//full match?
 				if (current_matches == parameters.size ) {
 					if (current_matches > max_matches) {
@@ -369,9 +387,9 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		return methods; 
 	}
 
-	public Gee.List<string> determine_method_parameter_names(ClassDefinition! class_definition, Vala.Method! method)
+	public Gee.List<ImplicitsParameter> determine_parameter_names_and_default_values(ClassDefinition! class_definition, Vala.Method! method)
 	{
-		var result = new Gee.ArrayList<string> (str_equal);
+		var result = new Gee.ArrayList<ImplicitsParameter> ();
 		string method_name = method.name;
 		if (method.name.has_prefix (".new"))
 			method_name = method.name.substring(1, method.name.len () - 1);
@@ -379,10 +397,16 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		if (result_array.size != 0)
 		{
 			foreach (ImplicitsParameter result_item in result_array)
-				result.add (result_item.name);
+				result.add (result_item);
 		} else {
-			foreach (FormalParameter p in method.get_parameters ())
-				if (!p.ellipsis)result.add (p.name);
+			foreach (FormalParameter p in method.get_parameters ()) {
+				if (!p.ellipsis) { //hack for add_with_parameters (widget, ...)
+					var new_implicits_parameter = new ImplicitsParameter ();
+					new_implicits_parameter.name = p.name;
+					new_implicits_parameter.default_value = null; //here we can go for "zero"es and "false"s
+					result.add (new_implicits_parameter);
+				}
+			}
 		}
 		return result;
 	}

@@ -94,7 +94,9 @@ public class Gtkaml.ImplicitsStore : Object
 				var kf_parameters = kfw.get_string_list (class_name, method_name);
 				foreach (string parameter in kf_parameters) {
 					var implicits_parameter = new ImplicitsParameter ();
-					implicits_parameter.name = parameter;
+					var name_value = parameter.split ("=");
+					implicits_parameter.name = name_value[0];
+					implicits_parameter.default_value = name_value[1];//either null or not
 					parameters.add (implicits_parameter);
 				}
 				return parameters;

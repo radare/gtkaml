@@ -37,11 +37,7 @@ public class Gtkaml.ImplicitsStore : Object
 {
 	private Gee.List<string> implicits_dirs = new ArrayList<string> (str_equal);
 	private Map<string,Gee.List<KeyFileWrapper> > loaded_ns = new HashMap<string,Gee.List<KeyFileWrapper> > (str_hash, str_equal);
-	
-	construct {
-		this.add_implicits_dir (Path.build_filename (Config.PACKAGE_DATADIR, "implicits"));
-	}
-	
+		
 	public ReadOnlyList<string> get_implicits_dirs ()
 	{
 		return new ReadOnlyList<string> (implicits_dirs);

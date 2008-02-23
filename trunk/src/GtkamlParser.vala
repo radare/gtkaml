@@ -42,7 +42,7 @@ public class Gtkaml.Parser : Gtkaml.Dummy {
 		if (implicits_directories != null)
 			foreach (string implicits_dirs in implicits_directories)
 				implicits_store.add_implicits_dir (implicits_dirs);
-
+		implicits_store.add_implicits_dir (Path.build_filename (Config.PACKAGE_DATADIR, "implicits"));
 		this.context = context;
 		base.parse( context );
 	}

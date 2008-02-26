@@ -1,0 +1,1 @@
+shlibs:Depends=libxml2 (>= 2.6.27), libvala0 (>= 0.1.6), libc6 (>= 2.7-1), libglib2.0-0 (>= 2.15.5)

@@ -13,7 +13,7 @@ BUILT_SOURCES = test0.stamp test1.stamp
 noinst_PROGRAMS = test0 test1
 
 
-CLEANFILES = test0.h test0.c test1.h test1.c test0.vala test1.vala
+CLEANFILES = test0.h test0.c test1.h test1.c test0.vala test1.vala test0.stamp test1.stamp
 
 ## Example 0
 test0_GTKAMLSOURCES = \

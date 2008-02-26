@@ -15,6 +15,7 @@ AM_CFLAGS = -I$(top_srcdir) \
 bin_PROGRAMS = gtkamlc 
 
 BUILT_SOURCES = gtkamlc.vala.stamp
+CLEANFILES = gtkamlc.vala.stamp
 
 gtkamlc_VALASOURCES = \
 	GtkamlCompiler.vala \

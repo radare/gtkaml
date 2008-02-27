@@ -1,3 +1,7 @@
+2008-02-28
+  - renamed gtkaml:reference to gtkaml:existing
+  - introduced gtkaml:standalone
+
 2008-02-21
   - added gtkaml:implements
   - allow hyphen-separated attributes

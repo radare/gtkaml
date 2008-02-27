@@ -44,18 +44,7 @@ public class Gtkaml.ClassDefinition : GLib.Object {
 
 	public Gee.List<Gtkaml.Attribute> attrs {get;set;}
 
-	private weak ClassDefinition _parent_container;
-	public weak ClassDefinition parent_container {
-		get { 
-			return _parent_container;
-		}
-		set {
-			//hmm reparent?
-			if (value != null)
-				value.add_child (this);
-			_parent_container = value;
-		}
-	}
+	public weak ClassDefinition parent_container {get;set;}
 	
 	public Gee.List<ClassDefinition> children {get;set;}
 	public DefinitionScope definition_scope {get;set;}

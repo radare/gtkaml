@@ -36,34 +36,17 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 	}
 	
-	/*
-	construct {
-		string file_name;
-		try {
-			key_file = new KeyFile ();
-			file_name = Path.build_filename (Config.PACKAGE_DATADIR, "implicits", "implicits.ini");
-			if (!FileUtils.test (file_name, FileTest.EXISTS))
-				file_name = "../data/implicits.ini";
-			key_file.load_from_file (file_name, KeyFileFlags.NONE);
-		} catch (Error error) {
-			Report.error (null, "Error while opening %s:%s".printf (file_name, error.message));
-		}
-	}
-	*/
-	
 	public void resolve (ClassDefinition !class_definition)
 	{
 		//determine which constructor shall we use
 		//references don't have to be constructed
 		if (!(class_definition is ReferenceClassDefinition)) {
 			determine_construct_method (class_definition);
-			if (class_definition.construct_method == null) 
-				return;
 		}
 		//then determine the container add function, if applicable
 		if (class_definition.parent_container != null)
 			determine_add_method (class_definition);
-		//References should have no 'rest attributes'
+		//References should have no other attributes than the 'attached' ones (woa.. i learned xaml)
 		if (class_definition is ReferenceClassDefinition && class_definition.attrs.size != 0) {
 			Report.error (class_definition.source_reference, "No attributes other than the container add parameters are allowed on references");
 			return;
@@ -314,7 +297,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			if (max_matches_method == null){
 				if (min_param_names == null) {
 					Report.error(class_definition.source_reference, "The class %s doesn't have %ss\n".printf (class_definition.base_full_name, wording));
-				} else {
+				} /*else {
 					string message = "";
 					int i = 0;
 					if (first_parameter!=null) i = 1;
@@ -324,7 +307,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 					if (i < min_param_names.size )
 						message += min_param_names.get (i);
 					Report.error (parameter_class.source_reference, "No matching %s found for %s: specify at least: %s\n".printf (wording, class_definition.base_full_name, message));
-				}
+				} */
 				return null;
 			}
 			

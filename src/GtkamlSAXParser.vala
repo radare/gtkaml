@@ -363,6 +363,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		string reference = null;
 		string construct_code = null;
 		string preconstruct_code = null;
+		ClassDefinition parent_container = container_definition;
 
 		foreach (XmlAttribute attr in attrs) {
 			if (attr.prefix!=null && attr.prefix==gtkaml_prefix) {
@@ -377,25 +378,34 @@ public class Gtkaml.SAXParser : GLib.Object {
 					} else {
 						identifier_scope = DefinitionScope.PRIVATE;
 					}
-				} else if (attr.localname=="reference") {
+				} else if (attr.localname=="existing") {
 					reference = attr.value;
 				} else if (attr.localname=="construct") {
 					construct_code = attr.value;
 				} else if (attr.localname=="preconstruct") {
 					preconstruct_code = attr.value;
+				} else if (attr.localname=="standalone") {
+					if (attr.value == "true") {
+						parent_container = null;
+					} else {
+						Report.error (create_source_reference (), "Invalid 'standalone' value");
+						stop_parsing ();
+					}
+				} else {
+					Report.error (create_source_reference (), "Unkown gtkaml attribute '%s'".printf (attr.localname));
+					stop_parsing ();
 				}
 			} else if (attr.prefix != null) {
 				Report.error (create_source_reference (), "%s is the only allowed prefix for attributes. Other attributes must be left unprefixed".printf (gtkaml_prefix));
 				stop_parsing ();
-				return null;
 			}
 		}
 		
 		if (identifier != null && reference != null) {
-			Report.error (create_source_reference (), "Cannot specify both reference and a new identifier name");
+			Report.error (create_source_reference (), "Cannot specify both existing and a new identifier name");
 			stop_parsing ();
-			return null;
 		}
+		
 		ClassDefinition class_definition=null;
 		if (reference == null) {
 			int counter = 0;
@@ -410,20 +420,20 @@ public class Gtkaml.SAXParser : GLib.Object {
 				generated_identifiers_counter.set (clazz.name.down (clazz.name.len ()), counter);
 			}
 
-			class_definition = new ClassDefinition (create_source_reference (), identifier, prefix_to_namespace (prefix), clazz, identifier_scope, container_definition);
+			class_definition = new ClassDefinition (create_source_reference (), identifier, prefix_to_namespace (prefix), clazz, identifier_scope, parent_container);
 			class_definition.construct_code = construct_code;
 			class_definition.preconstruct_code = preconstruct_code;
 		} else {
 			if (construct_code != null || preconstruct_code != null) {
 				Report.error (create_source_reference (), "Cannot specify 'construct' or 'preconstruct' code for references");
 				stop_parsing ();
-				return null;
 			}
-			class_definition = new ReferenceClassDefinition (create_source_reference (), reference, prefix_to_namespace (prefix), clazz, container_definition);
+			class_definition = new ReferenceClassDefinition (create_source_reference (), reference, prefix_to_namespace (prefix), clazz, parent_container);
 		}
 		
-		
-
+		if (container_definition != null)
+			container_definition.add_child (class_definition);
+			
 		foreach (XmlAttribute attr in attrs) {
 			if (attr.prefix == null) {
 				var simple_attribute = new SimpleAttribute (strip_attribute_hyphens (attr.localname), attr.value);

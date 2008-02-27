@@ -70,6 +70,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			generate_children (class_definition);
 			write_construct (class_definition);
 		} else if (class_definition is ReferenceClassDefinition) {
+			generate_children (class_definition);
 			write_add (class_definition);			
 		} else {
 			write_declaration (class_definition);
@@ -85,7 +86,6 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 
 	public void generate_children (ClassDefinition! class_definition)
 	{
-		if (!(class_definition is ReferenceClassDefinition))
 			foreach (ClassDefinition child in class_definition.children)
 				generate (child);
 	}

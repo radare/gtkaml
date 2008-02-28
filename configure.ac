@@ -55,6 +55,7 @@ src/Makefile
 data/Makefile
 vapi/Makefile
 tests/Makefile
+examples/SimpleViewer2/Makefile
 ])
 
 AC_OUTPUT

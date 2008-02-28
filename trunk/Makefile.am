@@ -1,7 +1,8 @@
 SUBDIRS = src \
 	data \
 	vapi \
-	tests
+	tests \
+	examples/SimpleViewer2
 
 gtkamldocdir = ${prefix}/doc/gtkaml
 gtkamldoc_DATA = \

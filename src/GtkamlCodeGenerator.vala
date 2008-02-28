@@ -200,7 +200,6 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	
 	public void write_constructor (ClassDefinition! class_definition)
 	{
-		stderr.printf ("writing constructor for %s\n", class_definition.identifier);
 		string construct_name = class_definition.construct_method.name;
 		construct_name = construct_name.substring (".new".len (), construct_name.len () - ".new".len ());
 		constructors += "\t\t" + class_definition.identifier + " = new " + class_definition.base_full_name + construct_name + " (";

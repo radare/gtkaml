@@ -133,7 +133,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			int i = 0;
 			if (first_parameter!=null) i = 1;//skip child
 			for (; i < parameters.size -1; i++)
-				message += parameters.get (i).name + ",";
+				message += parameters.get (i).name + ", ";
 			if (i < parameters.size)
 				message += parameters.get (i).name;
 			Report.error (child_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("add method", child_definition.parent_container.base_full_name, message));
@@ -203,9 +203,10 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		{
 			string message = "";
 			int i = 0;
-			for (i = 0; i < parameters.size -1; i++)
-				message += parameters.get (i).name + ",";
-			if (parameters.size > 0)
+			for (i = 0; i < parameters.size -1; i++) {
+				message += parameters.get (i).name + ", ";
+			}
+			if (i < parameters.size)
 				message += parameters.get (i).name;
 			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("creation method", class_definition.base_full_name, message));
 			return;
@@ -241,7 +242,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			/** the minimum number of parameters */ 
 			int min_params = 999; /* use MAX_INT? */
 			/** the least you would need to call that minimal method */
-			Gee.List<string> min_param_names = null;
+			Gee.List<ImplicitsParameter> min_param_names = null;
 			/** the number of maximum matched parameters */
 			int max_matches = -1;
 			/** the method most matched */
@@ -297,17 +298,17 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			if (max_matches_method == null){
 				if (min_param_names == null) {
 					Report.error(class_definition.source_reference, "The class %s doesn't have %ss\n".printf (class_definition.base_full_name, wording));
-				} /*else {
+				} else {
 					string message = "";
 					int i = 0;
 					if (first_parameter!=null) i = 1;
 					for (; i < min_param_names.size - 1; i++) {
-						message += min_param_names.get (i) + " ,";
+						message += min_param_names.get (i).name + ", ";
 					}
 					if (i < min_param_names.size )
-						message += min_param_names.get (i);
-					Report.error (parameter_class.source_reference, "No matching %s found for %s: specify at least: %s\n".printf (wording, class_definition.base_full_name, message));
-				} */
+						message += min_param_names.get (i).name;
+					Report.error (parameter_class.source_reference, "NO matching %s found for %s: specify at least: %s\n".printf (wording, class_definition.base_full_name, message));
+				} 
 				return null;
 			}
 			

@@ -43,7 +43,7 @@
 			<MenuItem label="_Help" with-mnemonic="true">
 				<submenu>
 					<Menu>
-						<ImageMenuItem accel-group="null" stock-id="gtk-about" from-stock="true" />
+						<ImageMenuItem accel-group="null" stock-id="gtk-about" from-stock="true" activate="{OnMenuHelpAboutActivatedEvent}"/>
 					</Menu>
 				</submenu>
 			</MenuItem>
@@ -52,7 +52,20 @@
 			<TextView can-focus="true" editable="false" />
 		</ScrolledWindow>
 	</VBox>	
-	
+	<AboutDialog class:standalone="true" class:private="aboutdialog1"
+		border-width="5" title="About SimpleViewer2" resizable="false" modal="true"
+		window-position="{WindowPosition.CENTER_ON_PARENT}" has-separator="false"
+		program-name="SimpleViewer2" version="1.0" copyright="Copyright (c) 2007 MIchael Werle"
+		comments="Simple .Net demonstration program, displays a text file in a scrolling text box and allows the user to toggle word-wrap on and off"
+		website="http://www.michaelwerle.com/SimpleViewer2/" authors='{new string[] {"Michael Werle (micha@michaelwerle.com), ported to gtkaml by Vlad Grecescu (b100dian@gmail.com)",null}}'>
+		<VBox class:standalone="true" class:existing="(aboutdialog1.vbox as VBox)">
+			<!-- add more stuff here? -->
+		</VBox>	
+		<HButtonBox class:standalone="true" class:existing="(aboutdialog1.action_area as HButtonBox)">
+			<!-- add more buttons here? -->
+		</HButtonBox>
+	</AboutDialog>			
+
 <![CDATA[
 	private void OnWindow1DeleteEvent ()
 	{
@@ -62,8 +75,17 @@
 	{
 	}
 	
+	private void OnMenuHelpAboutActivatedEvent ()
+	{
+		aboutdialog1.transient_for = this;
+		aboutdialog1.run ();
+	}
 	static int main (string[] args)
 	{
+		Gtk.init (ref args);
+		var viewer = new SimpleViewer2 ();
+		viewer.show_all ();
+		Gtk.main ();
 	}
 ]]>
 </Window>

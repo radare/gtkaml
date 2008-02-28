@@ -97,6 +97,7 @@ public class Gtkaml.ImplicitsStore : Object
 					var name_value = parameter.split ("=");
 					implicits_parameter.name = name_value[0];
 					implicits_parameter.default_value = name_value[1];//either null or not
+					stderr.printf ("Found for %s.%s.%s parameter %s=%s;\n", ns, class_name, method_name, implicits_parameter.name, implicits_parameter.default_value);
 					parameters.add (implicits_parameter);
 				}
 				return parameters;

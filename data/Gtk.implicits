@@ -1,6 +1,7 @@
 [Label]
 ## For each constructor(new), we point to the required attribute(s)
-## (only if they cannot be inferred from the FormalParameters names)
+## only if they cannot be inferred from the FormalParameters names
+## or, if you have default values for _some_ of them, specify them _all_
 new = label
 ## This constructor is called when there's an attribute with_mnemonic="true"
 new.with_mnemonic = label
@@ -15,8 +16,12 @@ adds=add_with_properties
 ## or automatically by specifiying one of the introduced attributes (?)
 adds = pack_start;pack_end;pack_start_defaults;pack_end_defaults
 ## This is the name of the introduced attributes to give them
-add.pack_start = expand;fill;padding
-add.pack_end   = expand;fill;padding
+add.pack_start = widget;expand=true;fill=true;padding=0
+add.pack_end   = widget;expand;fill;padding
+[VBox]
+new = homogeneous=false;spacing=0
+[HBox]
+new = homogeneous=false;spacing=0
 [Fixed]
 adds = put
 [Paned]

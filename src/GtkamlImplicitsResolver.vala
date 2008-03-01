@@ -90,7 +90,9 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		Vala.Method determined_add = null;
 		Gtkaml.AddMethod new_method = new Gtkaml.AddMethod ();
 		Gee.List<Gtkaml.Attribute> to_remove = new Gee.ArrayList<Gtkaml.Attribute> ();
-
+	
+		int i;
+		
 		//todo: move this one in the parser
 		//pass one: see if we find an explicitly specified add method
 		foreach (Vala.Method add in adds) {
@@ -127,22 +129,23 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			}
 		}		
 		
-		if ( parameters.size  != new_method.parameter_attributes.size )
+		if ( parameters.size  != new_method.parameter_attributes.size)
 		{
-			string message = "";
-			int i = 0;
+			stderr.printf ("failed because %d != %d", parameters.size, new_method.parameter_attributes.size + i);
+			i = 0;
 			if (first_parameter!=null) i = 1;//skip child
+			string message = "";
 			for (; i < parameters.size -1; i++)
 				message += parameters.get (i).name + ", ";
 			if (i < parameters.size)
 				message += parameters.get (i).name;
 			Report.error (child_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("add method", child_definition.parent_container.base_full_name, message));
 			return;
-		}
+		} 
 		
 		//determine attr.target_types directly from method signature
 		Gee.Collection<FormalParameter> add_parameters = determined_add.get_parameters ();
-		int i = 0;
+		i = 0;
 		foreach (FormalParameter formal_parameter in add_parameters)
 		{
 			if (!formal_parameter.ellipsis) {
@@ -220,6 +223,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		{
 			if (!formal_parameter.ellipsis) {
 				var attr = new_method.parameter_attributes.get (i);
+				stderr.printf ("matching %s formal parameter against %s attribute\n", formal_parameter.name, attr.name);
 				attr.target_type = formal_parameter;
 				i++;
 			}
@@ -247,6 +251,10 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			int max_matches = -1;
 			/** the method most matched */
 			Vala.Method max_matches_method;
+			/** the number of matched defaulted parameters */
+			int max_matches_defaulted = 0;
+			/** the default parameters for the max matches method */
+			Gee.List<ImplicitsParameter> max_matches_method_defaulted_parameters;
 			/** if there are more methods that match for the same parameters, this is > 1 */
 			int count_with_max_match = 0;
 			ClassDefinition parameter_class = class_definition;
@@ -255,23 +263,31 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			if (first_parameter != null)
 				parameter_class = first_parameter.complex_type;
 
+			stderr.printf ("===%d candidates\n", methods.size);
 			foreach (Vala.Method method in methods) {
+				stderr.printf ("CANDIDATE %s\n", method.name);
 				var parameters = determine_parameter_names_and_default_values (class_definition, method);
 				int current_matches = 0;
-				int current_defaulted_parameter_matches = 0;
 				Gee.List<ImplicitsParameter> current_defaulted_parameters = new Gee.ArrayList<ImplicitsParameter> ();
 				 
 				foreach (ImplicitsParameter parameter in parameters) {
+					stderr.printf ("searching for %s =>", parameter.name); 
 					int flag_current_matches_modified = current_matches;
 					foreach (Gtkaml.Attribute attr in parameter_class.attrs) {
 						if (parameter.name == attr.name) {
 							current_matches ++;
+							stderr.printf (" .. explicit\n");
 							break;
 						}
 					}
-					if (flag_current_matches_modified != current_matches && parameter.default_value != null) {
-						current_defaulted_parameter_matches++;
-						current_defaulted_parameters.add (parameter);
+					if (flag_current_matches_modified == current_matches) {
+						if (parameter.default_value != null) {
+							current_matches++;
+							current_defaulted_parameters.add (parameter);
+							stderr.printf (" .. default %s\n", parameter.name);
+						} else {
+							stderr.printf (" .. not found\n");
+						}
 					}
 				}
 				if (first_parameter != null) //child widget
@@ -282,12 +298,16 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				//full match?
 				if (current_matches == parameters.size ) {
 					if (current_matches > max_matches) {
+						stderr.printf ("local maximum is %s\n", method.name);
 						max_matches = current_matches;
 						max_matches_method = method;
+						max_matches_method_defaulted_parameters = current_defaulted_parameters;
 						count_with_max_match = 1;
 					} else if (current_matches == max_matches) {
 						count_with_max_match ++;
 					}
+				} else {
+					stderr.printf ("discarded because %d != %d\n", current_matches, parameters.size);
 				}
 				if (parameters.size < min_params) {
 					min_params = parameters.size;
@@ -315,8 +335,16 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			if (count_with_max_match > 1) {
 				//Report.warning (class_definition.source_reference, "More than one %s matches your definition of %s(%s)\n".printf (wording, class_definition.identifier, class_definition.base_full_name));
 			}
-					
 			
+			foreach (ImplicitsParameter parameter in max_matches_method_defaulted_parameters) {
+				stderr.printf ("found default value for %s.%s.%s being <%s>\n", class_definition.base_full_name, max_matches_method.name, parameter.name, parameter.default_value);
+				if (first_parameter != null) {
+					first_parameter.complex_type.add_attribute (new SimpleAttribute (parameter.name, parameter.default_value));
+				} else {
+					class_definition.add_attribute (new SimpleAttribute (parameter.name, parameter.default_value));
+				}
+			}
+			stderr.printf ("selected '%s'\n", max_matches_method.name);			
 			return max_matches_method;
 	}	
 
@@ -373,15 +401,24 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 
 	public Gee.List<ImplicitsParameter> determine_parameter_names_and_default_values(ClassDefinition! class_definition, Vala.Method! method)
 	{
+		var ns = method.parent_symbol.parent_symbol.get_full_name ();
+		var clazz = method.parent_symbol.name;
+		stderr.printf ("determine_parameter_names_and_default_values %s %s of %s.%s\n", class_definition.base_full_name, method.name, ns, clazz);
 		var result = new Gee.ArrayList<ImplicitsParameter> ();
 		string method_name = method.name;
 		if (method.name.has_prefix (".new"))
 			method_name = method.name.substring(1, method.name.len () - 1);
-		var result_array = implicits_store.get_method_parameters (class_definition.base_ns, class_definition.base_type.name, method_name);
+		else
+			method_name = "add." + method.name;
+		var result_array = implicits_store.get_method_parameters (ns, clazz, method_name);
 		if (result_array.size != 0)
 		{
-			foreach (ImplicitsParameter result_item in result_array)
+			foreach (ImplicitsParameter result_item in result_array) {
+				if (result_item.default_value != null) {
+					stderr.printf ("default value for %s=<%s>\n", result_item.name, result_item.default_value);
+				}
 				result.add (result_item);
+			}
 		} else {
 			foreach (FormalParameter p in method.get_parameters ()) {
 				if (!p.ellipsis) { //hack for add_with_parameters (widget, ...)

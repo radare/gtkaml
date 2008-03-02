@@ -288,9 +288,9 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 				} else {
 					Report.error( null, "Attribute %s not properly ended".printf (attr.name));
 				}
-			} else if (utype.type_name == "string") {
+			} else if (utype.unresolved_symbol.name == "string") {
 				literal = "\"" + value.escape (null) + "\"";
-			} else if (utype.type_name == "bool") {
+			} else if (utype.unresolved_symbol.name == "bool") {
 				if (stripped_value != "true" && stripped_value != "false") {
 					Report.error (null, "'%s' is not a boolean literal".printf (value));
 					return null;

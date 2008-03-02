@@ -131,7 +131,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		if ( parameters.size  != new_method.parameter_attributes.size)
 		{
-			stderr.printf ("failed because %d != %d", parameters.size, new_method.parameter_attributes.size + i);
+			//stderr.printf ("failed because %d != %d", parameters.size, new_method.parameter_attributes.size + i);
 			i = 0;
 			if (first_parameter!=null) i = 1;//skip child
 			string message = "";
@@ -223,7 +223,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		{
 			if (!formal_parameter.ellipsis) {
 				var attr = new_method.parameter_attributes.get (i);
-				stderr.printf ("matching %s formal parameter against %s attribute\n", formal_parameter.name, attr.name);
+				//stderr.printf ("matching %s formal parameter against %s attribute\n", formal_parameter.name, attr.name);
 				attr.target_type = formal_parameter;
 				i++;
 			}
@@ -263,30 +263,31 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			if (first_parameter != null)
 				parameter_class = first_parameter.complex_type;
 
-			stderr.printf ("===%d candidates\n", methods.size);
+			//stderr.printf ("===%d candidates\n", methods.size);
 			foreach (Vala.Method method in methods) {
-				stderr.printf ("CANDIDATE %s\n", method.name);
+				//stderr.printf ("CANDIDATE %s\n", method.name);
 				var parameters = determine_parameter_names_and_default_values (class_definition, method);
 				int current_matches = 0;
+				int current_matches_defaulted = 0;
 				Gee.List<ImplicitsParameter> current_defaulted_parameters = new Gee.ArrayList<ImplicitsParameter> ();
 				 
 				foreach (ImplicitsParameter parameter in parameters) {
-					stderr.printf ("searching for %s =>", parameter.name); 
+					//stderr.printf ("searching for %s =>", parameter.name); 
 					int flag_current_matches_modified = current_matches;
 					foreach (Gtkaml.Attribute attr in parameter_class.attrs) {
 						if (parameter.name == attr.name) {
 							current_matches ++;
-							stderr.printf (" .. explicit\n");
+							//stderr.printf (" .. explicit\n");
 							break;
 						}
 					}
 					if (flag_current_matches_modified == current_matches) {
 						if (parameter.default_value != null) {
-							current_matches++;
+							current_matches_defaulted++;
 							current_defaulted_parameters.add (parameter);
-							stderr.printf (" .. default %s\n", parameter.name);
+							//stderr.printf (" .. default %s\n", parameter.name);
 						} else {
-							stderr.printf (" .. not found\n");
+							//stderr.printf (" .. not found\n");
 						}
 					}
 				}
@@ -296,18 +297,30 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				} 
 				
 				//full match?
-				if (current_matches == parameters.size ) {
+				if (current_matches + current_matches_defaulted == parameters.size ) {
 					if (current_matches > max_matches) {
-						stderr.printf ("local maximum is %s\n", method.name);
+						//stderr.printf ("local maximum is %s with %d matches and %d defaulted\n", method.name, current_matches, current_matches_defaulted);
 						max_matches = current_matches;
+						max_matches_defaulted = current_matches_defaulted;
 						max_matches_method = method;
 						max_matches_method_defaulted_parameters = current_defaulted_parameters;
 						count_with_max_match = 1;
 					} else if (current_matches == max_matches) {
-						count_with_max_match ++;
+						if (max_matches_defaulted > current_matches_defaulted) {
+							//stderr.printf ("found method with less defaulted parameters\n");
+							max_matches = current_matches;
+							max_matches_defaulted = current_matches_defaulted;
+							max_matches_method = method;
+							max_matches_method_defaulted_parameters = current_defaulted_parameters;
+							count_with_max_match = 1;
+						} else if (max_matches_defaulted > current_matches_defaulted) {
+							count_with_max_match ++;
+						} else {
+							//stderr.printf ("found method with more defaulted parameters, discarding\n");
+						}
 					}
 				} else {
-					stderr.printf ("discarded because %d != %d\n", current_matches, parameters.size);
+					//stderr.printf ("discarded because %d != %d\n", current_matches, parameters.size);
 				}
 				if (parameters.size < min_params) {
 					min_params = parameters.size;
@@ -337,14 +350,14 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			}
 			
 			foreach (ImplicitsParameter parameter in max_matches_method_defaulted_parameters) {
-				stderr.printf ("found default value for %s.%s.%s being <%s>\n", class_definition.base_full_name, max_matches_method.name, parameter.name, parameter.default_value);
+				//stderr.printf ("found default value for %s.%s.%s being <%s>\n", class_definition.base_full_name, max_matches_method.name, parameter.name, parameter.default_value);
 				if (first_parameter != null) {
 					first_parameter.complex_type.add_attribute (new SimpleAttribute (parameter.name, parameter.default_value));
 				} else {
 					class_definition.add_attribute (new SimpleAttribute (parameter.name, parameter.default_value));
 				}
 			}
-			stderr.printf ("selected '%s'\n", max_matches_method.name);			
+			//stderr.printf ("selected '%s'\n", max_matches_method.name);			
 			return max_matches_method;
 	}	
 
@@ -403,7 +416,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	{
 		var ns = method.parent_symbol.parent_symbol.get_full_name ();
 		var clazz = method.parent_symbol.name;
-		stderr.printf ("determine_parameter_names_and_default_values %s %s of %s.%s\n", class_definition.base_full_name, method.name, ns, clazz);
+		//stderr.printf ("determine_parameter_names_and_default_values %s %s of %s.%s\n", class_definition.base_full_name, method.name, ns, clazz);
 		var result = new Gee.ArrayList<ImplicitsParameter> ();
 		string method_name = method.name;
 		if (method.name.has_prefix (".new"))
@@ -415,7 +428,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		{
 			foreach (ImplicitsParameter result_item in result_array) {
 				if (result_item.default_value != null) {
-					stderr.printf ("default value for %s=<%s>\n", result_item.name, result_item.default_value);
+					//stderr.printf ("default value for %s=<%s>\n", result_item.name, result_item.default_value);
 				}
 				result.add (result_item);
 			}

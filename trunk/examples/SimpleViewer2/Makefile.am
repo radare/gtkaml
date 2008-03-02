@@ -12,9 +12,8 @@ AM_CFLAGS = \
 BUILT_SOURCES = SimpleViewer2.stamp 
 noinst_PROGRAMS = SimpleViewer2 
 
-CLEANFILES = SimpleViewer2.h SimpleViewer2.c SimpleViewer2.vala test1.vala
+CLEANFILES = SimpleViewer2.h SimpleViewer2.c SimpleViewer2.vala SimpleViewer2.stamp
 
-## Example 0
 SimpleViewer2_GTKAMLSOURCES = \
 	SimpleViewer2.gtkaml
 
@@ -30,8 +29,6 @@ SimpleViewer2_LDADD = \
 SimpleViewer2.stamp : $(SimpleViewer2_GTKAMLSOURCES)
 	../../src/gtkamlc $(VALAFLAGS) --implicitsdir ../../data --pkg gtk+-2.0 $^
 	touch $@
-
-
 
 EXTRA_DIST = \
 	$(SimpleViewer2_GTKAMLSOURCES)

@@ -29,8 +29,8 @@ using Gee;
 public class Gtkaml.SAXParser : GLib.Object {
 	/** the only reason this is public is to be accessible from the [Import]s */
 	public pointer xmlCtxt;
-	private CodeContext context {get;construct;}
-	private weak SourceFile source_file {get;construct;}
+	public CodeContext context {get;construct;}
+	public weak SourceFile source_file {get;construct;}
 	private StateStack states {get;set;}
 	private Map<string,int> generated_identifiers_counter = new HashMap<string,int> (str_hash, str_equal);
 	private Collection<string> used_identifiers = new ArrayList<string> (str_equal);

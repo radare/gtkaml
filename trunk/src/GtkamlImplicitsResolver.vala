@@ -28,7 +28,7 @@ using Vala;
 public class Gtkaml.ImplicitsResolver : GLib.Object 
 {
 	/** configuration file with some hints*/
-	private ImplicitsStore implicits_store {get;construct;}
+	public ImplicitsStore implicits_store {get;construct;}
 	private Vala.CodeContext context {get;set;}
 	
 	public ImplicitsResolver (construct Vala.CodeContext! context, construct ImplicitsStore! implicits_store) 
@@ -394,11 +394,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		foreach (DataType dt in container_class.get_base_types ()) {
 			if (dt is UnresolvedType) {
-				var ns = (dt as UnresolvedType).namespace_name;
-				if (ns == null) {
+				string ns;
+				if ((dt as UnresolvedType).unresolved_symbol.inner == null) {
 					continue;
 				}
-				Class c = lookup_class (ns, (dt as UnresolvedType).type_name);
+				ns = (dt as UnresolvedType).unresolved_symbol.inner.name;
+				Class c = lookup_class (ns, (dt as UnresolvedType).unresolved_symbol.name);
 				if (c != null) {
 					var otherMethods = lookup_container_add_methods (ns, c);
 					foreach (Vala.Method method in otherMethods) {
@@ -464,8 +465,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		foreach (DataType dt in clazz.get_base_types ()) {
 			if (dt is UnresolvedType)
 			{
-				var name = (dt as UnresolvedType).type_name;
-				var ns = (dt as UnresolvedType).namespace_name;
+				var name = (dt as UnresolvedType).unresolved_symbol.name;
+				string ns;
+				if ((dt as UnresolvedType).unresolved_symbol.inner != null)
+					ns = (dt as UnresolvedType).unresolved_symbol.inner.name;
+				else
+					ns = null;
 				var clazz = lookup_class (ns, name);
 				if (clazz != null && ( null != (result = member_lookup_inherited (clazz, member) as Member)))
 					return result;

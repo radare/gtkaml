@@ -1,3 +1,21 @@
+2008-03-02
+showstoppers for 0.2.0.0
+  - update GtkamlCompiler with latest ValaCompiler changes (create a .patch)
+  - check my version against source version
+  - use user data directories
+  - cast gtkaml:existing expressions to the tag type
+ETA 1 day
+
+
+2008-03-02
+  - finished adding default values to *.implicits
+  - fixed vala-0.1.7 compile errors
+
+2008-03-02
+  - finished adding default values to *.implicits
+  - fixed vala-0.1.7 compile errors
+
+
 2008-02-28
   - renamed gtkaml:reference to gtkaml:existing
   - introduced gtkaml:standalone

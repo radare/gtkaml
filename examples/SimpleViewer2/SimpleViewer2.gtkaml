@@ -78,6 +78,7 @@
 	private void OnMenuHelpAboutActivatedEvent ()
 	{
 		aboutdialog1.transient_for = this;
+		aboutdialog1.ref (); //prevents delete
 		aboutdialog1.run ();
 	}
 	static int main (string[] args)

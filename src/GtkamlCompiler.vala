@@ -43,7 +43,6 @@ class Gtkaml.Compiler : Object {
 	static string output;
 	static bool debug;
 	static bool thread;
-	static int optlevel;
 	static bool disable_assert;
 	static bool disable_checking;
 	static bool non_null;
@@ -53,6 +52,7 @@ class Gtkaml.Compiler : Object {
 	static bool save_temps;
 	[NoArrayLength]
 	static string[] defines;
+	static bool quiet_mode;
 
 	private CodeContext context;
 
@@ -68,7 +68,6 @@ class Gtkaml.Compiler : Object {
 		{ "output", 'o', 0, OptionArg.FILENAME, out output, "Place output in file FILE", "FILE" },
 		{ "debug", 'g', 0, OptionArg.NONE, ref debug, "Produce debug information", null },
 		{ "thread", 0, 0, OptionArg.NONE, ref thread, "Enable multithreading support", null },
-		{ "optimize", 'O', 0, OptionArg.INT, ref optlevel, "Optimization level", "OPTLEVEL" },
 		{ "define", 'D', 0, OptionArg.STRING_ARRAY, out defines, "Define SYMBOL", "SYMBOL..." },
 		{ "disable-assert", 0, 0, OptionArg.NONE, ref disable_assert, "Disable assertions", null },
 		{ "disable-checking", 0, 0, OptionArg.NONE, ref disable_checking, "Disable run-time checks", null },
@@ -77,48 +76,26 @@ class Gtkaml.Compiler : Object {
 		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, out cc_options, "Pass OPTION to the C compiler", "OPTION..." },
 		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
 		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, out implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
+		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
 		{ "", 0, 0, OptionArg.FILENAME_ARRAY, out sources, null, "FILE..." },
 		{ null }
 	};
 	
 	private int quit () {
+		if (Report.get_errors () == 0 && Report.get_warnings () == 0) {
+			return 0;
+		}
 		if (Report.get_errors () == 0) {
-			stdout.printf ("Compilation succeeded - %d warning(s)\n", Report.get_warnings ());
+			if (!quiet_mode) {
+				stdout.printf ("Compilation succeeded - %d warning(s)\n", Report.get_warnings ());
+			}
 			return 0;
 		} else {
-			stdout.printf ("Compilation failed: %d error(s), %d warning(s)\n", Report.get_errors (), Report.get_warnings ());
+			if (!quiet_mode) {
+				stdout.printf ("Compilation failed: %d error(s), %d warning(s)\n", Report.get_errors (), Report.get_warnings ());
+			}
 			return 1;
 		}
-	}
-	
-	private string get_package_path (string! pkg) {
-		string basename = "%s.vapi".printf (pkg);
-
-		if (vapi_directories != null) {
-			foreach (string vapidir in vapi_directories) {
-				var filename = Path.build_filename (vapidir, basename);
-				if (FileUtils.test (filename, FileTest.EXISTS)) {
-					return filename;
-				}
-			}
-		}
-
-		string filename = Path.build_filename (Config.PACKAGE_DATADIR, "vapi", basename);
-		if (FileUtils.test (filename, FileTest.EXISTS)) {
-			return filename;
-		}
-
-		filename = Path.build_filename ("/usr/local/share/vala/vapi", basename);
-		if (FileUtils.test (filename, FileTest.EXISTS)) {
-			return filename;
-		}
-
-		filename = Path.build_filename ("/usr/share/vala/vapi", basename);
-		if (FileUtils.test (filename, FileTest.EXISTS)) {
-			return filename;
-		}
-
-		return null;
 	}
 	
 	private bool add_package (CodeContext! context, string! pkg) {
@@ -127,7 +104,7 @@ class Gtkaml.Compiler : Object {
 			return true;
 		}
 	
-		var package_path = get_package_path (pkg);
+		var package_path = context.get_package_path (pkg, vapi_directories);
 		
 		if (package_path == null) {
 			return false;
@@ -184,7 +161,6 @@ class Gtkaml.Compiler : Object {
 		}
 		context.debug = debug;
 		context.thread = thread;
-		context.optlevel = optlevel;
 		context.save_temps = save_temps;
 
 		if (defines != null) {
@@ -269,6 +245,13 @@ class Gtkaml.Compiler : Object {
 			return quit ();
 		}
 
+		var cfg_builder = new CFGBuilder ();
+		cfg_builder.build_cfg (context);
+
+		if (Report.get_errors () > 0) {
+			return quit ();
+		}
+
 		var memory_manager = new MemoryManager ();
 		memory_manager.analyze (context);
 
@@ -284,7 +267,14 @@ class Gtkaml.Compiler : Object {
 		
 		if (library != null) {
 			var interface_writer = new InterfaceWriter ();
-			interface_writer.write_file (context, "%s.vapi".printf (library));
+			string vapi_filename = "%s.vapi".printf (library);
+
+			// put .vapi file in current directory unless -d has been explicitly specified
+			if (directory != null) {
+				vapi_filename = "%s/%s".printf (context.directory, vapi_filename);
+			}
+
+			interface_writer.write_file (context, vapi_filename);
 			
 			library = null;
 		}
@@ -297,29 +287,43 @@ class Gtkaml.Compiler : Object {
 		return quit ();
 	}
 
+	private static bool ends_with_dir_separator (string s) {
+		return Path.is_dir_separator (s.offset (s.len () - 1).get_char ());
+	}
+
 	/* ported from glibc */
-	private string! realpath (string! name) {
+	private static string! realpath (string! name) {
 		string rpath;
 
-		if (name.get_char () != '/') {
-			// relative path
-			rpath = Environment.get_current_dir ();
-		} else {
-			rpath = "/";
-		}
-
+		// start of path component
 		weak string start;
+		// end of path component
 		weak string end;
 
-		for (start = end = name; start.get_char () != 0; start = end) {
+		if (!Path.is_absolute (name)) {
+			// relative path
+			rpath = Environment.get_current_dir ();
+
+			start = end = name;
+		} else {
+			// set start after root
+			start = end = Path.skip_root (name);
+
+			// extract root
+			rpath = name.substring (0, name.pointer_to_offset (start));
+		}
+
+		long root_len = rpath.pointer_to_offset (Path.skip_root (rpath));
+
+		for (; start.get_char () != 0; start = end) {
 			// skip sequence of multiple path-separators
-			while (start.get_char () == '/') {
+			while (Path.is_dir_separator (start.get_char ())) {
 				start = start.next_char ();
 			}
 
 			// find end of path component
 			long len = 0;
-			for (end = start; end.get_char () != 0 && end.get_char () != '/'; end = end.next_char ()) {
+			for (end = start; end.get_char () != 0 && !Path.is_dir_separator (end.get_char ()); end = end.next_char ()) {
 				len++;
 			}
 
@@ -329,22 +333,35 @@ class Gtkaml.Compiler : Object {
 				// do nothing
 			} else if (len == 2 && start.has_prefix ("..")) {
 				// back up to previous component, ignore if at root already
-				if (rpath.len () > 1) {
+				if (rpath.len () > root_len) {
 					do {
 						rpath = rpath.substring (0, rpath.len () - 1);
-					} while (!rpath.has_suffix ("/"));
+					} while (!ends_with_dir_separator (rpath));
 				}
 			} else {
-				if (!rpath.has_suffix ("/")) {
-					rpath += "/";
+				if (!ends_with_dir_separator (rpath)) {
+					rpath += Path.DIR_SEPARATOR_S;
 				}
 
 				rpath += start.substring (0, len);
 			}
 		}
 
-		if (rpath.len () > 1 && rpath.has_suffix ("/")) {
+		if (rpath.len () > root_len && ends_with_dir_separator (rpath)) {
 			rpath = rpath.substring (0, rpath.len () - 1);
+		}
+
+		if (Path.DIR_SEPARATOR != '/') {
+			// don't use backslashes internally,
+			// to avoid problems in #include directives
+			try {
+				var regex = new Regex (Regex.escape_string (Path.DIR_SEPARATOR_S));
+				string new_rpath = regex.replace_literal (rpath, -1, 0, "/");
+				rpath = new_rpath;
+			} catch (RegexError e) {
+				// should never happen
+				assert_not_reached ();
+			}
 		}
 
 		return rpath;

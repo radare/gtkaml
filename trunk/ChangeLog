@@ -1,9 +1,12 @@
+
+2008-03-03
+cast gtkaml:existing expressions to the tag type
+
 2008-03-02
 showstoppers for 0.2.0.0
   - update GtkamlCompiler with latest ValaCompiler changes (create a .patch)
   - check my version against source version
   - use user data directories
-  - cast gtkaml:existing expressions to the tag type
 ETA 1 day
 
 

@@ -23,5 +23,5 @@ public class Gtkaml.ReferenceClassDefinition : Gtkaml.ClassDefinition
 		this.construct_code = null;
 		this.preconstruct_code = null;
 	}
-	
+
 }

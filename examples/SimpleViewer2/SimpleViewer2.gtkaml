@@ -1,35 +1,27 @@
 <!-- this is a port of http://www.michaelwerle.name/Programming/CSharp/SimpleViewer2.glade -->
 <Window xmlns='Gtk' xmlns:GLib='GLib' xmlns:class="http://gtkaml.org/0.2"
-	class:name="SimpleViewer2" title="SimpleViewer2"	type="{WindowType.TOPLEVEL}"	delete-event="{OnWindow1DeleteEvent}">
-	<VBox homogeneous="false" spacing="0">
-		<!-- <packing>
-		        <property name="expand">False</property>
-		     </packing>
-		     =>
-		     expand="false"
-		-->
-		<MenuBar expand="false" padding="0" fill="false">
-			<!-- use_underline => with-mnemonic -->
+	class:name="SimpleViewer2" title="SimpleViewer2" delete-event="{OnWindow1DeleteEvent}">
+	<VBox>
+		<MenuBar expand="false">
 			<MenuItem label="_File" with-mnemonic="true">
 				<submenu>
 					<Menu>
-						<!-- use_stock => from-stock -->
-						<ImageMenuItem accel-group="null" stock-id="gtk-new" from-stock="true" />
-						<ImageMenuItem accel-group="null" stock-id="gtk-open" from-stock="true" activate="{OnFileOpenEvent}"/>
-						<ImageMenuItem accel-group="null" stock-id="gtk-save" from-stock="true" />
-						<ImageMenuItem accel-group="null" stock-id="gtk-save-as" from-stock="true" />
+						<ImageMenuItem stock-id="gtk-new" />
+						<ImageMenuItem stock-id="gtk-open" activate="{OnFileOpenEvent}"/>
+						<ImageMenuItem stock-id="gtk-save" />
+						<ImageMenuItem stock-id="gtk-save-as" />
 						<SeparatorMenuItem />
-						<ImageMenuItem accel-group="null" stock-id="gtk-quit" from-stock="true" activate="{OnQuitEvent}"/>
+						<ImageMenuItem stock-id="gtk-quit" activate="{OnQuitEvent}"/>
 					</Menu>
 				</submenu>
 			</MenuItem>
 			<MenuItem label="_Edit" with-mnemonic="true">
 				<submenu>
 					<Menu>
-						<ImageMenuItem accel-group="null" stock-id="gtk-cut" from-stock="true" />
-						<ImageMenuItem accel-group="null" stock-id="gtk-copy" from-stock="true" />
-						<ImageMenuItem accel-group="null" stock-id="gtk-paste" from-stock="true" />
-						<ImageMenuItem accel-group="null" stock-id="gtk-delete" from-stock="true" />
+						<ImageMenuItem stock-id="gtk-cut" />
+						<ImageMenuItem stock-id="gtk-copy" />
+						<ImageMenuItem stock-id="gtk-paste" />
+						<ImageMenuItem stock-id="gtk-delete" />
 					</Menu>
 				</submenu>
 			</MenuItem>
@@ -43,13 +35,13 @@
 			<MenuItem label="_Help" with-mnemonic="true">
 				<submenu>
 					<Menu>
-						<ImageMenuItem accel-group="null" stock-id="gtk-about" from-stock="true" activate="{OnMenuHelpAboutActivatedEvent}"/>
+						<ImageMenuItem stock-id="gtk-about" activate="{OnMenuHelpAboutActivatedEvent}"/>
 					</Menu>
 				</submenu>
 			</MenuItem>
 		</MenuBar>
-		<ScrolledWindow can-focus="true" hscrollbar-policy="{PolicyType.AUTOMATIC}" vscrollbar-policy="{PolicyType.AUTOMATIC}"  hadjustment="null" vadjustment="null">
-			<TextView can-focus="true" editable="false" class:private="textview1"/>
+		<ScrolledWindow can-focus="true" hscrollbar-policy="{PolicyType.AUTOMATIC}" vscrollbar-policy="{PolicyType.AUTOMATIC}" >
+			<TextView can-focus="true" editable="false" class:private="textview1" />
 		</ScrolledWindow>
 	</VBox>	
 	<AboutDialog class:standalone="true" class:private="aboutdialog1" delete-event="{aboutdialog1.hide_on_delete}"
@@ -57,7 +49,8 @@
 		window-position="{WindowPosition.CENTER_ON_PARENT}" has-separator="false"
 		program-name="SimpleViewer2" version="1.0" copyright="Copyright (c) 2007 MIchael Werle"
 		comments="Simple .Net demonstration program, displays a text file in a scrolling text box and allows the user to toggle word-wrap on and off"
-		website="http://www.michaelwerle.com/SimpleViewer2/" authors='{new string[] {"Michael Werle (micha@michaelwerle.com), ported to gtkaml by Vlad Grecescu (b100dian@gmail.com)",null}}'>
+		website="http://www.michaelwerle.com/SimpleViewer2/" 
+		authors='{new string[] {"Michael Werle (micha@michaelwerle.com)", "ported to gtkaml by Vlad Grecescu (b100dian@gmail.com)", null}}'>
 		<VBox class:standalone="true" class:existing="(aboutdialog1.vbox as VBox)">
 			<!-- add more stuff here? -->
 		</VBox>	

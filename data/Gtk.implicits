@@ -1,45 +1,79 @@
+## Most entries here are for specifying the add methods
+## Others are here for renaming some parameters 
+## or to specify default values
 [Label]
-## For each 'new' or 'add', we point to the required attribute(s)
-## only if they cannot be inferred from the FormalParameters names
-## or, if you have default values for _some_ of them, specify them _all_
+## rename the parameter to label
 new = label
 new.with_mnemonic = label
+
 [MenuItem]
+## rename the parameter to label
 new.with_label = label
 new.with_mnemonic = label
+
 [Container]
 adds=add_with_properties
+
+[ScrolledWindow]
+## see issue #5
+## adds = add_with_properties;add_with_viewport
+new = hadjustment={null};vadjustment={null}
+
 [Box]
 adds = pack_start;pack_end;pack_start_defaults;pack_end_defaults
+## defaulting as per pack_start/end_defaults
 add.pack_start = widget;expand=true;fill=true;padding=0
 add.pack_end   = widget;expand=true;fill=true;padding=0
+
 [VBox]
+## default values
 new = homogeneous=false;spacing=0
+
 [HBox]
+## default values
 new = homogeneous=false;spacing=0
+
 [Fixed]
 adds = put
+
 [Paned]
 adds = add1;add2;pack1;pack2
+
 [Layout]
 adds = put
 
+[Window]
+## defaulting to toplevel window
+new = type={WindowType.TOPLEVEL}
+
 [MenuShell]
-adds = append;prepend;insert; 
+adds = append;prepend;insert;
+## renaming parameter 
 add.insert = position
+
+[ImageMenuItem]
+## defaulting the accel_group attribute to null
+new.from_stock = stock_id;accel_group={null}
+
 [Notebook]
 adds = append_page;append_page_menu;prepend_page;prepend_page_menu;insert_page;insert_page_menu
+
 [Socket]
 adds = add_id
+
 [Table]
-new = n_rows;n_columns;homogeneous
 adds = attach;attach_defaults; 
+## renaming parameters
+new = n_rows;n_columns;homogeneous
+
 [Toolbar]
 adds = insert
-#todo: support <void> for adding space no-childers?
+
 [TreeView]
 adds = append_column;remove_column;insert_column
+
 [TreeViewColumn]
 adds = pack_start;pack_end;add_attribute;
+
 [Dialog]
 adds = add_action_widget

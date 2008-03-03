@@ -373,6 +373,16 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	}
 	*/
 	
+	/*
+	public static bool method_equal (pointer pointer1, pointer pointer2)
+	{
+		Vala.Method m1 = pointer1 as Vala.Method;
+		Vala.Method m2 = pointer2 as Vala.Method;
+		//stderr.printf ("Comparing %s with %s returned %d", m1.name, m2.name, (m1.name == m2.name && m1.get_parameters ().size == m2.get_parameters ().size));
+		return (m1.name == m2.name && m1.get_parameters ().size == m2.get_parameters ().size); 
+	}
+	// */
+	
 	public Gee.List<Vala.Method> lookup_container_add_methods (string! ns, Class! container_class)
 	{
 		Gee.List<Vala.Method> methods = new Gee.ArrayList<Vala.Method> ();
@@ -387,6 +397,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				foreach (Vala.Method method in container_class.get_methods ())
 					if (method.name == add_method) {
 						methods.add (method);
+						//stderr.printf ("Found direct add method '%s'(%x), we now have %d\n", method.name, method, methods.size);
 						break;
 					}
 			}
@@ -404,6 +415,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 					var otherMethods = lookup_container_add_methods (ns, c);
 					foreach (Vala.Method method in otherMethods) {
 						methods.add (method);
+					  //stderr.printf ("Found inherited add method '%s.%s.%s'(%x), we now have %d\n", ns, c.name, method.name, method, methods.size);
 					}
 					break;
 				}

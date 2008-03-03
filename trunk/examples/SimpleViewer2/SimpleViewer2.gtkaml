@@ -142,6 +142,7 @@
 			viewer.loadFile (args[1]);
 		viewer.show_all ();
 		Gtk.main ();
+		return 0;
 	}
 ]]>
 </Window>

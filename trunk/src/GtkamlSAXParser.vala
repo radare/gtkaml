@@ -38,8 +38,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	private Gee.Map<string,string> prefixes_namespaces {get;set;}
 
 	private Gtkaml.RootClassDefinition root_class_definition {get;set;}	
-	public string gtkaml_prefix="gtkaml";
-	
+	public string gtkaml_prefix="gtkaml";	
 	
 	public SAXParser( Vala.CodeContext! context, Vala.SourceFile! source_file) {
 		this.context = context;
@@ -491,6 +490,10 @@ public class Gtkaml.SAXParser : GLib.Object {
 			if (ns.URI != null && ns.URI.has_prefix ("http://gtkaml.org/")) {
 				if (ns.prefix != null) {
 					gtkaml_prefix = ns.prefix;
+					string version = ns.URI.substring ("http://gtkaml.org/".len (), ns.URI.len () - "http://gtkaml.org/".len ());
+					if (version > Config.PACKAGE_VERSION) {
+						Report.warning (create_source_reference (), "Source file version (%s) newer than gtkaml compiler version (%s)".printf (version, Config.PACKAGE_VERSION));
+					}
 				} else {
 					Report.error (create_source_reference (), "You cannot use the gtkaml namespace as default namespace");
 				}

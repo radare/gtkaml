@@ -1,31 +1,31 @@
 /* GtkamlCompiler.vala
  * 
- * valacompiler.vala
- * Copyright (C) 2007 Jürg Billeter
+ * Copyright (C) 2006-2008  Jürg Billeter
+ * Copyright (C) 1996-2002, 2004, 2005, 2006 Free Software Foundation, Inc.
  *
- * This program is free software; you can redistribute it and/or
+ * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
+
+ * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+
  * You should have received a copy of the GNU Lesser General Public
- * License along with main.c; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
  *
  * Author:
- * 	      Jürg Billeter <j@bitron.ch>
- *        Vlad Grecescu (b100dian@gmail.com)
+ * 	Jürg Billeter <j@bitron.ch>
+ * 	Vlad Grecescu (b100dian@gmail.com)
  */
+
 using GLib;
 using Vala;
 
-class Gtkaml.Compiler : Object 
-{
+class Gtkaml.Compiler : Object {
 	static string basedir;
 	static string directory;
 	static bool version;
@@ -36,7 +36,6 @@ class Gtkaml.Compiler : Object
 	static string library;
 	[NoArrayLength ()]
 	static string[] packages;
-	//gtkaml specific
 	static string[] implicits_directories; 
 
 	static bool ccode_only;
@@ -77,7 +76,6 @@ class Gtkaml.Compiler : Object
 		{ "cc", 0, 0, OptionArg.STRING, out cc_command, "Use COMMAND as C compiler command", "COMMAND" },
 		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, out cc_options, "Pass OPTION to the C compiler", "OPTION..." },
 		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
-		//gtkaml specific
 		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, out implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
 		{ "", 0, 0, OptionArg.FILENAME_ARRAY, out sources, null, "FILE..." },
 		{ null }
@@ -190,9 +188,9 @@ class Gtkaml.Compiler : Object
 		context.save_temps = save_temps;
 
 		if (defines != null) {
-		   foreach (string define in defines) {
+			foreach (string define in defines) {
 				context.add_define (define);
-		   }
+			}
 		}
 
 		context.codegen = new CCodeGenerator ();
@@ -220,7 +218,6 @@ class Gtkaml.Compiler : Object
 				var rpath = realpath (source);
 				if (source.has_suffix (".vala")) {
 					context.add_source_file (new SourceFile (context, rpath));
-				//gtkaml specific
 				} else if (source.has_suffix (".gtkaml")) {
 					context.add_source_file (new SourceFile (context, rpath));
 				} else if (source.has_suffix (".vapi")) {
@@ -240,7 +237,6 @@ class Gtkaml.Compiler : Object
 			return quit ();
 		}
 		
-		//gtkaml specific
 		var parser = new Gtkaml.Parser ();
 		parser.parse (context, implicits_directories);
 		
@@ -272,14 +268,14 @@ class Gtkaml.Compiler : Object
 		if (Report.get_errors () > 0) {
 			return quit ();
 		}
-		
+
 		var memory_manager = new MemoryManager ();
 		memory_manager.analyze (context);
-		
+
 		if (Report.get_errors () > 0) {
 			return quit ();
 		}
-		
+
 		context.codegen.emit (context);
 		
 		if (Report.get_errors () > 0) {
@@ -367,7 +363,7 @@ class Gtkaml.Compiler : Object
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s (based on Vala 0.1.6)\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s (based on Vala 0.1.7)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		
@@ -379,5 +375,4 @@ class Gtkaml.Compiler : Object
 		var compiler = new Compiler ();
 		return compiler.run ();
 	}
-
 }

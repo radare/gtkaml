@@ -1,0 +1,70 @@
+--- valacompiler.vala	Fri Jan 18 01:20:54 2008
++++ GtkamlCompiler.vala	Mon Mar  3 15:20:47 2008
+@@ -1,5 +1,5 @@
+-/* valacompiler.vala
+- *
++/* GtkamlCompiler.vala
++ * 
+  * Copyright (C) 2006-2008  Jürg Billeter
+  * Copyright (C) 1996-2002, 2004, 2005, 2006 Free Software Foundation, Inc.
+  *
+@@ -19,11 +19,13 @@
+  *
+  * Author:
+  * 	Jürg Billeter <j@bitron.ch>
++ * 	Vlad Grecescu (b100dian@gmail.com)
+  */
+ 
+ using GLib;
++using Vala;
+ 
+-class Vala.Compiler : Object {
++class Gtkaml.Compiler : Object {
+ 	static string basedir;
+ 	static string directory;
+ 	static bool version;
+@@ -34,6 +36,7 @@
+ 	static string library;
+ 	[NoArrayLength ()]
+ 	static string[] packages;
++	static string[] implicits_directories; 
+ 
+ 	static bool ccode_only;
+ 	static bool compile_only;
+@@ -73,6 +76,7 @@
+ 		{ "cc", 0, 0, OptionArg.STRING, out cc_command, "Use COMMAND as C compiler command", "COMMAND" },
+ 		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, out cc_options, "Pass OPTION to the C compiler", "OPTION..." },
+ 		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
++		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, out implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
+ 		{ "", 0, 0, OptionArg.FILENAME_ARRAY, out sources, null, "FILE..." },
+ 		{ null }
+ 	};
+@@ -214,6 +218,8 @@
+ 				var rpath = realpath (source);
+ 				if (source.has_suffix (".vala")) {
+ 					context.add_source_file (new SourceFile (context, rpath));
++				} else if (source.has_suffix (".gtkaml")) {
++					context.add_source_file (new SourceFile (context, rpath));
+ 				} else if (source.has_suffix (".vapi")) {
+ 					context.add_source_file (new SourceFile (context, rpath, true));
+ 				} else if (source.has_suffix (".c")) {
+@@ -231,8 +237,8 @@
+ 			return quit ();
+ 		}
+ 		
+-		var parser = new Parser ();
+-		parser.parse (context);
++		var parser = new Gtkaml.Parser ();
++		parser.parse (context, implicits_directories);
+ 		
+ 		if (Report.get_errors () > 0) {
+ 			return quit ();
+@@ -357,7 +363,7 @@
+ 		}
+ 		
+ 		if (version) {
+-			stdout.printf ("Vala %s\n", Config.PACKAGE_VERSION);
++			stdout.printf ("Gtkaml %s (based on Vala 0.1.7)\n", Config.PACKAGE_VERSION);
+ 			return 0;
+ 		}
+ 		

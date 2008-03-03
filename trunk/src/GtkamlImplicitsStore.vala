@@ -79,8 +79,10 @@ public class Gtkaml.ImplicitsStore : Object
 		foreach (KeyFileWrapper kfw in kf_ns) {
 			if (kfw.has_key (class_name, "adds")) {
 				var kf_adds = kfw.get_string_list (class_name, "adds");
-				foreach (string add in kf_adds)
+				foreach (string add in kf_adds) {
+					//stderr.printf ("store contains %s\n", add);
 					adds.add (add);
+				}
 			}
 		}
 		return adds;

@@ -45,7 +45,7 @@ public class Gtkaml.Parser : Vala.Parser {
 		foreach (string datadir in Environment.get_system_data_dirs ()) {
 			var filename = Path.build_filename (datadir, "gtkaml", "implicits");
 			if (FileUtils.test (filename, FileTest.EXISTS)) {  
-				stderr.printf ("adding dir=%s\n", filename);
+				//stderr.printf ("adding dir=%s\n", filename);
 				implicits_store.add_implicits_dir (filename);
 			}
 		}

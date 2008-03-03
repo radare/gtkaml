@@ -429,6 +429,19 @@ public class Gtkaml.SAXParser : GLib.Object {
 				stop_parsing ();
 			}
 			class_definition = new ReferenceClassDefinition (create_source_reference (), reference, prefix_to_namespace (prefix), clazz, parent_container);
+			/* now post-process the reference FIXME put this in code generator or something*/
+			string reference_stripped = reference; 
+			reference_stripped.strip ();
+			if (reference_stripped.has_prefix ("{")) {
+				if (reference_stripped.has_suffix ("}"))
+				{
+					class_definition.identifier = reference_stripped.substring (1, reference_stripped.len () -2 );
+				} else {
+					Report.error (create_source_reference (), "'existing' attribute not properly ended");
+				}
+			} else {
+				class_definition.identifier = "(%s as %s)".printf (reference, class_definition.base_full_name);
+			}
 		}
 		
 		if (container_definition != null)

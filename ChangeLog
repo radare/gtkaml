@@ -1,14 +1,9 @@
 
 2008-03-03
-cast gtkaml:existing expressions to the tag type
-
-2008-03-02
-showstoppers for 0.2.0.0
-  - update GtkamlCompiler with latest ValaCompiler changes (create a .patch)
-  - check my version against source version
+  - cast gtkaml:existing expressions to the tag type
   - use user data directories
-ETA 1 day
-
+  - updated GtkamlCompiler with latest ValaCompiler changes (create a .patch)
+  - check my version against source version and issue a warning
 
 2008-03-02
   - finished adding default values to *.implicits

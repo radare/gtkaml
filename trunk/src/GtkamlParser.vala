@@ -23,7 +23,7 @@ using GLib;
 using Vala;
 
 
-public class Gtkaml.Parser : Gtkaml.Dummy {
+public class Gtkaml.Parser : Vala.Parser {
 
 
 	private CodeContext context;

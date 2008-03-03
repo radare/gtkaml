@@ -1,5 +1,6 @@
 
 2008-03-03
+  - 0.2.0.0 release
   - cast gtkaml:existing expressions to the tag type
   - use user data directories
   - updated GtkamlCompiler with latest ValaCompiler changes (create a .patch)

@@ -36,9 +36,9 @@
  		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, out cc_options, "Pass OPTION to the C compiler", "OPTION..." },
  		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
 +		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, out implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
+		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
  		{ "", 0, 0, OptionArg.FILENAME_ARRAY, out sources, null, "FILE..." },
  		{ null }
- 	};
 @@ -214,6 +218,8 @@
  				var rpath = realpath (source);
  				if (source.has_suffix (".vala")) {

@@ -19,11 +19,16 @@
  * Author:
  *        Vlad Grecescu (b100dian@gmail.com)
  */
+
 using GLib;
 using Vala;
 
+/**
+ * An attribute that is defined using a sub-tag
+ */
 public class Gtkaml.ComplexAttribute : Gtkaml.Attribute {
 	
+	/** the definition of the complex value/tag */
 	public ClassDefinition complex_type {get;set;}
 	
 	public ComplexAttribute (string! name, ClassDefinition! complex_type) {

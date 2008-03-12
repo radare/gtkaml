@@ -19,6 +19,7 @@
  * Author:
  *        Vlad Grecescu (b100dian@gmail.com)
  */
+
 using GLib;
 using Gee;
 using Vala;
@@ -28,6 +29,9 @@ public class Gtkaml.ImplicitsParameter : Object {
 	public string default_value;
 }
 
+/**
+ * GObject-ification of KeyFile
+ */
 private class Gtkaml.KeyFileWrapper : Object {
 	public KeyFile key_file;
 	construct 
@@ -53,7 +57,9 @@ private class Gtkaml.KeyFileWrapper : Object {
 	}		
 }
 
-/** collects $(ns).implicits key files and provides key information from all of them*/
+/** 
+ * collects $(ns).implicits key files and provides key information from all of them
+ */
 public class Gtkaml.ImplicitsStore : Object 
 {
 	private Gee.List<string> implicits_dirs = new ArrayList<string> (str_equal);

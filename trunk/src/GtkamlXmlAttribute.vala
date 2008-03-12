@@ -21,6 +21,9 @@
  */
 using GLib;
 
+/**
+ * an attribute as presented by libxml2
+ */
 public class Gtkaml.XmlAttribute : GLib.Object {
 	public string localname;
 	public string prefix;

@@ -23,7 +23,7 @@
 using GLib;
 using Vala;
 
-/** represents a tag with gtkaml:reference */
+/** represents a tag with gtkaml:existing */
 public class Gtkaml.ReferenceClassDefinition : Gtkaml.ClassDefinition 
 {
 	private int dummy {get;set;}

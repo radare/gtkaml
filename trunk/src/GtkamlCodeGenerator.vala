@@ -19,12 +19,15 @@
  * Author:
  *        Vlad Grecescu (b100dian@gmail.com)
  */
+
 using GLib;
 using Vala;
 using Gee;
 
+/**
+ * Generates vala source from a given ClassDefinition root tag
+ */
 public class Gtkaml.CodeGenerator : GLib.Object {
-	/* this is the output */
 	private string using_directives = new string();
 	private string class_start = new string();
 	private string members_declarations = new string();
@@ -41,6 +44,9 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	
 	public CodeGenerator (construct CodeContext context) {}
 	
+	/**
+	 * returns a string that is the Vala source code
+	 */
 	public string yield() {
 		return using_directives + "\n" +
 		       class_start + "\n" +
@@ -55,6 +61,9 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		       class_end;
 	}
 	
+	/** 
+	 * processes the root class definition and its children
+	 */
 	public void generate (ClassDefinition! class_definition)
 	{
 		if (class_definition is RootClassDefinition) {
@@ -84,27 +93,27 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}
 
-	public void generate_children (ClassDefinition! class_definition)
+	protected void generate_children (ClassDefinition! class_definition)
 	{
 			foreach (ClassDefinition child in class_definition.children)
 				generate (child);
 	}
 
-	public void write_preconstruct (ClassDefinition! class_definition)
+	protected void write_preconstruct (ClassDefinition! class_definition)
 	{
 		if (class_definition.preconstruct_code != null) {
 			write_construct_call (class_definition.identifier, class_definition.base_full_name, "preconstruct", class_definition.preconstruct_code);
 		}
 	}
 	
-	public void write_construct (ClassDefinition! class_definition)
+	protected void write_construct (ClassDefinition! class_definition)
 	{
 		if (class_definition.construct_code != null) {
 			write_construct_call (class_definition.identifier, class_definition.base_full_name, "construct", class_definition.construct_code);
 		}
 	}
 
-	private void write_construct_call (string identifier, string identifier_type, string construct_type, string construct_code )
+	protected void write_construct_call (string identifier, string identifier_type, string construct_type, string construct_code )
 	{
 		string construct_signal = identifier + "_" + construct_type;
 		string real_construct_code = construct_code;
@@ -130,7 +139,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	}
 		
 
-	public void write_complex_attributes (ClassDefinition! class_definition)
+	protected void write_complex_attributes (ClassDefinition! class_definition)
 	{	
 		foreach (Attribute attr in class_definition.attrs) {
 			if (attr is ComplexAttribute)
@@ -151,7 +160,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			}						
 	}
 	
-	private void write_root_class_definition (RootClassDefinition root_class_definition)
+	protected void write_root_class_definition (RootClassDefinition root_class_definition)
 	{
 		string ns = root_class_definition.target_namespace;
 		string name = root_class_definition.target_name;
@@ -175,7 +184,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}
 
-	public void write_declaration (ClassDefinition! class_definition)
+	protected void write_declaration (ClassDefinition! class_definition)
 	{
 		switch (class_definition.definition_scope) {
 			case DefinitionScope.PUBLIC:
@@ -190,7 +199,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}	
 		
-	public void write_root_constructor_parameters (RootClassDefinition! class_definition)
+	protected void write_root_constructor_parameters (RootClassDefinition! class_definition)
 	{
 		foreach (Attribute attr in class_definition.construct_method.parameter_attributes)
 		{
@@ -198,7 +207,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}
 	
-	public void write_constructor (ClassDefinition! class_definition)
+	protected void write_constructor (ClassDefinition! class_definition)
 	{
 		string construct_name = class_definition.construct_method.name;
 		construct_name = construct_name.substring (".new".len (), construct_name.len () - ".new".len ());
@@ -213,7 +222,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		constructors += ");\n";		
 	}
 	
-	public void write_add (ClassDefinition! child_definition) {
+	protected void write_add (ClassDefinition! child_definition) {
 		if (child_definition.parent_container == null)
 			return;
 		construct_body += "\t\t%s.%s (".printf (child_definition.parent_container.identifier, child_definition.add_method.name);
@@ -228,7 +237,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			
 	}
 	
-	public void write_setters (ClassDefinition! class_definition)
+	protected void write_setters (ClassDefinition! class_definition)
 	{
 		foreach (Attribute attr in class_definition.attrs) 
 		{
@@ -245,19 +254,19 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}
 	
-	private string prefix_to_namespace (string prefix)
+	protected string prefix_to_namespace (string prefix)
 	{
 		return root_class_definition.prefixes_namespaces.get ((prefix==null)?"":prefix);		
 	}
 
 	
-	public void write_using (string ns)
+	protected void write_using (string ns)
 	{
 		using_directives+="using %s;\n".printf(ns);
 	}
 	
 	
-	public string generate_literal (Attribute attr) {
+	protected string generate_literal (Attribute attr) {
 		string literal;
 		DataType type;
 		
@@ -306,12 +315,12 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}
 
-	public void write_setter (ClassDefinition! class_definition, Attribute attr) 
+	protected void write_setter (ClassDefinition! class_definition, Attribute attr) 
 	{
 		construct_body += "\t\t%s.%s = %s;\n".printf (class_definition.identifier, attr.name, generate_literal (attr));
 	}
 	
-	public void write_signal_setter (ClassDefinition! class_definition, Attribute signal_attr)
+	protected void write_signal_setter (ClassDefinition! class_definition, Attribute signal_attr)
 	{
 		if (! (signal_attr is SimpleAttribute) ) {
 			Report.error (class_definition.source_reference, "Cannot set the signal '%s' to this value.".printf (signal_attr.name));
@@ -354,7 +363,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		
 	}
 	
-	public void add_code (string value)
+	protected void add_code (string value)
 	{
 		code += value + "\n";
 	}

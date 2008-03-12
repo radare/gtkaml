@@ -7,7 +7,7 @@ pkgdesc="Gtk+Vala application markup language"
 arch=('i686' 'x86_64')
 url="http://gtkaml.googlecode.com"
 license=('LGPL')
-depends=('vala>=0.1.6' 'gtk2' 'libxml2')
+depends=('vala>=0.1.7' 'gtk2' 'libxml2')
 makedepends=('pkgconfig')
 source=(gtkaml-$pkgver.tar.bz2)
 

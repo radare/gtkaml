@@ -1,6 +1,6 @@
 gtkaml is an XML parser that extends the Vala.Parser (literally) 
 and transforms all your tags into a valid Gtk+ UI described in the Vala language.
 
-It requires glib-2.0, vala-1.0 >= 0.1.6, libxml-2.0, and gtk+-2.0 >= 2.12 
+It requires glib-2.0, vala-1.0, libxml-2.0, and gtk+-2.0
 
-See http://code.google.com/p/gtkaml for details
+See http://code.google.com/p/gtkaml for the latest version details

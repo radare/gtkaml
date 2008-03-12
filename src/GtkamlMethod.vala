@@ -19,9 +19,13 @@
  * Author:
  *        Vlad Grecescu (b100dian@gmail.com)
  */
+
 using GLib;
 using Vala;
 
+/**
+ * a constructor or an add method
+ */
 public abstract class Gtkaml.Method : GLib.Object {
 	public string name {get;set;}
 	public Gee.List<Gtkaml.Attribute> parameter_attributes{get;set;}
@@ -31,10 +35,12 @@ public abstract class Gtkaml.Method : GLib.Object {
 	}
 }
 
+/** useless specialization */
 public class Gtkaml.AddMethod : Gtkaml.Method 
 {
 }
 
+/** useless specialization */
 public class Gtkaml.ConstructMethod : Gtkaml.Method 
 {
 }

@@ -19,9 +19,13 @@
  * Author:
  *        Vlad Grecescu (b100dian@gmail.com)
  */
+
 using GLib;
 using Gee;
 
+/** 
+ * Simple, specialized, stack implementation using a Gee.List
+ */
 public class Gtkaml.StateStack : GLib.Object
 {
 	private Gee.ArrayList<State> array_list {get;set;}

@@ -19,11 +19,13 @@
  * Author:
  *        Vlad Grecescu (b100dian@gmail.com)
  */
+
 using GLib;
 using Vala;
 
 /** 
- * determines which constructors to use or which container add functions to use
+ * determines which constructors to use or which container add functions to use;
+ * moves attributes from their ClassDefinition to the add or construct methods
  */
 public class Gtkaml.ImplicitsResolver : GLib.Object 
 {
@@ -83,7 +85,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	/**
 	 * Determines which add method of parent container would be useful
 	 */	
-	public void determine_add_method (ClassDefinition! child_definition)
+	private void determine_add_method (ClassDefinition! child_definition)
 	{
 		Gee.List<Vala.Method> adds = lookup_container_add_methods( child_definition.parent_container.base_ns, child_definition.parent_container.base_type );
 
@@ -162,7 +164,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		child_definition.add_method =  new_method;
 	}
 
-	public void determine_construct_method (ClassDefinition! class_definition)
+	private void determine_construct_method (ClassDefinition! class_definition)
 	{
 		Gee.List<Vala.Method> constructors = lookup_constructors (class_definition.base_type);
 		Vala.Method determined_constructor = null;
@@ -241,7 +243,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	 * @first_parameter is used to discern between add methods (first_parameter=child widget) and creation methods (first_parameter=null)
 	 * @wording contains a display name for the type of method
 	 */
-	public Vala.Method implicit_method_choice (ClassDefinition !class_definition, Gee.List<Vala.Method>! methods, string! wording, ComplexAttribute first_parameter=null )
+	private Vala.Method implicit_method_choice (ClassDefinition !class_definition, Gee.List<Vala.Method>! methods, string! wording, ComplexAttribute first_parameter=null )
 	{
 			/** the minimum number of parameters */ 
 			int min_params = 999; /* use MAX_INT? */
@@ -360,28 +362,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			//stderr.printf ("selected '%s'\n", max_matches_method.name);			
 			return max_matches_method;
 	}	
-
-	/*
-	private bool has_key (string! group_name, string! key)
-	{
-		return key_file.has_key (group_name, key);
-	}
-	
-	private string[] get_string_list (string! group_name, string! key)
-	{
-		return key_file.get_string_list (group_name, key);
-	}
-	*/
-	
-	/*
-	public static bool method_equal (pointer pointer1, pointer pointer2)
-	{
-		Vala.Method m1 = pointer1 as Vala.Method;
-		Vala.Method m2 = pointer2 as Vala.Method;
-		//stderr.printf ("Comparing %s with %s returned %d", m1.name, m2.name, (m1.name == m2.name && m1.get_parameters ().size == m2.get_parameters ().size));
-		return (m1.name == m2.name && m1.get_parameters ().size == m2.get_parameters ().size); 
-	}
-	// */
 	
 	public Gee.List<Vala.Method> lookup_container_add_methods (string! ns, Class! container_class)
 	{
@@ -425,7 +405,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		return methods; 
 	}
 
-	public Gee.List<ImplicitsParameter> determine_parameter_names_and_default_values(ClassDefinition! class_definition, Vala.Method! method)
+	private Gee.List<ImplicitsParameter> determine_parameter_names_and_default_values(ClassDefinition! class_definition, Vala.Method! method)
 	{
 		var ns = method.parent_symbol.parent_symbol.get_full_name ();
 		var clazz = method.parent_symbol.name;
@@ -458,7 +438,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		return result;
 	}
 	
-	public void determine_attribute_types (ClassDefinition! class_definition)
+	private void determine_attribute_types (ClassDefinition! class_definition)
 	{
 		foreach (Attribute attr in class_definition.attrs)
 		{
@@ -469,7 +449,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		}
 	}
 	
-	public Member member_lookup_inherited (Class! clazz, string! member) {
+	private Member member_lookup_inherited (Class! clazz, string! member) {
 		Member result = clazz.scope.lookup (member) as Member;
 		if (result != null)
 			return result;
@@ -505,7 +485,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	}
 
 
-	public Gee.List<Vala.Method> lookup_constructors (Class! clazz) {
+	private Gee.List<Vala.Method> lookup_constructors (Class! clazz) {
 		var constructors = new Gee.ArrayList<Vala.Method> ();
 		foreach (Vala.Method m in clazz.get_methods ()) {
 			//todo: if m is ConstructMethod ?

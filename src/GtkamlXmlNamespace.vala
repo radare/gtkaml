@@ -21,6 +21,9 @@
  */
 using GLib;
 	
+/**
+ * an xml namespace, often referred to as 'prefix'
+ */
 public class XmlNamespace : GLib.Object {
 	public string prefix;
 	public string URI;

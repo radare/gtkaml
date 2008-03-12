@@ -19,6 +19,7 @@
  * Author:
  *        Vlad Grecescu (b100dian@gmail.com)
  */
+
 #include "GtkamlSAXParser.h"
 #include <libxml/parser.h>
 #include <glib.h>

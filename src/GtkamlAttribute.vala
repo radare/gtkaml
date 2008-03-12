@@ -23,6 +23,9 @@
 using GLib;
 using Vala;
 
+/**
+ * A generic xml attribute with a name and a reflected Vala type
+ */
 public abstract class Gtkaml.Attribute : GLib.Object {
 	public string name {get;set;}
 	public Symbol target_type {get;set;}

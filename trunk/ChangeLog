@@ -1,3 +1,7 @@
+2008-03-20
+  - bumped version to 0.2.0.1
+  - removing generated content (if --save-temps not specified)
+  - removing unwanted debug output
 
 2008-03-03
   - 0.2.0.0 release

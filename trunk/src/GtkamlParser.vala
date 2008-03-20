@@ -48,7 +48,6 @@ public class Gtkaml.Parser : Vala.Parser {
 		foreach (string datadir in Environment.get_system_data_dirs ()) {
 			var filename = Path.build_filename (datadir, "gtkaml", "implicits");
 			if (FileUtils.test (filename, FileTest.EXISTS)) {  
-				//stderr.printf ("adding dir=%s\n", filename);
 				implicits_store.add_implicits_dir (filename);
 			}
 		}
@@ -91,6 +90,9 @@ public class Gtkaml.Parser : Vala.Parser {
 					FileUtils.set_contents (vala_filename, vala_contents);
 					gtkaml_source_file.filename = vala_filename;
 					base.visit_source_file (gtkaml_source_file);
+					if (Report.get_errors () == 0 && !context.save_temps) {
+						FileUtils.unlink (vala_filename);
+					}
 				} 
 			} catch (FileError e) {
 				Report.error (null, e.message);

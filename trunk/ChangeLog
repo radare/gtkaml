@@ -2,6 +2,7 @@
   - bumped version to 0.2.0.1
   - removing generated content (if --save-temps not specified)
   - removing unwanted debug output
+  - fixed issue #8
 
 2008-03-03
   - 0.2.0.0 release

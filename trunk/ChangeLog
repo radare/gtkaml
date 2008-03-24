@@ -1,4 +1,5 @@
 2008-03-24
+  - 0.2.0.1 release
   - now gtkamlc attempts to match the line numbers from your vala code 
     when generating the whole vala output
 

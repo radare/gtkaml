@@ -1,7 +1,7 @@
 # Archlinux build script
 # Maintainer: Vlad Grecescu <b100dian at gmail dot com>
 pkgname=gtkaml
-pkgver=0.2.0.0
+pkgver=0.2.0.1
 pkgrel=1
 pkgdesc="Gtk+Vala application markup language"
 arch=('i686' 'x86_64')

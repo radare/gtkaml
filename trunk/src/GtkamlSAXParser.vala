@@ -211,6 +211,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 			State previous_state = states.peek (1);
 			if (previous_state.state_id == StateId.SAX_PARSER_INITIAL_STATE) {
 				RootClassDefinition root_class = state.class_definition as RootClassDefinition;
+				if (root_class.original_first_code_line < 0) {
+					root_class.original_first_code_line = line_number ();
+				}
 				root_class.code.add (cdata.ndup (len));
 			} else {
 				parse_attribute_content_as_text (state, cdata.ndup (len));

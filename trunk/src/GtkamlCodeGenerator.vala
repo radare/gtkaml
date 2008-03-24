@@ -48,10 +48,15 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	 * returns a string that is the Vala source code
 	 */
 	public string yield() {
-		return using_directives + "\n" +
+		string yielded = using_directives + "\n" +
 		       class_start + "\n" +
-		       members_declarations + "\n" +
-		       code + "\n" +
+		       members_declarations + "\n";
+
+		for (int i = line_count(yielded); i < root_class_definition.original_first_code_line; i++) {
+			yielded += "\n";
+		} 
+
+		yielded += code + "\n" +
 		       construct_signals + "\n" +
 		       "\tconstruct {\n" + 
 		           construct_body_locals + "\n" + 
@@ -59,6 +64,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		           construct_body + "\n" + 
 		       "\t}\n" + 
 		       class_end;
+		return yielded;
 	}
 	
 	/** 
@@ -91,6 +97,18 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			write_construct (class_definition);
 			write_add (class_definition);
 		}
+	}
+
+	private int line_count (string s) {
+		int count = 0;
+		weak string current = s;
+		while (current.get_char () != 0) {
+			if (current.get_char () == '\n') { 
+				count ++;
+			}
+			current = current.next_char ();
+		}
+		return count;
 	}
 
 	protected void generate_children (ClassDefinition! class_definition)

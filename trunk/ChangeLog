@@ -1,3 +1,7 @@
+2008-03-24
+  - now gtkamlc attempts to match the line numbers from your vala code 
+    when generating the whole vala output
+
 2008-03-20
   - bumped version to 0.2.0.1
   - removing generated content (if --save-temps not specified)

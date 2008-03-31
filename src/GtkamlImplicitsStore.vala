@@ -24,6 +24,7 @@ using GLib;
 using Gee;
 using Vala;
 
+/** a method parameter as it came from an .implicits file, with its default value */
 public class Gtkaml.ImplicitsParameter : Object {
 	public string name;
 	public string default_value;
@@ -93,8 +94,8 @@ public class Gtkaml.ImplicitsStore : Object
 					}
 				}
 			}
-			loaded_ns.set (ns, key_file_list);
 			//even an empty list does it: so that we don't scan the directories again
+			loaded_ns.set (ns, key_file_list);
 			return key_file_list;
 		}
 	}

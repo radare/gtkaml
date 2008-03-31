@@ -23,6 +23,24 @@
 using GLib;
 using Vala;
 
+private class Gtkaml.MatchInformation:Object {
+	/** the minimum number of parameters */ 
+	public int min_params = 999; /* use MAX_INT? */
+	/** the least you would need to call that minimal method */
+	public Gee.List<ImplicitsParameter> min_param_names = null;
+	/** the number of maximum matched parameters */
+	public int max_matches = -1;
+	/** the method most matched */
+	public Vala.Method max_matches_method = null;
+	/** the number of matched defaulted parameters */
+	public int max_matches_defaulted = 0;
+	/** the default parameters for the max matches method */
+	public Gee.List<ImplicitsParameter> max_matches_method_defaulted_parameters = null;
+	/** if there are more methods that match for the same parameters, this is > 1 */
+	public int count_with_max_match = 0;
+	
+}
+
 /** 
  * determines which constructors to use or which container add functions to use;
  * moves attributes from their ClassDefinition to the add or construct methods
@@ -35,7 +53,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	
 	public ImplicitsResolver (construct Vala.CodeContext! context, construct ImplicitsStore! implicits_store) 
 	{
-		
 	}
 	
 	public void resolve (ClassDefinition !class_definition)
@@ -111,7 +128,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_add == null) {
-			determined_add = implicit_method_choice (child_definition.parent_container, adds, "container add method", first_parameter);
+			determined_add = implicit_method_choice (new MatchInformation (), child_definition.parent_container, adds, "container add method", first_parameter);
 			if (determined_add == null) {
 				return;
 			}
@@ -185,7 +202,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_constructor == null) {
-			determined_constructor = implicit_method_choice (class_definition, constructors, "constructor");
+			determined_constructor = implicit_method_choice (new MatchInformation (), class_definition, constructors, "constructor");
 			if (determined_constructor == null) {
 				return;
 			}
@@ -243,22 +260,8 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	 * @first_parameter is used to discern between add methods (first_parameter=child widget) and creation methods (first_parameter=null)
 	 * @wording contains a display name for the type of method
 	 */
-	private Vala.Method implicit_method_choice (ClassDefinition !class_definition, Gee.List<Vala.Method>! methods, string! wording, ComplexAttribute first_parameter=null )
+	private Vala.Method implicit_method_choice (MatchInformation match_information, ClassDefinition !class_definition, Gee.List<Vala.Method>! methods, string! wording, ComplexAttribute first_parameter=null )
 	{
-			/** the minimum number of parameters */ 
-			int min_params = 999; /* use MAX_INT? */
-			/** the least you would need to call that minimal method */
-			Gee.List<ImplicitsParameter> min_param_names = null;
-			/** the number of maximum matched parameters */
-			int max_matches = -1;
-			/** the method most matched */
-			Vala.Method max_matches_method;
-			/** the number of matched defaulted parameters */
-			int max_matches_defaulted = 0;
-			/** the default parameters for the max matches method */
-			Gee.List<ImplicitsParameter> max_matches_method_defaulted_parameters;
-			/** if there are more methods that match for the same parameters, this is > 1 */
-			int count_with_max_match = 0;
 			ClassDefinition parameter_class = class_definition;
 			Gee.List<ImplicitsParameter> defaulted_parameters;
 
@@ -300,23 +303,23 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				
 				//full match?
 				if (current_matches + current_matches_defaulted == parameters.size ) {
-					if (current_matches > max_matches) {
+					if (current_matches > match_information.max_matches) {
 						//stderr.printf ("local maximum is %s with %d matches and %d defaulted\n", method.name, current_matches, current_matches_defaulted);
-						max_matches = current_matches;
-						max_matches_defaulted = current_matches_defaulted;
-						max_matches_method = method;
-						max_matches_method_defaulted_parameters = current_defaulted_parameters;
-						count_with_max_match = 1;
-					} else if (current_matches == max_matches) {
-						if (max_matches_defaulted > current_matches_defaulted) {
+						match_information.max_matches = current_matches;
+						match_information.max_matches_defaulted = current_matches_defaulted;
+						match_information.max_matches_method = method;
+						match_information.max_matches_method_defaulted_parameters = current_defaulted_parameters;
+						match_information.count_with_max_match = 1;
+					} else if (current_matches == match_information.max_matches) {
+						if (match_information.max_matches_defaulted > current_matches_defaulted) {
 							//stderr.printf ("found method with less defaulted parameters\n");
-							max_matches = current_matches;
-							max_matches_defaulted = current_matches_defaulted;
-							max_matches_method = method;
-							max_matches_method_defaulted_parameters = current_defaulted_parameters;
-							count_with_max_match = 1;
-						} else if (max_matches_defaulted > current_matches_defaulted) {
-							count_with_max_match ++;
+							match_information.max_matches = current_matches;
+							match_information.max_matches_defaulted = current_matches_defaulted;
+							match_information.max_matches_method = method;
+							match_information.max_matches_method_defaulted_parameters = current_defaulted_parameters;
+							match_information.count_with_max_match = 1;
+						} else if (match_information.max_matches_defaulted > current_matches_defaulted) {
+							match_information.count_with_max_match ++;
 						} else {
 							//stderr.printf ("found method with more defaulted parameters, discarding\n");
 						}
@@ -324,34 +327,34 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				} else {
 					//stderr.printf ("discarded because %d != %d\n", current_matches, parameters.size);
 				}
-				if (parameters.size < min_params) {
-					min_params = parameters.size;
-					min_param_names = parameters;
+				if (parameters.size < match_information.min_params) {
+					match_information.min_params = parameters.size;
+					match_information.min_param_names = parameters;
 				}
 			}
 			
-			if (max_matches_method == null){
-				if (min_param_names == null) {
+			if (match_information.max_matches_method == null){
+				if (match_information.min_param_names == null) {
 					Report.error(class_definition.source_reference, "The class %s doesn't have %ss\n".printf (class_definition.base_full_name, wording));
 				} else {
 					string message = "";
 					int i = 0;
 					if (first_parameter!=null) i = 1;
-					for (; i < min_param_names.size - 1; i++) {
-						message += min_param_names.get (i).name + ", ";
+					for (; i < match_information.min_param_names.size - 1; i++) {
+						message += match_information.min_param_names.get (i).name + ", ";
 					}
-					if (i < min_param_names.size )
-						message += min_param_names.get (i).name;
+					if (i < match_information.min_param_names.size )
+						message += match_information.min_param_names.get (i).name;
 					Report.error (parameter_class.source_reference, "NO matching %s found for %s: specify at least: %s\n".printf (wording, class_definition.base_full_name, message));
 				} 
 				return null;
 			}
 			
-			if (count_with_max_match > 1) {
+			if (match_information.count_with_max_match > 1) {
 				//Report.warning (class_definition.source_reference, "More than one %s matches your definition of %s(%s)\n".printf (wording, class_definition.identifier, class_definition.base_full_name));
 			}
 			
-			foreach (ImplicitsParameter parameter in max_matches_method_defaulted_parameters) {
+			foreach (ImplicitsParameter parameter in match_information.max_matches_method_defaulted_parameters) {
 				//stderr.printf ("found default value for %s.%s.%s being <%s>\n", class_definition.base_full_name, max_matches_method.name, parameter.name, parameter.default_value);
 				if (first_parameter != null) {
 					first_parameter.complex_type.add_attribute (new SimpleAttribute (parameter.name, parameter.default_value));
@@ -360,7 +363,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				}
 			}
 			//stderr.printf ("selected '%s'\n", max_matches_method.name);			
-			return max_matches_method;
+			return match_information.max_matches_method;
 	}	
 	
 	public Gee.List<Vala.Method> lookup_container_add_methods (string! ns, Class! container_class)

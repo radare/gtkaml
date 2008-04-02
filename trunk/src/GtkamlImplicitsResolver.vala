@@ -23,24 +23,6 @@
 using GLib;
 using Vala;
 
-private class Gtkaml.MatchInformation:Object {
-	/** the minimum number of parameters */ 
-	public int min_params = 999; /* use MAX_INT? */
-	/** the least you would need to call that minimal method */
-	public Gee.List<ImplicitsParameter> min_param_names = null;
-	/** the number of maximum matched parameters */
-	public int max_matches = -1;
-	/** the method most matched */
-	public Vala.Method max_matches_method = null;
-	/** the number of matched defaulted parameters */
-	public int max_matches_defaulted = 0;
-	/** the default parameters for the max matches method */
-	public Gee.List<ImplicitsParameter> max_matches_method_defaulted_parameters = null;
-	/** if there are more methods that match for the same parameters, this is > 1 */
-	public int count_with_max_match = 0;
-	
-}
-
 /** 
  * determines which constructors to use or which container add functions to use;
  * moves attributes from their ClassDefinition to the add or construct methods
@@ -128,7 +110,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_add == null) {
-			determined_add = implicit_method_choice (new MatchInformation (), child_definition.parent_container, adds, "container add method", first_parameter);
+			determined_add = implicit_method_choice (new MethodMatcher (), child_definition.parent_container, adds, "container add method", first_parameter);
 			if (determined_add == null) {
 				return;
 			}
@@ -202,7 +184,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_constructor == null) {
-			determined_constructor = implicit_method_choice (new MatchInformation (), class_definition, constructors, "constructor");
+			determined_constructor = implicit_method_choice (new MethodMatcher (), class_definition, constructors, "constructor");
 			if (determined_constructor == null) {
 				return;
 			}
@@ -260,7 +242,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	 * @first_parameter is used to discern between add methods (first_parameter=child widget) and creation methods (first_parameter=null)
 	 * @wording contains a display name for the type of method
 	 */
-	private Vala.Method implicit_method_choice (MatchInformation match_information, ClassDefinition !class_definition, Gee.List<Vala.Method>! methods, string! wording, ComplexAttribute first_parameter=null )
+	private Vala.Method implicit_method_choice (MethodMatcher match_information, ClassDefinition !class_definition, Gee.List<Vala.Method>! methods, string! wording, ComplexAttribute first_parameter=null )
 	{
 			ClassDefinition parameter_class = class_definition;
 			Gee.List<ImplicitsParameter> defaulted_parameters;

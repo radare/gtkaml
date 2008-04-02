@@ -34,7 +34,8 @@ gtkamlc_VALASOURCES = \
 	GtkamlComplexAttribute.vala \
 	GtkamlMethod.vala \
 	GtkamlImplicitsResolver.vala \
-	GtkamlImplicitsStore.vala
+	GtkamlImplicitsStore.vala \
+	GtkamlMethodMatcher.vala
 
 gtkamlc_SOURCES = \
 	gtkamlc.vala.stamp \

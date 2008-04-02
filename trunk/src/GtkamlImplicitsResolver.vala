@@ -112,14 +112,15 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_add == null) {
 			foreach (Vala.Method method in adds) {
-				method_matcher.addMethod (method);
+				method_matcher.add_method (method);
 			}
 			determined_add = method_matcher.determine_matching_method ();
 			if (determined_add == null) {
 				return;
 			}
 		} else {
-			method_matcher.addMethod (determined_add);
+			method_matcher.add_method (determined_add);
+			method_matcher.determine_matching_method ();
 		}
 		
 		new_method.name = determined_add.name;
@@ -193,14 +194,15 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_constructor == null) {
 			foreach (Vala.Method method in constructors) {
-				method_matcher.addMethod (method);
+				method_matcher.add_method (method);
 			}
 			determined_constructor = method_matcher.determine_matching_method ();
 			if (determined_constructor == null) {
 				return;
 			}
 		} else {
-			method_matcher.addMethod (determined_constructor);
+			method_matcher.add_method (determined_constructor);
+			method_matcher.determine_matching_method ();
 		}
 		
 		new_method.name = determined_constructor.name;

@@ -6,7 +6,7 @@
 			<MenuItem label="_File" with-mnemonic="true">
 				<submenu>
 					<Menu>
-						<ImageMenuItem stock-id="gtk-new" />
+						<ImageMenuItem from-stock="true" stock-id="gtk-new" />
 						<ImageMenuItem stock-id="gtk-open" activate="{OnFileOpenEvent}"/>
 						<ImageMenuItem stock-id="gtk-save" />
 						<ImageMenuItem stock-id="gtk-save-as" />

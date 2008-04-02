@@ -134,4 +134,38 @@ public class Gtkaml.ImplicitsStore : Object
 		}
 		return /*empty*/ parameters;
 	}
+	
+	public Gee.List<ImplicitsParameter> determine_parameter_names_and_default_values(ClassDefinition! class_definition, Vala.Method! method)
+	{
+		var ns = method.parent_symbol.parent_symbol.get_full_name ();
+		var clazz = method.parent_symbol.name;
+		//stderr.printf ("determine_parameter_names_and_default_values %s %s of %s.%s\n", class_definition.base_full_name, method.name, ns, clazz);
+		var result = new Gee.ArrayList<ImplicitsParameter> ();
+		string method_name = method.name;
+		if (method.name.has_prefix (".new"))
+			method_name = method.name.substring(1, method.name.len () - 1);
+		else
+			method_name = "add." + method.name;
+		var result_array = this.get_method_parameters (ns, clazz, method_name);
+		if (result_array.size != 0)
+		{
+			foreach (ImplicitsParameter result_item in result_array) {
+				if (result_item.default_value != null) {
+					//stderr.printf ("default value for %s=<%s>\n", result_item.name, result_item.default_value);
+				}
+				result.add (result_item);
+			}
+		} else {
+			foreach (FormalParameter p in method.get_parameters ()) {
+				if (!p.ellipsis) { //hack for add_with_parameters (widget, ...)
+					var new_implicits_parameter = new ImplicitsParameter ();
+					new_implicits_parameter.name = p.name;
+					new_implicits_parameter.default_value = null; //here we can go for "zero"es and "false"s
+					result.add (new_implicits_parameter);
+				}
+			}
+		}
+		return result;
+	}
+	
 }

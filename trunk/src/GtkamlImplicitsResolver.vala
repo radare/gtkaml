@@ -107,19 +107,25 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		}
 		
 		ComplexAttribute first_parameter = new ComplexAttribute ( "widget", child_definition);
+		MethodMatcher method_matcher = new MethodMatcher (implicits_store, child_definition.parent_container, "container add method", first_parameter);
 		
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_add == null) {
-			determined_add = implicit_method_choice (new MethodMatcher (), child_definition.parent_container, adds, "container add method", first_parameter);
+			foreach (Vala.Method method in adds) {
+				method_matcher.addMethod (method);
+			}
+			determined_add = method_matcher.determine_matching_method ();
 			if (determined_add == null) {
 				return;
 			}
+		} else {
+			method_matcher.addMethod (determined_add);
 		}
 		
 		new_method.name = determined_add.name;
 		new_method.parameter_attributes.add (first_parameter);
 		//move the attributes from class definition to add method
-		Gee.List<ImplicitsParameter> parameters = determine_parameter_names_and_default_values (child_definition.parent_container, determined_add);
+		Gee.List<ImplicitsParameter> parameters = implicits_store.determine_parameter_names_and_default_values (child_definition.parent_container, determined_add);
 		foreach (ImplicitsParameter parameter in parameters) {
 			foreach (Gtkaml.Attribute attr in child_definition.attrs) {
 				if (parameter.name == attr.name) {
@@ -182,17 +188,24 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			}
 		}
 		
+		MethodMatcher method_matcher = new MethodMatcher (implicits_store, class_definition, "constructor");
+		
 		//pass two: the first who matches the most parameters + warning if there are more
 		if (determined_constructor == null) {
-			determined_constructor = implicit_method_choice (new MethodMatcher (), class_definition, constructors, "constructor");
+			foreach (Vala.Method method in constructors) {
+				method_matcher.addMethod (method);
+			}
+			determined_constructor = method_matcher.determine_matching_method ();
 			if (determined_constructor == null) {
 				return;
 			}
+		} else {
+			method_matcher.addMethod (determined_constructor);
 		}
 		
 		new_method.name = determined_constructor.name;
 		//move the attributes from class definition to construct method
-		Gee.List<ImplicitsParameter> parameters = determine_parameter_names_and_default_values (class_definition, determined_constructor);
+		Gee.List<ImplicitsParameter> parameters = implicits_store.determine_parameter_names_and_default_values (class_definition, determined_constructor);
 		foreach (ImplicitsParameter parameter in parameters) {
 			foreach (Gtkaml.Attribute attr in class_definition.attrs) {
 				if (parameter.name == attr.name) {
@@ -237,117 +250,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		class_definition.construct_method =  new_method;
 	}
 	
-	/**
-	 * the method that brought this class (ImplicitsResolver) to the world
-	 * @first_parameter is used to discern between add methods (first_parameter=child widget) and creation methods (first_parameter=null)
-	 * @wording contains a display name for the type of method
-	 */
-	private Vala.Method implicit_method_choice (MethodMatcher match_information, ClassDefinition !class_definition, Gee.List<Vala.Method>! methods, string! wording, ComplexAttribute first_parameter=null )
-	{
-			ClassDefinition parameter_class = class_definition;
-			Gee.List<ImplicitsParameter> defaulted_parameters;
-
-			if (first_parameter != null)
-				parameter_class = first_parameter.complex_type;
-
-			//stderr.printf ("===%d candidates\n", methods.size);
-			foreach (Vala.Method method in methods) {
-				//stderr.printf ("CANDIDATE %s\n", method.name);
-				var parameters = determine_parameter_names_and_default_values (class_definition, method);
-				int current_matches = 0;
-				int current_matches_defaulted = 0;
-				Gee.List<ImplicitsParameter> current_defaulted_parameters = new Gee.ArrayList<ImplicitsParameter> ();
-				 
-				foreach (ImplicitsParameter parameter in parameters) {
-					//stderr.printf ("searching for %s =>", parameter.name); 
-					int flag_current_matches_modified = current_matches;
-					foreach (Gtkaml.Attribute attr in parameter_class.attrs) {
-						if (parameter.name == attr.name) {
-							current_matches ++;
-							//stderr.printf (" .. explicit\n");
-							break;
-						}
-					}
-					if (flag_current_matches_modified == current_matches) {
-						if (parameter.default_value != null) {
-							current_matches_defaulted++;
-							current_defaulted_parameters.add (parameter);
-							//stderr.printf (" .. default %s\n", parameter.name);
-						} else {
-							//stderr.printf (" .. not found\n");
-						}
-					}
-				}
-				if (first_parameter != null) //child widget
-				{
-					current_matches++;
-				} 
-				
-				//full match?
-				if (current_matches + current_matches_defaulted == parameters.size ) {
-					if (current_matches > match_information.max_matches) {
-						//stderr.printf ("local maximum is %s with %d matches and %d defaulted\n", method.name, current_matches, current_matches_defaulted);
-						match_information.max_matches = current_matches;
-						match_information.max_matches_defaulted = current_matches_defaulted;
-						match_information.max_matches_method = method;
-						match_information.max_matches_method_defaulted_parameters = current_defaulted_parameters;
-						match_information.count_with_max_match = 1;
-					} else if (current_matches == match_information.max_matches) {
-						if (match_information.max_matches_defaulted > current_matches_defaulted) {
-							//stderr.printf ("found method with less defaulted parameters\n");
-							match_information.max_matches = current_matches;
-							match_information.max_matches_defaulted = current_matches_defaulted;
-							match_information.max_matches_method = method;
-							match_information.max_matches_method_defaulted_parameters = current_defaulted_parameters;
-							match_information.count_with_max_match = 1;
-						} else if (match_information.max_matches_defaulted > current_matches_defaulted) {
-							match_information.count_with_max_match ++;
-						} else {
-							//stderr.printf ("found method with more defaulted parameters, discarding\n");
-						}
-					}
-				} else {
-					//stderr.printf ("discarded because %d != %d\n", current_matches, parameters.size);
-				}
-				if (parameters.size < match_information.min_params) {
-					match_information.min_params = parameters.size;
-					match_information.min_param_names = parameters;
-				}
-			}
-			
-			if (match_information.max_matches_method == null){
-				if (match_information.min_param_names == null) {
-					Report.error(class_definition.source_reference, "The class %s doesn't have %ss\n".printf (class_definition.base_full_name, wording));
-				} else {
-					string message = "";
-					int i = 0;
-					if (first_parameter!=null) i = 1;
-					for (; i < match_information.min_param_names.size - 1; i++) {
-						message += match_information.min_param_names.get (i).name + ", ";
-					}
-					if (i < match_information.min_param_names.size )
-						message += match_information.min_param_names.get (i).name;
-					Report.error (parameter_class.source_reference, "NO matching %s found for %s: specify at least: %s\n".printf (wording, class_definition.base_full_name, message));
-				} 
-				return null;
-			}
-			
-			if (match_information.count_with_max_match > 1) {
-				//Report.warning (class_definition.source_reference, "More than one %s matches your definition of %s(%s)\n".printf (wording, class_definition.identifier, class_definition.base_full_name));
-			}
-			
-			foreach (ImplicitsParameter parameter in match_information.max_matches_method_defaulted_parameters) {
-				//stderr.printf ("found default value for %s.%s.%s being <%s>\n", class_definition.base_full_name, max_matches_method.name, parameter.name, parameter.default_value);
-				if (first_parameter != null) {
-					first_parameter.complex_type.add_attribute (new SimpleAttribute (parameter.name, parameter.default_value));
-				} else {
-					class_definition.add_attribute (new SimpleAttribute (parameter.name, parameter.default_value));
-				}
-			}
-			//stderr.printf ("selected '%s'\n", max_matches_method.name);			
-			return match_information.max_matches_method;
-	}	
-	
 	public Gee.List<Vala.Method> lookup_container_add_methods (string! ns, Class! container_class)
 	{
 		Gee.List<Vala.Method> methods = new Gee.ArrayList<Vala.Method> ();
@@ -390,38 +292,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		return methods; 
 	}
 
-	private Gee.List<ImplicitsParameter> determine_parameter_names_and_default_values(ClassDefinition! class_definition, Vala.Method! method)
-	{
-		var ns = method.parent_symbol.parent_symbol.get_full_name ();
-		var clazz = method.parent_symbol.name;
-		//stderr.printf ("determine_parameter_names_and_default_values %s %s of %s.%s\n", class_definition.base_full_name, method.name, ns, clazz);
-		var result = new Gee.ArrayList<ImplicitsParameter> ();
-		string method_name = method.name;
-		if (method.name.has_prefix (".new"))
-			method_name = method.name.substring(1, method.name.len () - 1);
-		else
-			method_name = "add." + method.name;
-		var result_array = implicits_store.get_method_parameters (ns, clazz, method_name);
-		if (result_array.size != 0)
-		{
-			foreach (ImplicitsParameter result_item in result_array) {
-				if (result_item.default_value != null) {
-					//stderr.printf ("default value for %s=<%s>\n", result_item.name, result_item.default_value);
-				}
-				result.add (result_item);
-			}
-		} else {
-			foreach (FormalParameter p in method.get_parameters ()) {
-				if (!p.ellipsis) { //hack for add_with_parameters (widget, ...)
-					var new_implicits_parameter = new ImplicitsParameter ();
-					new_implicits_parameter.name = p.name;
-					new_implicits_parameter.default_value = null; //here we can go for "zero"es and "false"s
-					result.add (new_implicits_parameter);
-				}
-			}
-		}
-		return result;
-	}
 	
 	private void determine_attribute_types (ClassDefinition! class_definition)
 	{

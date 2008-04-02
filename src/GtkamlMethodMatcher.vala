@@ -21,7 +21,7 @@ namespace Gtkaml {
 		
 		private Gee.List<Vala.Method> methods = new Gee.ArrayList<Vala.Method> ();
 		
-		public void addMethod (Vala.Method method) 
+		public void add_method (Vala.Method method) 
 		{
 			methods.add (method);
 		}

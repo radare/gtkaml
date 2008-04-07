@@ -52,7 +52,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		       class_start + "\n" +
 		       members_declarations + "\n";
 
-		for (int i = line_count(yielded); i < root_class_definition.original_first_code_line; i++) {
+		for (int i = line_count(yielded) + 1; i < root_class_definition.original_first_code_line; i++) {
 			yielded += "\n";
 		} 
 
@@ -146,7 +146,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			
 		}
 		else 
-			real_construct_code = " target => { %s; }".printf (construct_code);
+			real_construct_code = " (thiz, target) => { %s; }".printf (construct_code);
 		this.construct_signals += "\tprivate signal void %s (%s target);\n".printf (construct_signal, identifier_type);
 		string to_append = "\t\t%s += %s;\n".printf (construct_signal, real_construct_code)
 			+ "\t\t" + construct_signal + " (" + identifier + ");\n";

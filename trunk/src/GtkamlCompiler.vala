@@ -46,6 +46,7 @@ class Gtkaml.Compiler : Object {
 	static bool disable_assert;
 	static bool disable_checking;
 	static bool non_null;
+	static bool verbose;
 	static string cc_command;
 	[NoArrayLength]
 	static string[] cc_options;
@@ -77,6 +78,7 @@ class Gtkaml.Compiler : Object {
 		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
 		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, out implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
 		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
+		{ "verbose", 'v', 0, OptionArg.NONE, ref verbose, "Include the source line text when reporting errors or warnings." },
 		{ "", 0, 0, OptionArg.FILENAME_ARRAY, out sources, null, "FILE..." },
 		{ null }
 	};
@@ -147,6 +149,7 @@ class Gtkaml.Compiler : Object {
 		context.assert = !disable_assert;
 		context.checking = !disable_checking;
 		context.non_null = non_null;
+		Report.set_verbose_errors (verbose);
 
 		context.ccode_only = ccode_only;
 		context.compile_only = compile_only;
@@ -275,7 +278,19 @@ class Gtkaml.Compiler : Object {
 			}
 
 			interface_writer.write_file (context, vapi_filename);
-			
+
+
+			var gidl_writer = new GIdlWriter ();
+			string gidl_filename = "%s.gidl".printf (library);
+
+			// put .gidl file in current directory unless -d has been explicitly specified
+			if (directory != null) {
+				gidl_filename = "%s/%s".printf (context.directory, gidl_filename);
+			}
+
+			gidl_writer.write_file (context, gidl_filename);
+
+
 			library = null;
 		}
 
@@ -354,14 +369,8 @@ class Gtkaml.Compiler : Object {
 		if (Path.DIR_SEPARATOR != '/') {
 			// don't use backslashes internally,
 			// to avoid problems in #include directives
-			try {
-				var regex = new Regex (Regex.escape_string (Path.DIR_SEPARATOR_S));
-				string new_rpath = regex.replace_literal (rpath, -1, 0, "/");
-				rpath = new_rpath;
-			} catch (RegexError e) {
-				// should never happen
-				assert_not_reached ();
-			}
+			string[] components = rpath.split ("\\");
+			rpath = string.joinv ("/", components);
 		}
 
 		return rpath;
@@ -369,7 +378,7 @@ class Gtkaml.Compiler : Object {
 
 	static int main (string[] args) {
 		try {
-			var opt_context = new OptionContext ("- Vala Compiler");
+			var opt_context = new OptionContext ("- Vala Gtkaml Compiler");
 			opt_context.set_help_enabled (true);
 			opt_context.add_main_entries (options, null);
 			opt_context.parse (ref args);
@@ -380,7 +389,7 @@ class Gtkaml.Compiler : Object {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s (based on Vala 0.1.7)\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s (based on Vala 0.2.0)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

@@ -1,5 +1,5 @@
---- valacompiler.vala	Fri Jan 18 01:20:54 2008
-+++ GtkamlCompiler.vala	Mon Mar  3 15:20:47 2008
+--- valacompiler.vala	Mon Mar 24 16:53:21 2008
++++ GtkamlCompiler.vala	Wed Apr  9 11:22:40 2008
 @@ -1,5 +1,5 @@
 -/* valacompiler.vala
 - *
@@ -36,10 +36,10 @@
  		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, out cc_options, "Pass OPTION to the C compiler", "OPTION..." },
  		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
 +		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, out implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
-		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
+ 		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
+ 		{ "verbose", 'v', 0, OptionArg.NONE, ref verbose, "Include the source line text when reporting errors or warnings." },
  		{ "", 0, 0, OptionArg.FILENAME_ARRAY, out sources, null, "FILE..." },
- 		{ null }
-@@ -214,6 +218,8 @@
+@@ -193,6 +197,8 @@
  				var rpath = realpath (source);
  				if (source.has_suffix (".vala")) {
  					context.add_source_file (new SourceFile (context, rpath));
@@ -48,7 +48,7 @@
  				} else if (source.has_suffix (".vapi")) {
  					context.add_source_file (new SourceFile (context, rpath, true));
  				} else if (source.has_suffix (".c")) {
-@@ -231,8 +237,8 @@
+@@ -210,8 +216,8 @@
  			return quit ();
  		}
  		
@@ -59,12 +59,21 @@
  		
  		if (Report.get_errors () > 0) {
  			return quit ();
-@@ -357,7 +363,7 @@
+@@ -372,7 +378,7 @@
+ 
+ 	static int main (string[] args) {
+ 		try {
+-			var opt_context = new OptionContext ("- Vala Compiler");
++			var opt_context = new OptionContext ("- Vala Gtkaml Compiler");
+ 			opt_context.set_help_enabled (true);
+ 			opt_context.add_main_entries (options, null);
+ 			opt_context.parse (ref args);
+@@ -383,7 +389,7 @@
  		}
  		
  		if (version) {
 -			stdout.printf ("Vala %s\n", Config.PACKAGE_VERSION);
-+			stdout.printf ("Gtkaml %s (based on Vala 0.1.7)\n", Config.PACKAGE_VERSION);
++			stdout.printf ("Gtkaml %s (based on Vala 0.2.0)\n", Config.PACKAGE_VERSION);
  			return 0;
  		}
  		

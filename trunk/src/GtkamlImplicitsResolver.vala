@@ -85,7 +85,8 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	 */	
 	private void determine_add_method (ClassDefinition! child_definition)
 	{
-		Gee.List<Vala.Method> adds = lookup_container_add_methods( child_definition.parent_container.base_ns, child_definition.parent_container.base_type );
+		Gee.List<Vala.Method> adds = new Gee.ArrayList<Vala.Method> ();
+		lookup_container_add_methods( child_definition.parent_container.base_ns, child_definition.parent_container.base_type, adds );
 
 		Vala.Method determined_add = null;
 		Gtkaml.AddMethod new_method = new Gtkaml.AddMethod ();
@@ -175,13 +176,8 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		class_definition.construct_method =  new_method;
 	}
 	
-	public Gee.List<Vala.Method> lookup_container_add_methods (string! ns, Class! container_class)
+	private void lookup_container_add_methods_for_class (string! ns, Class! container_class, Gee.List<Vala.Method> methods)
 	{
-		Gee.List<Vala.Method> methods = new Gee.ArrayList<Vala.Method> ();
-		//FIXME workaround to stop recursion at TypeInstance and Object
-		if (null == ns) 
-			return methods;
-
 		var add_methods = implicits_store.get_adds (ns, container_class.name);
 		if (add_methods.size != 0)
 		{
@@ -194,6 +190,15 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 					}
 			}
 		}
+	}
+	
+	public void lookup_container_add_methods (string! ns, Class! container_class, Gee.List<Vala.Method> methods)
+	{
+		//FIXME workaround to stop recursion at TypeInstance and Object
+		if (null == ns) 
+			return;
+
+		lookup_container_add_methods_for_class (ns, container_class, methods);
 		
 		foreach (DataType dt in container_class.get_base_types ()) {
 			if (dt is UnresolvedType) {
@@ -204,17 +209,14 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				ns = (dt as UnresolvedType).unresolved_symbol.inner.name;
 				Class c = lookup_class (ns, (dt as UnresolvedType).unresolved_symbol.name);
 				if (c != null) {
-					var otherMethods = lookup_container_add_methods (ns, c);
-					foreach (Vala.Method method in otherMethods) {
-						methods.add (method);
-					  //stderr.printf ("Found inherited add method '%s.%s.%s'(%x), we now have %d\n", ns, c.name, method.name, method, methods.size);
-					}
+					//favour inherited methods
+					lookup_container_add_methods_for_class (ns, c, methods);
+					//over inherited implicits definitions
+					lookup_container_add_methods (ns, c, methods);
 					break;
 				}
 			}
 		}
-		
-		return methods; 
 	}
 
 	

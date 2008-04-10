@@ -50,7 +50,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		//References should have no other attributes than the 'attached' ones (woa.. i learned xaml)
 		if (class_definition is ReferenceClassDefinition && class_definition.attrs.size != 0 && class_definition.parent_container != null) {
 			Report.error (class_definition.source_reference, "No attributes other than the container add parameters are allowed on existing widgets which are not standalone");
-			return;
 		}
 		
 		//resolve the rest of the attr types
@@ -92,9 +91,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		Gtkaml.AddMethod new_method = new Gtkaml.AddMethod ();
 		Gee.List<Gtkaml.Attribute> to_remove = new Gee.ArrayList<Gtkaml.Attribute> ();
 	
-		int i;
-		
-		//todo: move this one in the parser
 		//pass one: see if we find an explicitly specified add method
 		foreach (Vala.Method add in adds) {
 			foreach (Gtkaml.Attribute attr in child_definition.attrs) {
@@ -120,49 +116,13 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			}
 		} else {
 			method_matcher.add_method (determined_add);
-			method_matcher.determine_matching_method ();
-		}
-		
-		new_method.name = determined_add.name;
-		new_method.parameter_attributes.add (first_parameter);
-		//move the attributes from class definition to add method
-		Gee.List<ImplicitsParameter> parameters = implicits_store.determine_parameter_names_and_default_values (child_definition.parent_container, determined_add);
-		foreach (ImplicitsParameter parameter in parameters) {
-			foreach (Gtkaml.Attribute attr in child_definition.attrs) {
-				if (parameter.name == attr.name) {
-					new_method.parameter_attributes.add (attr);
-					to_remove.add (attr);
-					break;
-				}
-			}
-		}		
-		
-		if ( parameters.size  != new_method.parameter_attributes.size)
-		{
-			//stderr.printf ("failed because %d != %d", parameters.size, new_method.parameter_attributes.size + i);
-			i = 0;
-			if (first_parameter!=null) i = 1;//skip child
-			string message = "";
-			for (; i < parameters.size -1; i++)
-				message += parameters.get (i).name + ", ";
-			if (i < parameters.size)
-				message += parameters.get (i).name;
-			Report.error (child_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("add method", child_definition.parent_container.base_full_name, message));
-			return;
-		} 
-		
-		//determine attr.target_types directly from method signature
-		Gee.Collection<FormalParameter> add_parameters = determined_add.get_parameters ();
-		i = 0;
-		foreach (FormalParameter formal_parameter in add_parameters)
-		{
-			if (!formal_parameter.ellipsis) {
-				var attr = new_method.parameter_attributes.get (i);
-				attr.target_type = formal_parameter;
-				i++;
+			if (null == method_matcher.determine_matching_method ())
+			{
+				return;
 			}
 		}
 		
+		method_matcher.set_method_parameters (new_method, determined_add);
 		
 		foreach (Gtkaml.Attribute attr in to_remove)
 			child_definition.attrs.remove (attr);
@@ -177,7 +137,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		Gtkaml.ConstructMethod new_method = new Gtkaml.ConstructMethod ();
 		Gee.List<Gtkaml.Attribute> to_remove = new Gee.ArrayList<Gtkaml.Attribute> ();
 		
-		//todo: move this one in the parser
 		//pass one: see if we find an explicitly specified constructor
 		foreach (Vala.Method constructor in constructors) {
 			foreach (Gtkaml.Attribute attr in class_definition.attrs) {
@@ -202,49 +161,13 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			}
 		} else {
 			method_matcher.add_method (determined_constructor);
-			method_matcher.determine_matching_method ();
-		}
-		
-		new_method.name = determined_constructor.name;
-		//move the attributes from class definition to construct method
-		Gee.List<ImplicitsParameter> parameters = implicits_store.determine_parameter_names_and_default_values (class_definition, determined_constructor);
-		foreach (ImplicitsParameter parameter in parameters) {
-			foreach (Gtkaml.Attribute attr in class_definition.attrs) {
-				if (parameter.name == attr.name) {
-					new_method.parameter_attributes.add (attr);
-					to_remove.add (attr);
-					break;
-				}
-			}
-		}		
-		
-		if ( parameters.size  != new_method.parameter_attributes.size )
-		{
-			string message = "";
-			int i = 0;
-			for (i = 0; i < parameters.size -1; i++) {
-				message += parameters.get (i).name + ", ";
-			}
-			if (i < parameters.size)
-				message += parameters.get (i).name;
-			Report.error (class_definition.source_reference, "No matching %s found for %s: specify at least: %s\n".printf ("creation method", class_definition.base_full_name, message));
-			return;
-		}
-		
-		
-		//determine attr.target_types directly from constructor signature
-		Gee.Collection<FormalParameter> constructor_parameters = determined_constructor.get_parameters ();
-		int i = 0;
-		foreach (FormalParameter formal_parameter in constructor_parameters)
-		{
-			if (!formal_parameter.ellipsis) {
-				var attr = new_method.parameter_attributes.get (i);
-				//stderr.printf ("matching %s formal parameter against %s attribute\n", formal_parameter.name, attr.name);
-				attr.target_type = formal_parameter;
-				i++;
+			if (null == method_matcher.determine_matching_method ())
+			{
+				return;
 			}
 		}
-
+		
+		method_matcher.set_method_parameters (new_method, determined_constructor);
 		
 		foreach (Gtkaml.Attribute attr in to_remove)
 			class_definition.attrs.remove (attr);

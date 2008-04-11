@@ -200,7 +200,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				foreach (Vala.Method method in container_class_holding_methods.get_methods ())
 					if (method.name == add_method) {
 						methods.add (method);
-						stderr.printf ("Found direct add method '%s.%s' for %s(%x), we now have %d\n", container_class_holding_methods.name, container_class_implicits_entry.name, method.name, methods.size);
+						//stderr.printf ("Found direct add method '%s.%s' for %s(%x), we now have %d\n", container_class_holding_methods.name, container_class_implicits_entry.name, method.name, methods.size);
 						break;
 					}
 			}

@@ -176,20 +176,36 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		class_definition.construct_method =  new_method;
 	}
 	
-	private void lookup_container_add_methods_for_class (string! ns, Class! container_class, Gee.List<Vala.Method> methods)
+	private void lookup_container_add_methods_for_class (string! ns, Class! container_class_implicits_entry, string! ns2, Class! container_class_holding_methods, Gee.List<Vala.Method> methods)
 	{
-		var add_methods = implicits_store.get_adds (ns, container_class.name);
+		if (ns2 == null)
+			return;
+
+		//recurse over base classes - ugly ugly ugly!
+		foreach (DataType dt in container_class_holding_methods.get_base_types ()) {
+			if (dt is UnresolvedType) {
+				string utns = get_unresolved_type_ns (dt as UnresolvedType);
+				if (utns == null) continue;
+				Class c = lookup_class (utns, (dt as UnresolvedType).unresolved_symbol.name);
+				if (c != null) {
+					lookup_container_add_methods_for_class (ns, container_class_implicits_entry, utns, c, methods);
+				}
+			}
+		}
+			
+		var add_methods = implicits_store.get_adds (ns, container_class_implicits_entry.name);
 		if (add_methods.size != 0)
 		{
 			foreach (string add_method in add_methods) {
-				foreach (Vala.Method method in container_class.get_methods ())
+				foreach (Vala.Method method in container_class_holding_methods.get_methods ())
 					if (method.name == add_method) {
 						methods.add (method);
-						//stderr.printf ("Found direct add method '%s'(%x), we now have %d\n", method.name, method, methods.size);
+						stderr.printf ("Found direct add method '%s.%s' for %s(%x), we now have %d\n", container_class_holding_methods.name, container_class_implicits_entry.name, method.name, methods.size);
 						break;
 					}
 			}
 		}
+
 	}
 	
 	public void lookup_container_add_methods (string! ns, Class! container_class, Gee.List<Vala.Method> methods)
@@ -198,27 +214,29 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		if (null == ns) 
 			return;
 
-		lookup_container_add_methods_for_class (ns, container_class, methods);
+		lookup_container_add_methods_for_class (ns, container_class, ns, container_class, methods);
 		
 		foreach (DataType dt in container_class.get_base_types ()) {
 			if (dt is UnresolvedType) {
-				string ns;
-				if ((dt as UnresolvedType).unresolved_symbol.inner == null) {
-					continue;
-				}
-				ns = (dt as UnresolvedType).unresolved_symbol.inner.name;
-				Class c = lookup_class (ns, (dt as UnresolvedType).unresolved_symbol.name);
+				string utns = get_unresolved_type_ns (dt as UnresolvedType);
+				if (utns == null) continue;
+				Class c = lookup_class (utns, (dt as UnresolvedType).unresolved_symbol.name);
 				if (c != null) {
-					//favour inherited methods
-					lookup_container_add_methods_for_class (ns, c, methods);
 					//over inherited implicits definitions
-					lookup_container_add_methods (ns, c, methods);
+					lookup_container_add_methods (utns, c, methods);
 					break;
 				}
 			}
 		}
 	}
 
+	private string get_unresolved_type_ns (UnresolvedType dt)
+	{
+		if (dt.unresolved_symbol.inner == null) {
+			return null;
+		}
+		return dt.unresolved_symbol.inner.name; 
+	}
 	
 	private void determine_attribute_types (ClassDefinition! class_definition)
 	{

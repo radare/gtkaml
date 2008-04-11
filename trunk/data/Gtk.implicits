@@ -1,27 +1,50 @@
-## Most entries here are for specifying the add methods
-## Others are here for renaming some parameters 
-## or to specify default values
+## Most entries here are for specifying the add methods for each Container
+## Others are here for renaming some parameters or to specify default values.
+##
+## Usage:
+## Tweak a creation method:
+##   new.creation_method_name=param1[=value];param2[=value]
+## Tweak the default creation method
+##   new = param1[=value];param2[=value]
+## List the container add methods:
+##   adds=add_method_1;add_method_2
+## Tweak an add method:
+##   add.add_method_1=param1[=value];param2=[value]
+##
+## Given a specific container X, the order of picking a method is
+## - the implicits files in --implicitsdir come first, in the order the dirs 
+##   were specified, then comes the installed ${PREFIX}/share/gtkaml/*.implicits  
+## - then the methods listed under the [X] group, in the order they are listed
+## - then the methods listed under [Y] where X extends Y. 
+##   (repeated for the whole class hierarchy)
+##
+## You can have your own NS.implicits file, where NS is a Vala namespace
+## You specify an aditional folder for gtkamlc too look in with --implicitsdir
+## And the files configuring the same namespace NS have their definitions merged
+
 [Label]
-## rename the parameter to label
+## rename the parameter 'str' to 'label'
 new = label
 new.with_mnemonic = label
 
 [MenuItem]
-## rename the parameter to label
+## rename the parameter 'str' to 'label'
 new.with_label = label
 new.with_mnemonic = label
 
 [Container]
+## see issue #7 - we can't use add () for the moment because its a signal
 adds=add_with_properties
 
 [ScrolledWindow]
-## see issue #5
-## adds = add_with_properties;add_with_viewport
+## actually add_with_properties reffers to Container.add_with_properties
+## Here we just make it the first to pick by default
+adds = add_with_properties;add_with_viewport
 new = hadjustment={null};vadjustment={null}
 
 [Box]
 adds = pack_start;pack_end;pack_start_defaults;pack_end_defaults
-## defaulting as per pack_start/end_defaults
+## defaulting as per pack_start_defaults/pack_end_defaults
 add.pack_start = widget;expand=true;fill=true;padding=0
 add.pack_end   = widget;expand=true;fill=true;padding=0
 

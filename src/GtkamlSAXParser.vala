@@ -82,7 +82,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	public int line_number();
 
 	[NoArrayLength]
-	public void start_element (string localname, string prefix, 
+	public void start_element (string localname, string? prefix, 
 	                         string URI, int nb_namespaces, string[] namespaces, 
 	                         int nb_attributes, int nb_defaulted, string[] attributes)
 	{
@@ -258,7 +258,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 			return;
 		}
 	}
-	private string prefix_to_namespace (string prefix)
+	private string prefix_to_namespace (string? prefix)
 	{
 		if (prefix==null)
 			return prefixes_namespaces.get ("");		
@@ -269,10 +269,14 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return new SourceReference (source_file, line_number (), column_number (), line_number (), column_number ()); 
 	}
 	
-	private Class lookup_class (string xmlNamespace, string name)
+	private Class lookup_class (string? xmlNamespace, string name)
 	{
+		stderr.printf ("lookuing up %s in %s\n", name, xmlNamespace);
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
-			if ( (ns.name == null && xmlNamespace == null ) || (ns.name != null && xmlNamespace != null && ns.name == xmlNamespace)) {
+			stderr.printf ("valanamespace.ns %s\n", ns.name);
+			var nsname = ns.name;
+			if ( (nsname == null && xmlNamespace == null ) || (nsname != null && xmlNamespace != null && nsname == xmlNamespace)) {
+				stderr.printf ("EQUAL!!\n");
 				Symbol s = ns.scope.lookup (name);
 				if (s is Class) {
 					return (s as Class);

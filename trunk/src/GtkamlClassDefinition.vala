@@ -54,8 +54,8 @@ public class Gtkaml.ClassDefinition : GLib.Object {
 	public string construct_code{get;set;}
 	public string preconstruct_code{get;set;}
 
-	public ClassDefinition (SourceReference! source_reference, string! identifier, string! base_ns, Vala.Class! base_type, 
-		DefinitionScope! definition_scope, ClassDefinition parent_container = null)
+	public ClassDefinition (SourceReference source_reference, string identifier, string base_ns, Vala.Class base_type, 
+		DefinitionScope definition_scope, ClassDefinition? parent_container = null)
 	{
 		this.source_reference = source_reference;
 		this.base_ns = base_ns;

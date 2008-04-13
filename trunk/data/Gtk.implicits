@@ -100,3 +100,6 @@ adds = pack_start;pack_end;add_attribute;
 
 [Dialog]
 adds = add_action_widget
+
+[ActionGroup]
+adds = add_action;add_action_with_accel

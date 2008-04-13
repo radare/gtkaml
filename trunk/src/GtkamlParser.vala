@@ -40,7 +40,7 @@ public class Gtkaml.Parser : Vala.Parser {
 	}
 	
 	[NoArrayLength]
-	public void parse (CodeContext! context, string[] implicits_directories = null)
+	public void parse (CodeContext context, string[] implicits_directories = null)
 	{
 		if (implicits_directories != null)
 			foreach (string implicits_dirs in implicits_directories)
@@ -55,7 +55,7 @@ public class Gtkaml.Parser : Vala.Parser {
 		base.parse( context );
 	}
 	
-	public override void visit_source_file (SourceFile! source_file) {
+	public override void visit_source_file (SourceFile source_file) {
 		if (source_file.filename.has_suffix (".vala") || source_file.filename.has_suffix (".vapi")) {
 			base.visit_source_file (source_file);
 		} else if (source_file.filename.has_suffix (".gtkaml")) {
@@ -63,7 +63,7 @@ public class Gtkaml.Parser : Vala.Parser {
 		}
 	}
 	
-	public virtual void parse_gtkaml_file (SourceFile! gtkaml_source_file) {
+	public virtual void parse_gtkaml_file (SourceFile gtkaml_source_file) {
 		if (FileUtils.test (gtkaml_source_file.filename, FileTest.EXISTS)) {
 			try {
 				SourceFile dummy_file = new SourceFile( context, gtkaml_source_file.filename );

@@ -32,8 +32,8 @@ public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
 	public int original_first_code_line {get;set;}
 	public string implements {get;set;}
 	
-	public RootClassDefinition (SourceReference! source_reference, string! identifier, string base_ns, Vala.Class! base_type, 
-		DefinitionScope! definition_scope, Gtkaml.ClassDefinition parent_container = null)
+	public RootClassDefinition (SourceReference source_reference, string identifier, string base_ns, Vala.Class base_type, 
+		DefinitionScope definition_scope, Gtkaml.ClassDefinition? parent_container = null)
 	{
 		this.source_reference = source_reference;
 		this.base_ns = base_ns;

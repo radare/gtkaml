@@ -40,7 +40,7 @@ private class Gtkaml.KeyFileWrapper : Object {
 		this.key_file = new KeyFile ();
 	}
 	
-	public bool has_key (string !group, string! key)
+	public bool has_key (string group, string key)
 	{
 		try {
 			return key_file.has_key (group, key);
@@ -48,7 +48,7 @@ private class Gtkaml.KeyFileWrapper : Object {
 			return false;
 		}
 	}
-	public string[] get_string_list (string !group, string! key)
+	public string[] get_string_list (string group, string key)
 	{
 		try {
 			return key_file.get_string_list (group, key);
@@ -71,12 +71,12 @@ public class Gtkaml.ImplicitsStore : Object
 		return new ReadOnlyList<string> (implicits_dirs);
 	}
 	
-	public void add_implicits_dir (string! directory)
+	public void add_implicits_dir (string directory)
 	{
 		implicits_dirs.add (directory);
 	}
 	
-	private Gee.List<KeyFileWrapper> get_ns (string! ns)
+	private Gee.List<KeyFileWrapper> get_ns (string ns)
 	{
 		if (loaded_ns.contains (ns)) {
 			return loaded_ns.get (ns);
@@ -100,7 +100,7 @@ public class Gtkaml.ImplicitsStore : Object
 		}
 	}
 	
-	public Gee.List<string> get_adds (string! ns, string! class_name)
+	public Gee.List<string> get_adds (string ns, string class_name)
 	{
 		Gee.List<string> adds = new Gee.ArrayList<string> ();
 		var kf_ns = get_ns (ns);
@@ -116,7 +116,7 @@ public class Gtkaml.ImplicitsStore : Object
 		return adds;
 	}
 
-	public Gee.List<ImplicitsParameter> get_method_parameters (string! ns, string! class_name, string! method_name)
+	public Gee.List<ImplicitsParameter> get_method_parameters (string ns, string class_name, string method_name)
 	{
 		Gee.List<ImplicitsParameter> parameters = new Gee.ArrayList<ImplicitsParameter> ();
 		foreach (KeyFileWrapper kfw in get_ns (ns)) {
@@ -135,7 +135,7 @@ public class Gtkaml.ImplicitsStore : Object
 		return /*empty*/ parameters;
 	}
 	
-	public Gee.List<ImplicitsParameter> determine_parameter_names_and_default_values(ClassDefinition! class_definition, Vala.Method! method)
+	public Gee.List<ImplicitsParameter> determine_parameter_names_and_default_values(ClassDefinition class_definition, Vala.Method method)
 	{
 		var ns = method.parent_symbol.parent_symbol.get_full_name ();
 		var clazz = method.parent_symbol.name;

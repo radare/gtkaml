@@ -28,8 +28,8 @@ public class Gtkaml.ReferenceClassDefinition : Gtkaml.ClassDefinition
 {
 	private int dummy {get;set;}
 	
-	public ReferenceClassDefinition (SourceReference! source_reference, string! reference, string! base_ns, Vala.Class! base_type, 
-		ClassDefinition parent_container = null)
+	public ReferenceClassDefinition (SourceReference source_reference, string reference, string base_ns, Vala.Class base_type, 
+		ClassDefinition? parent_container = null)
 	{
 		this.dummy=0;
 		

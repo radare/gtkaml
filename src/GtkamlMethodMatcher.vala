@@ -38,9 +38,13 @@ namespace Gtkaml {
 		 * @first_parameter is used to discern between add methods (first_parameter=child widget) and creation methods (first_parameter=null)
 		 * @wording contains a display name for the type of method
 		 */
-		public MethodMatcher (construct ImplicitsStore! implicits_store, construct ClassDefinition! class_owning_method, 
-			construct string! wording, construct ComplexAttribute? first_parameter = null)
+		public MethodMatcher (ImplicitsStore implicits_store, ClassDefinition class_owning_method, 
+			string wording, ComplexAttribute? first_parameter = null)
 		{
+			this.implicits_store = implicits_store;
+			this.class_owning_method = class_owning_method;
+			this.wording = wording;
+			this.first_parameter = first_parameter;
 		}
 		
 		construct {

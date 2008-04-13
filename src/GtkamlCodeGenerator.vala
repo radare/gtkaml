@@ -42,7 +42,9 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	private RootClassDefinition root_class_definition {get;set;}
 	
 	
-	public CodeGenerator (construct CodeContext context) {}
+	public CodeGenerator (CodeContext context) {
+		this.context = context;
+	}
 	
 	/**
 	 * returns a string that is the Vala source code
@@ -70,7 +72,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	/** 
 	 * processes the root class definition and its children
 	 */
-	public void generate (ClassDefinition! class_definition)
+	public void generate (ClassDefinition class_definition)
 	{
 		if (class_definition is RootClassDefinition) {
 			root_class_definition = class_definition as RootClassDefinition;
@@ -111,20 +113,20 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		return count;
 	}
 
-	protected void generate_children (ClassDefinition! class_definition)
+	protected void generate_children (ClassDefinition class_definition)
 	{
 			foreach (ClassDefinition child in class_definition.children)
 				generate (child);
 	}
 
-	protected void write_preconstruct (ClassDefinition! class_definition)
+	protected void write_preconstruct (ClassDefinition class_definition)
 	{
 		if (class_definition.preconstruct_code != null) {
 			write_construct_call (class_definition.identifier, class_definition.base_full_name, "preconstruct", class_definition.preconstruct_code);
 		}
 	}
 	
-	protected void write_construct (ClassDefinition! class_definition)
+	protected void write_construct (ClassDefinition class_definition)
 	{
 		if (class_definition.construct_code != null) {
 			write_construct_call (class_definition.identifier, class_definition.base_full_name, "construct", class_definition.construct_code);
@@ -157,7 +159,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	}
 		
 
-	protected void write_complex_attributes (ClassDefinition! class_definition)
+	protected void write_complex_attributes (ClassDefinition class_definition)
 	{	
 		foreach (Attribute attr in class_definition.attrs) {
 			if (attr is ComplexAttribute)
@@ -202,7 +204,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}
 
-	protected void write_declaration (ClassDefinition! class_definition)
+	protected void write_declaration (ClassDefinition class_definition)
 	{
 		switch (class_definition.definition_scope) {
 			case DefinitionScope.PUBLIC:
@@ -217,7 +219,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}	
 		
-	protected void write_root_constructor_parameters (RootClassDefinition! class_definition)
+	protected void write_root_constructor_parameters (RootClassDefinition class_definition)
 	{
 		foreach (Attribute attr in class_definition.construct_method.parameter_attributes)
 		{
@@ -225,7 +227,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}
 	
-	protected void write_constructor (ClassDefinition! class_definition)
+	protected void write_constructor (ClassDefinition class_definition)
 	{
 		string construct_name = class_definition.construct_method.name;
 		construct_name = construct_name.substring (".new".len (), construct_name.len () - ".new".len ());
@@ -240,7 +242,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		constructors += ");\n";		
 	}
 	
-	protected void write_add (ClassDefinition! child_definition) {
+	protected void write_add (ClassDefinition child_definition) {
 		if (child_definition.parent_container == null)
 			return;
 		construct_body += "\t\t%s.%s (".printf (child_definition.parent_container.identifier, child_definition.add_method.name);
@@ -255,7 +257,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			
 	}
 	
-	protected void write_setters (ClassDefinition! class_definition)
+	protected void write_setters (ClassDefinition class_definition)
 	{
 		foreach (Attribute attr in class_definition.attrs) 
 		{
@@ -333,12 +335,12 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		}
 	}
 
-	protected void write_setter (ClassDefinition! class_definition, Attribute attr) 
+	protected void write_setter (ClassDefinition class_definition, Attribute attr) 
 	{
 		construct_body += "\t\t%s.%s = %s;\n".printf (class_definition.identifier, attr.name, generate_literal (attr));
 	}
 	
-	protected void write_signal_setter (ClassDefinition! class_definition, Attribute signal_attr)
+	protected void write_signal_setter (ClassDefinition class_definition, Attribute signal_attr)
 	{
 		if (! (signal_attr is SimpleAttribute) ) {
 			Report.error (class_definition.source_reference, "Cannot set the signal '%s' to this value.".printf (signal_attr.name));

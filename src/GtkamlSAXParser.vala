@@ -40,7 +40,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	private Gtkaml.RootClassDefinition root_class_definition {get;set;}	
 	public string gtkaml_prefix="gtkaml";	
 	
-	public SAXParser( Vala.CodeContext! context, Vala.SourceFile! source_file) {
+	public SAXParser( Vala.CodeContext context, Vala.SourceFile source_file) {
 		this.context = context;
 		this.source_file = source_file;
 	}
@@ -221,7 +221,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		} 
 	}
 
-	private void parse_attribute_content_as_text (State! state, string content)
+	private void parse_attribute_content_as_text (State state, string content)
 	{
 		if (state.state_id == StateId.SAX_PARSER_ATTRIBUTE_STATE) {
 			if (state.attribute_name == gtkaml_prefix+".preconstruct") {
@@ -282,7 +282,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return null;
 	}
 
-	private string strip_attribute_hyphens (string! attrname)
+	private string strip_attribute_hyphens (string attrname)
 	{
 		//see TDWTF, "The Hard Way"
 		var tokens = attrname.split ("-");
@@ -314,7 +314,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 							Report.error (create_source_reference (), "'private' not allowed on root tag.");
 							stop_parsing ();
 							return null;
-							break;
 						case "construct":
 							if (root_class_definition.construct_code != null) {
 								Report.error (create_source_reference (), "A construct attribute already exists for the root class");
@@ -358,7 +357,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return root_class_definition;
 	}
 	
-	public ClassDefinition get_child_for_container (Class clazz, ClassDefinition! container_definition, Gee.List<XmlAttribute> attrs, string prefix)
+	public ClassDefinition get_child_for_container (Class clazz, ClassDefinition container_definition, Gee.List<XmlAttribute> attrs, string prefix)
 	{
 		string identifier = null;
 		DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;

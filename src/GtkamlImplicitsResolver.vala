@@ -33,11 +33,13 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	public ImplicitsStore implicits_store {get;construct;}
 	private Vala.CodeContext context {get;set;}
 	
-	public ImplicitsResolver (construct Vala.CodeContext! context, construct ImplicitsStore! implicits_store) 
+	public ImplicitsResolver (Vala.CodeContext context, ImplicitsStore implicits_store) 
 	{
+		this.context = context;
+		this.implicits_store = implicits_store;
 	}
 	
-	public void resolve (ClassDefinition !class_definition)
+	public void resolve (ClassDefinition class_definition)
 	{
 		//determine which constructor shall we use
 		//references don't have to be constructed
@@ -59,7 +61,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			resolve (child); 
 	}
 
-	public void resolve_complex_attributes (ClassDefinition! class_definition)
+	public void resolve_complex_attributes (ClassDefinition class_definition)
 	{
 		foreach (Attribute attr in class_definition.attrs) {
 			if (attr is ComplexAttribute)
@@ -83,7 +85,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	/**
 	 * Determines which add method of parent container would be useful
 	 */	
-	private void determine_add_method (ClassDefinition! child_definition)
+	private void determine_add_method (ClassDefinition child_definition)
 	{
 		Gee.List<Vala.Method> adds = new Gee.ArrayList<Vala.Method> ();
 		lookup_container_add_methods( child_definition.parent_container.base_ns, child_definition.parent_container.base_type, adds );
@@ -131,7 +133,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		child_definition.add_method =  new_method;
 	}
 
-	private void determine_construct_method (ClassDefinition! class_definition)
+	private void determine_construct_method (ClassDefinition class_definition)
 	{
 		Gee.List<Vala.Method> constructors = lookup_constructors (class_definition.base_type);
 		Vala.Method determined_constructor = null;
@@ -176,7 +178,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		class_definition.construct_method =  new_method;
 	}
 	
-	private void lookup_container_add_methods_for_class (string! ns, Class! container_class_implicits_entry, string! ns2, Class! container_class_holding_methods, Gee.List<Vala.Method> methods)
+	private void lookup_container_add_methods_for_class (string ns, Class container_class_implicits_entry, string? ns2, Class? container_class_holding_methods, Gee.List<Vala.Method> methods)
 	{
 		if (ns2 == null)
 			return;
@@ -208,7 +210,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 
 	}
 	
-	public void lookup_container_add_methods (string! ns, Class! container_class, Gee.List<Vala.Method> methods)
+	public void lookup_container_add_methods (string? ns, Class? container_class, Gee.List<Vala.Method> methods)
 	{
 		//FIXME workaround to stop recursion at TypeInstance and Object
 		if (null == ns) 
@@ -238,7 +240,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		return dt.unresolved_symbol.inner.name; 
 	}
 	
-	private void determine_attribute_types (ClassDefinition! class_definition)
+	private void determine_attribute_types (ClassDefinition class_definition)
 	{
 		foreach (Attribute attr in class_definition.attrs)
 		{
@@ -249,7 +251,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		}
 	}
 	
-	private Member member_lookup_inherited (Class! clazz, string! member) {
+	private Member member_lookup_inherited (Class clazz, string member) {
 		Member result = clazz.scope.lookup (member) as Member;
 		if (result != null)
 			return result;
@@ -271,7 +273,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		return null;
 	}								
 
-	private Class lookup_class (string! xmlNamespace, string! name)
+	private Class lookup_class (string xmlNamespace, string name)
 	{
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
 			if ( (ns.name == null && xmlNamespace == null ) || ns.name == xmlNamespace) {
@@ -285,7 +287,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	}
 
 
-	private Gee.List<Vala.Method> lookup_constructors (Class! clazz) {
+	private Gee.List<Vala.Method> lookup_constructors (Class clazz) {
 		var constructors = new Gee.ArrayList<Vala.Method> ();
 		foreach (Vala.Method m in clazz.get_methods ()) {
 			//todo: if m is ConstructMethod ?

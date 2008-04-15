@@ -232,7 +232,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		}
 	}
 
-	private string get_unresolved_type_ns (UnresolvedType dt)
+	private string? get_unresolved_type_ns (UnresolvedType? dt)
 	{
 		if (dt.unresolved_symbol.inner == null) {
 			return null;
@@ -251,7 +251,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		}
 	}
 	
-	private Member member_lookup_inherited (Class clazz, string member) {
+	private Member? member_lookup_inherited (Class clazz, string member) {
 		Member result = clazz.scope.lookup (member) as Member;
 		if (result != null)
 			return result;
@@ -273,7 +273,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		return null;
 	}								
 
-	private Class lookup_class (string xmlNamespace, string name)
+	private Class? lookup_class (string xmlNamespace, string name)
 	{
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
 			if ( (ns.name == null && xmlNamespace == null ) || ns.name == xmlNamespace) {

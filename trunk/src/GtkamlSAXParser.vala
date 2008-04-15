@@ -271,8 +271,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	private Class? lookup_class (string? xmlNamespace, string name)
 	{
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
-			var nsname = ns.name;
-			if (nsname == xmlNamespace) {
+			if (xmlNamespace == ns.name) {
 				Symbol s = ns.scope.lookup (name);
 				if (s is Class) {
 					return (s as Class);

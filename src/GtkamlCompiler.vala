@@ -36,7 +36,7 @@ class Gtkaml.Compiler : Object {
 	static string library;
 	[NoArrayLength ()]
 	static string[] packages;
-	static string[] implicits_directories; 
+	static string[]? implicits_directories; 
 
 	static bool ccode_only;
 	static bool compile_only;

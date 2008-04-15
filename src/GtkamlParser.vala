@@ -43,7 +43,7 @@ public class Gtkaml.Parser : Vala.Parser {
 	public void parse (CodeContext context, string[]? implicits_directories = null)
 	{
 		if (implicits_directories != null)
-			foreach (string implicits_dirs in implicits_directories)
+			foreach (string? implicits_dirs in implicits_directories)
 				implicits_store.add_implicits_dir (implicits_dirs);
 		foreach (string datadir in Environment.get_system_data_dirs ()) {
 			var filename = Path.build_filename (datadir, "gtkaml", "implicits");

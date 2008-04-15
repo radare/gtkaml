@@ -48,7 +48,7 @@ public class Gtkaml.StateStack : GLib.Object
 		return element;
 	}		
 	
-	public State pop() {
+	public State? pop() {
 		State element = peek();
 		if (element != null) {
 			array_list.remove(element);

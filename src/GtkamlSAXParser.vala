@@ -60,7 +60,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 			FileUtils.get_contents ( this.source_file.filename, out contents, out length);
 		} catch (FileError e) {
 			Report.error (null, e.message);
-			return null;
 		}
 
 		State initial_state = new State (StateId.SAX_PARSER_INITIAL_STATE, null);
@@ -199,7 +198,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		}
 	}
 	
-	public void end_element (string localname, string prefix, string URI)
+	public void end_element (string localname, string? prefix, string URI)
 	{
 		states.pop();
 	}
@@ -269,14 +268,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return new SourceReference (source_file, line_number (), column_number (), line_number (), column_number ()); 
 	}
 	
-	private Class lookup_class (string? xmlNamespace, string name)
+	private Class? lookup_class (string? xmlNamespace, string name)
 	{
-		stderr.printf ("lookuing up %s in %s\n", name, xmlNamespace);
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
-			stderr.printf ("valanamespace.ns %s\n", ns.name);
 			var nsname = ns.name;
 			if (nsname == xmlNamespace) {
-				stderr.printf ("EQUAL!!\n");
 				Symbol s = ns.scope.lookup (name);
 				if (s is Class) {
 					return (s as Class);
@@ -293,7 +289,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return string.joinv ("_", tokens);
 	}
 
-	public RootClassDefinition get_root_definition (Class clazz, Gee.List<XmlAttribute> attrs, string prefix)
+	public RootClassDefinition get_root_definition (Class clazz, Gee.List<XmlAttribute> attrs, string? prefix)
 	{
 		RootClassDefinition root_class_definition = new Gtkaml.RootClassDefinition (create_source_reference (), "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
 		root_class_definition.prefixes_namespaces = prefixes_namespaces;
@@ -307,7 +303,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 							if (root_class_definition.target_name != null) {
 								Report.error (create_source_reference (), "A name for the class already exists ('%s')".printf (root_class_definition.target_name));
 								stop_parsing ();
-								return null;
 							}
 							root_class_definition.target_name = attr.value;
 							break;
@@ -317,12 +312,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 						case "private":
 							Report.error (create_source_reference (), "'private' not allowed on root tag.");
 							stop_parsing ();
-							return null;
+							break;
 						case "construct":
 							if (root_class_definition.construct_code != null) {
 								Report.error (create_source_reference (), "A construct attribute already exists for the root class");
 								stop_parsing ();
-								return null;
 							}
 							root_class_definition.construct_code = attr.value;
 							break;
@@ -330,7 +324,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 							if (root_class_definition.preconstruct_code != null) {
 								Report.error (create_source_reference (), "A preconstruct attribute already exists for the root class");
 								stop_parsing ();
-								return null;
 							}
 							root_class_definition.preconstruct_code = attr.value;
 							break;
@@ -347,7 +340,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 				} else  {
 					Report.error (create_source_reference (), "'%s' is the only allowed prefix for attributes. Other attributes must be left unprefixed".printf (gtkaml_prefix));
 					stop_parsing ();
-					return null;
 				}
 			} else {
 				var simple_attribute = new SimpleAttribute (strip_attribute_hyphens (attr.localname), attr.value);
@@ -361,7 +353,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return root_class_definition;
 	}
 	
-	public ClassDefinition get_child_for_container (Class clazz, ClassDefinition container_definition, Gee.List<XmlAttribute> attrs, string prefix)
+	public ClassDefinition get_child_for_container (Class clazz, ClassDefinition? container_definition, Gee.List<XmlAttribute> attrs, string? prefix)
 	{
 		string identifier = null;
 		DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;
@@ -375,7 +367,8 @@ public class Gtkaml.SAXParser : GLib.Object {
 				if ((attr.localname=="public" || attr.localname=="private")) {
 					if (identifier!=null) {
 						Report.error (create_source_reference (), "Cannot have multiple identifier names:%s".printf(attr.localname));
-						stop_parsing (); return null;
+						stop_parsing (); 
+						break;
 					}
 					identifier = attr.value;
 					if (attr.localname == "public") {

@@ -303,7 +303,6 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			type = (attr.target_type as FormalParameter).type_reference;
 		} else {		
 			Report.error(null, "The attribute %s with value %s is not Field, Property or FormalParameter".printf (attr.name, value));
-			return null;
 		}
 		
 		
@@ -318,11 +317,10 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 					Report.error( null, "Attribute %s not properly ended".printf (attr.name));
 				}
 			} else if (utype.unresolved_symbol.name == "string") {
-				literal = "\"" + value.escape (null) + "\"";
+				literal = "\"" + value.escape ("") + "\"";
 			} else if (utype.unresolved_symbol.name == "bool") {
 				if (stripped_value != "true" && stripped_value != "false") {
 					Report.error (null, "'%s' is not a boolean literal".printf (value));
-					return null;
 				}
 				literal = stripped_value;
 			} else {
@@ -330,8 +328,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			}
 			return literal;
 		} else { 
-			Report.error (null, "Don't know what to do with %s\n type".printf (attr.target_type.name)); 
-			return null;
+			Report.error (null, "Don't know any literal of type %s\n".printf (attr.target_type.name)); 
+			return stripped_value;
 		}
 	}
 

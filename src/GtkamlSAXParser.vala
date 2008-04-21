@@ -28,7 +28,7 @@ using Gee;
 /** this is the Flying Spaghetti Monster */
 public class Gtkaml.SAXParser : GLib.Object {
 	/** the only reason this is public is to be accessible from the [Import]s */
-	public pointer xmlCtxt;
+	public void* xmlCtxt;
 	public CodeContext context {get;construct;}
 	public weak SourceFile source_file {get;construct;}
 	private StateStack states {get;set;}

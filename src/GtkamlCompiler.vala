@@ -36,7 +36,7 @@ class Gtkaml.Compiler : Object {
 	static string library;
 	[NoArrayLength ()]
 	static string[] packages;
-	static string[]? implicits_directories; 
+	static string[] implicits_directories; 
 
 	static bool ccode_only;
 	static bool compile_only;
@@ -45,7 +45,8 @@ class Gtkaml.Compiler : Object {
 	static bool thread;
 	static bool disable_assert;
 	static bool disable_checking;
-	static bool non_null;
+	static bool disable_non_null;
+	static bool non_null_experimental;
 	static bool verbose;
 	static string cc_command;
 	[NoArrayLength]
@@ -72,7 +73,8 @@ class Gtkaml.Compiler : Object {
 		{ "define", 'D', 0, OptionArg.STRING_ARRAY, out defines, "Define SYMBOL", "SYMBOL..." },
 		{ "disable-assert", 0, 0, OptionArg.NONE, ref disable_assert, "Disable assertions", null },
 		{ "disable-checking", 0, 0, OptionArg.NONE, ref disable_checking, "Disable run-time checks", null },
-		{ "enable-non-null", 0, 0, OptionArg.NONE, ref non_null, "Enable non-null types", null },
+		{ "disable-non-null", 0, 0, OptionArg.NONE, ref disable_non_null, "Disable non-null types", null },
+		{ "enable-non-null-experimental", 0, 0, OptionArg.NONE, ref non_null_experimental, "Enable experimental enhancements for non-null types", null },
 		{ "cc", 0, 0, OptionArg.STRING, out cc_command, "Use COMMAND as C compiler command", "COMMAND" },
 		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, out cc_options, "Pass OPTION to the C compiler", "OPTION..." },
 		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
@@ -148,7 +150,8 @@ class Gtkaml.Compiler : Object {
 		context.library = library;
 		context.assert = !disable_assert;
 		context.checking = !disable_checking;
-		context.non_null = non_null;
+		context.non_null = !disable_non_null || non_null_experimental;
+		context.non_null_experimental = non_null_experimental;
 		Report.set_verbose_errors (verbose);
 
 		context.ccode_only = ccode_only;
@@ -237,11 +240,7 @@ class Gtkaml.Compiler : Object {
 			return quit ();
 		}
 
-		var dbus_binding_provider = new DBusBindingProvider ();
-		dbus_binding_provider.context = context;
-
 		var analyzer = new SemanticAnalyzer ();
-		analyzer.add_binding_provider (dbus_binding_provider);
 		analyzer.analyze (context);
 		
 		if (Report.get_errors () > 0) {
@@ -253,6 +252,15 @@ class Gtkaml.Compiler : Object {
 
 		if (Report.get_errors () > 0) {
 			return quit ();
+		}
+
+		if (context.non_null_experimental) {
+			var null_checker = new NullChecker ();
+			null_checker.check (context);
+
+			if (Report.get_errors () > 0) {
+				return quit ();
+			}
 		}
 
 		var memory_manager = new MemoryManager ();
@@ -296,7 +304,11 @@ class Gtkaml.Compiler : Object {
 
 		if (!ccode_only) {
 			var ccompiler = new CCodeCompiler ();
-			ccompiler.compile (context, cc_command, cc_options);
+			if (cc_options == null) {
+				ccompiler.compile (context, cc_command, new string[] { null });
+			} else {
+				ccompiler.compile (context, cc_command, cc_options);
+			}
 		}
 
 		return quit ();

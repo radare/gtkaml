@@ -1,5 +1,11 @@
+2008-04-22
+  - updating compiler to 0.3.1 release of vala
+  
+2008-04-
+  - making source compatible with nullable? types
+
 2008-04-10
-  - I think #5 is solved
+  - solved issue #5 
 
 2008-04-07
   - fixed issue #9

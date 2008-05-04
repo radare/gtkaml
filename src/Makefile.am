@@ -44,7 +44,7 @@ gtkamlc_SOURCES = \
 	GtkamlSAXParser_start_parsing.c
 
 gtkamlc.vala.stamp: $(gtkamlc_VALASOURCES)
-	$(VALAC) $(VALAFLAGS) --vapidir=../vapi --pkg config --pkg libxml-2.0 --pkg vala-1.0 $^ 
+	$(VALAC) -C $(VALAFLAGS) --vapidir=../vapi --pkg config --pkg libxml-2.0 --pkg vala-1.0 $^ 
 	touch $@
 
 gtkamlc_LDADD = \

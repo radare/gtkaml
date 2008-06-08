@@ -130,7 +130,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 				}
 			case StateId.SAX_PARSER_CONTAINER_STATE:	
 				{
-					
 					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
 					string fqan;
 					
@@ -160,7 +159,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 						stop_parsing ();
 						return;
 					}
-					
+
 					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
 					
 					ClassDefinition attribute_value_definition;

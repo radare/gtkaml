@@ -27,7 +27,7 @@ SimpleViewer2_LDADD = \
 	$(EXTRA_LDFLAGS)
 
 SimpleViewer2.stamp : $(SimpleViewer2_GTKAMLSOURCES)
-	../../src/gtkamlc $(VALAFLAGS) --implicitsdir ../../data --pkg gtk+-2.0 $^
+	../../src/gtkamlc -C $(VALAFLAGS) --implicitsdir ../../data --pkg gtk+-2.0 $^
 	touch $@
 
 EXTRA_DIST = \

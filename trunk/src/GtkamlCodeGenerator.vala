@@ -296,27 +296,26 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		string value = (attr as SimpleAttribute).value;
 		
 		if (attr.target_type is Field) {
-			type = (attr.target_type as Field).type_reference;
+			type = (attr.target_type as Field).field_type;
 		} else if (attr.target_type is Property) {
-			type = (attr.target_type as Property).type_reference;
+			type = (attr.target_type as Property).property_type;
 		} else if (attr.target_type is FormalParameter) {
-			type = (attr.target_type as FormalParameter).type_reference;
+			type = (attr.target_type as FormalParameter).parameter_type;
 		} else {		
 			Report.error(null, "The attribute %s with value %s is not Field, Property or FormalParameter".printf (attr.name, value));
 		}
 		
-		
 		string stripped_value = value; stripped_value.strip ();
-		if (type is UnresolvedType)
-		{
+
+		if (stripped_value.has_prefix ("{")) {
+			if (stripped_value.has_suffix ("}")) {
+				literal = stripped_value.substring (1, stripped_value.len () - 2);
+			} else {
+				Report.error( null, "Attribute %s not properly ended".printf (attr.name));
+			}
+		} else if (type is UnresolvedType) {
 			UnresolvedType utype = type as UnresolvedType;
-			if (stripped_value.has_prefix ("{")) {
-				if (stripped_value.has_suffix ("}")) {
-					literal = stripped_value.substring (1, stripped_value.len () - 2);
-				} else {
-					Report.error( null, "Attribute %s not properly ended".printf (attr.name));
-				}
-			} else if (utype.unresolved_symbol.name == "string") {
+			if (utype.unresolved_symbol.name == "string") {
 				literal = "\"" + value.escape ("") + "\"";
 			} else if (utype.unresolved_symbol.name == "bool") {
 				if (stripped_value != "true" && stripped_value != "false") {
@@ -326,11 +325,11 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			} else {
 				literal = stripped_value;
 			}
-			return literal;
 		} else { 
-			Report.error (null, "Don't know any literal of type %s\n".printf (attr.target_type.name)); 
+			Report.error (null, "Don't know any literal of type '%s'\n".printf (attr.target_type.name)); 
 			return stripped_value;
 		}
+		return literal;
 	}
 
 	protected void write_setter (ClassDefinition class_definition, Attribute attr) 

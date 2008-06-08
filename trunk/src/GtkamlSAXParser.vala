@@ -102,8 +102,10 @@ public class Gtkaml.SAXParser : GLib.Object {
 							var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
 							source_file.add_using_directive (namespace_reference);
 							if (null == ns.prefix) {
+								//stderr.printf ("adding '%s':'%s' to prefixes_namespaces map\n", "", uri_definition[0]);
 								prefixes_namespaces.set ("", uri_definition[0]); 
 							} else {
+								//stderr.printf ("adding '%s':'%s' to prefixes_namespaces map\n", ns.prefix, uri_definition[0]);
 								prefixes_namespaces.set (ns.prefix, uri_definition[0]); 
 							}
 						}
@@ -257,10 +259,12 @@ public class Gtkaml.SAXParser : GLib.Object {
 			return;
 		}
 	}
+	
 	private string prefix_to_namespace (string? prefix)
 	{
-		if (prefix==null)
+		if (prefix==null) {
 			return prefixes_namespaces.get ("");		
+		} 
 		return prefixes_namespaces.get (prefix);		
 	}
 	

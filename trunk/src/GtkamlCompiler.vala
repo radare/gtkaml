@@ -47,7 +47,6 @@ class Gtkaml.Compiler : Object {
 	static bool disable_checking;
 	static bool disable_non_null;
 	static bool non_null_experimental;
-	static bool verbose;
 	static string cc_command;
 	[NoArrayLength]
 	static string[] cc_options;
@@ -59,29 +58,28 @@ class Gtkaml.Compiler : Object {
 	private CodeContext context;
 
 	const OptionEntry[] options = {
-		{ "vapidir", 0, 0, OptionArg.FILENAME_ARRAY, out vapi_directories, "Look for package bindings in DIRECTORY", "DIRECTORY..." },
-		{ "pkg", 0, 0, OptionArg.STRING_ARRAY, out packages, "Include binding for PACKAGE", "PACKAGE..." },
-		{ "library", 0, 0, OptionArg.STRING, out library, "Library name", "NAME" },
-		{ "basedir", 'b', 0, OptionArg.FILENAME, out basedir, "Base source directory", "DIRECTORY" },
-		{ "directory", 'd', 0, OptionArg.FILENAME, out directory, "Output directory", "DIRECTORY" },
+		{ "vapidir", 0, 0, OptionArg.FILENAME_ARRAY, ref vapi_directories, "Look for package bindings in DIRECTORY", "DIRECTORY..." },
+		{ "pkg", 0, 0, OptionArg.STRING_ARRAY, ref packages, "Include binding for PACKAGE", "PACKAGE..." },
+		{ "library", 0, 0, OptionArg.STRING, ref library, "Library name", "NAME" },
+		{ "basedir", 'b', 0, OptionArg.FILENAME, ref basedir, "Base source directory", "DIRECTORY" },
+		{ "directory", 'd', 0, OptionArg.FILENAME, ref directory, "Output directory", "DIRECTORY" },
 		{ "version", 0, 0, OptionArg.NONE, ref version, "Display version number", null },
 		{ "ccode", 'C', 0, OptionArg.NONE, ref ccode_only, "Output C code", null },
 		{ "compile", 'c', 0, OptionArg.NONE, ref compile_only, "Compile but do not link", null },
-		{ "output", 'o', 0, OptionArg.FILENAME, out output, "Place output in file FILE", "FILE" },
+		{ "output", 'o', 0, OptionArg.FILENAME, ref output, "Place output in file FILE", "FILE" },
 		{ "debug", 'g', 0, OptionArg.NONE, ref debug, "Produce debug information", null },
 		{ "thread", 0, 0, OptionArg.NONE, ref thread, "Enable multithreading support", null },
-		{ "define", 'D', 0, OptionArg.STRING_ARRAY, out defines, "Define SYMBOL", "SYMBOL..." },
+		{ "define", 'D', 0, OptionArg.STRING_ARRAY, ref defines, "Define SYMBOL", "SYMBOL..." },
 		{ "disable-assert", 0, 0, OptionArg.NONE, ref disable_assert, "Disable assertions", null },
 		{ "disable-checking", 0, 0, OptionArg.NONE, ref disable_checking, "Disable run-time checks", null },
 		{ "disable-non-null", 0, 0, OptionArg.NONE, ref disable_non_null, "Disable non-null types", null },
 		{ "enable-non-null-experimental", 0, 0, OptionArg.NONE, ref non_null_experimental, "Enable experimental enhancements for non-null types", null },
-		{ "cc", 0, 0, OptionArg.STRING, out cc_command, "Use COMMAND as C compiler command", "COMMAND" },
-		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, out cc_options, "Pass OPTION to the C compiler", "OPTION..." },
-		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
-		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, out implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
+		{ "cc", 0, 0, OptionArg.STRING, ref cc_command, "Use COMMAND as C compiler command", "COMMAND" },
+		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, ref cc_options, "Pass OPTION to the C compiler", "OPTION..." },
+		{ "save-temps", 0, 0, OptionArg.NONE, ref save_temps, "Keep temporary files", null },
+		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, ref implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
 		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
-		{ "verbose", 'v', 0, OptionArg.NONE, ref verbose, "Include the source line text when reporting errors or warnings." },
-		{ "", 0, 0, OptionArg.FILENAME_ARRAY, out sources, null, "FILE..." },
+		{ "", 0, 0, OptionArg.FILENAME_ARRAY, ref sources, null, "FILE..." },
 		{ null }
 	};
 	
@@ -142,9 +140,14 @@ class Gtkaml.Compiler : Object {
 	private int run () {
 		context = new CodeContext ();
 
-		/* support old command line interface */
+		// default to build executable
 		if (!ccode_only && !compile_only && output == null) {
-			ccode_only = true;
+			// strip extension if there is one
+			// else we use the default output file of the C compiler
+			if (sources[0].rchr (-1, '.') != null) {
+				long dot = sources[0].pointer_to_offset (sources[0].rchr (-1, '.'));
+				output = Path.get_basename (sources[0].substring (0, dot));
+			}
 		}
 
 		context.library = library;
@@ -152,7 +155,7 @@ class Gtkaml.Compiler : Object {
 		context.checking = !disable_checking;
 		context.non_null = !disable_non_null || non_null_experimental;
 		context.non_null_experimental = non_null_experimental;
-		Report.set_verbose_errors (verbose);
+		Report.set_verbose_errors (!quiet_mode);
 
 		context.ccode_only = ccode_only;
 		context.compile_only = compile_only;
@@ -198,7 +201,7 @@ class Gtkaml.Compiler : Object {
 		foreach (string source in sources) {
 			if (FileUtils.test (source, FileTest.EXISTS)) {
 				var rpath = realpath (source);
-				if (source.has_suffix (".vala")) {
+				if (source.has_suffix (".vala") || source.has_suffix (".gs")) {
 					context.add_source_file (new SourceFile (context, rpath));
 				} else if (source.has_suffix (".gtkaml")) {
 					context.add_source_file (new SourceFile (context, rpath));
@@ -207,7 +210,7 @@ class Gtkaml.Compiler : Object {
 				} else if (source.has_suffix (".c")) {
 					context.add_c_source_file (rpath);
 				} else {
-					Report.error (null, "%s is not a supported source file type. Only .vala, .vapi, and .c files are supported.".printf (source));
+					Report.error (null, "%s is not a supported source file type. Only .vala, .vapi, .gs, .gtkaml, and .c files are supported.".printf (source));
 				}
 			} else {
 				Report.error (null, "%s not found".printf (source));
@@ -222,6 +225,9 @@ class Gtkaml.Compiler : Object {
 		var parser = new Gtkaml.Parser ();
 		parser.parse (context, implicits_directories);
 		
+		var genie_parser = new Genie.Parser ();
+		genie_parser.parse (context);
+
 		if (Report.get_errors () > 0) {
 			return quit ();
 		}
@@ -261,13 +267,6 @@ class Gtkaml.Compiler : Object {
 			if (Report.get_errors () > 0) {
 				return quit ();
 			}
-		}
-
-		var memory_manager = new MemoryManager ();
-		memory_manager.analyze (context);
-
-		if (Report.get_errors () > 0) {
-			return quit ();
 		}
 
 		context.codegen.emit (context);
@@ -401,7 +400,7 @@ class Gtkaml.Compiler : Object {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s (based on Vala 0.3.x)\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s (based on Vala 0.3.3)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

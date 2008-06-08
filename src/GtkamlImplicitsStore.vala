@@ -42,11 +42,19 @@ private class Gtkaml.KeyFileWrapper : Object {
 	
 	public bool has_key (string group, string key)
 	{
-		return key_file.has_key (group, key);
+		try {
+			return key_file.has_key (group, key);
+		} catch (GLib.KeyFileError e) {
+			return false;
+		}
 	}
 	public string[] get_string_list (string group, string key)
 	{
-		return key_file.get_string_list (group, key);
+		try {
+			return key_file.get_string_list (group, key);
+		} catch (Error e) {
+			return new string[0];
+		}
 	}		
 }
 

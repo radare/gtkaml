@@ -1,6 +1,6 @@
 <!-- this is a port of http://www.michaelwerle.name/Programming/CSharp/SimpleViewer2.glade -->
 <Window xmlns='Gtk' xmlns:GLib='GLib' xmlns:class="http://gtkaml.org/0.2"
-	class:name="SimpleViewer2" title="SimpleViewer2" delete-event="{OnWindow1DeleteEvent}">
+	class:name="SimpleViewer2" title="SimpleViewer2" delete-event="OnWindow1DeleteEvent()">
 	<VBox>
 		<MenuBar expand="false">
 			<MenuItem label="_File" with-mnemonic="true">

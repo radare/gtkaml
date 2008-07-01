@@ -38,7 +38,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	private string construct_body = new string();
 	private string class_end = new string();
 	
-	private CodeContext context {get;set;}
+	public CodeContext context {get;private set;}
 	private RootClassDefinition root_class_definition {get;set;}
 	
 	

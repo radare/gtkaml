@@ -30,7 +30,7 @@ public class Gtkaml.StateStack : GLib.Object
 {
 	private Gee.ArrayList<State> array_list {get;set;}
 	
-	public StateStack() {
+	construct {
 		array_list = new ArrayList<State>();
 	}
 		

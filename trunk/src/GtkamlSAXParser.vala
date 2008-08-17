@@ -68,17 +68,13 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return root_class_definition;
 	}
 	
-	[Import]
-	public void start_parsing (string contents, ulong length);
+	public extern void start_parsing (string contents, ulong length);
 	
-	[Import]
-	public void stop_parsing();
+	public extern void stop_parsing();
 	
-	[Import]
-	public int column_number();
+	public extern int column_number();
 	
-	[Import]
-	public int line_number();
+	public extern int line_number();
 
 	[NoArrayLength]
 	public void start_element (string localname, string? prefix, 

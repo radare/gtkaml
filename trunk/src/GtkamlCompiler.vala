@@ -36,6 +36,7 @@ class Gtkaml.Compiler : Object {
 	static string library;
 	[NoArrayLength ()]
 	static string[] packages;
+	static string target_glib;
 	static string[] implicits_directories; 
 
 	static bool ccode_only;
@@ -79,6 +80,7 @@ class Gtkaml.Compiler : Object {
 		{ "save-temps", 0, 0, OptionArg.NONE, ref save_temps, "Keep temporary files", null },
 		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, ref implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
 		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
+		{ "target-glib", 0, 0, OptionArg.STRING, ref target_glib, "Target version of glib for code generation", "MAJOR.MINOR" },
 		{ "", 0, 0, OptionArg.FILENAME_ARRAY, ref sources, null, "FILE..." },
 		{ null }
 	};
@@ -172,6 +174,18 @@ class Gtkaml.Compiler : Object {
 		context.thread = thread;
 		context.save_temps = save_temps;
 
+		int glib_major = 2;
+		int glib_minor = 12;
+		if (target_glib != null && target_glib.scanf ("%d.%d", out glib_major, out glib_minor) != 2) {
+			Report.error (null, "Invalid format for --target-glib");
+		}
+
+		context.target_glib_major = glib_major;
+		context.target_glib_minor = glib_minor;
+		if (context.target_glib_major != 2) {
+			Report.error (null, "This version of valac only supports GLib 2");
+		}
+
 		if (defines != null) {
 			foreach (string define in defines) {
 				context.add_define (define);
@@ -202,7 +216,12 @@ class Gtkaml.Compiler : Object {
 			if (FileUtils.test (source, FileTest.EXISTS)) {
 				var rpath = realpath (source);
 				if (source.has_suffix (".vala") || source.has_suffix (".gs")) {
-					context.add_source_file (new SourceFile (context, rpath));
+					var source_file = new SourceFile (context, rpath);
+
+					// import the GLib namespace by default (namespace of backend-specific standard library)
+					source_file.add_using_directive (new NamespaceReference ("GLib"));
+
+					context.add_source_file (source_file);
 				} else if (source.has_suffix (".gtkaml")) {
 					context.add_source_file (new SourceFile (context, rpath));
 				} else if (source.has_suffix (".vapi")) {
@@ -210,7 +229,7 @@ class Gtkaml.Compiler : Object {
 				} else if (source.has_suffix (".c")) {
 					context.add_c_source_file (rpath);
 				} else {
-					Report.error (null, "%s is not a supported source file type. Only .vala, .vapi, .gs, .gtkaml, and .c files are supported.".printf (source));
+					Report.error (null, "%s is not a supported source file type. Only .vala, .vapi, .gs, and .c files are supported.".printf (source));
 				}
 			} else {
 				Report.error (null, "%s not found".printf (source));
@@ -224,7 +243,7 @@ class Gtkaml.Compiler : Object {
 		
 		var parser = new Gtkaml.Parser ();
 		parser.parse (context, implicits_directories);
-		
+
 		var genie_parser = new Genie.Parser ();
 		genie_parser.parse (context);
 
@@ -280,8 +299,8 @@ class Gtkaml.Compiler : Object {
 			string vapi_filename = "%s.vapi".printf (library);
 
 			// put .vapi file in current directory unless -d has been explicitly specified
-			if (directory != null) {
-				vapi_filename = "%s/%s".printf (context.directory, vapi_filename);
+			if (directory != null && !Path.is_absolute (vapi_filename)) {
+				vapi_filename = "%s%c%s".printf (context.directory, Path.DIR_SEPARATOR, vapi_filename);
 			}
 
 			interface_writer.write_file (context, vapi_filename);
@@ -291,8 +310,8 @@ class Gtkaml.Compiler : Object {
 			string gidl_filename = "%s.gidl".printf (library);
 
 			// put .gidl file in current directory unless -d has been explicitly specified
-			if (directory != null) {
-				gidl_filename = "%s/%s".printf (context.directory, gidl_filename);
+			if (directory != null && !Path.is_absolute( gidl_filename)) {
+				gidl_filename = "%s%c%s".printf (context.directory, Path.DIR_SEPARATOR, gidl_filename);
 			}
 
 			gidl_writer.write_file (context, gidl_filename);
@@ -303,6 +322,9 @@ class Gtkaml.Compiler : Object {
 
 		if (!ccode_only) {
 			var ccompiler = new CCodeCompiler ();
+			if (cc_command == null && Environment.get_variable ("CC") != null) {
+				cc_command = Environment.get_variable ("CC");
+			}
 			if (cc_options == null) {
 				ccompiler.compile (context, cc_command, new string[] { null });
 			} else {
@@ -400,7 +422,7 @@ class Gtkaml.Compiler : Object {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s (based on Vala 0.3.3)\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s (based on Vala 0.3.5)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

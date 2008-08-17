@@ -138,6 +138,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 							fqan = prefix + "." + localname;
 						else 
 							fqan = localname;
+						if (attrs.size > 0) { //an attribute cannot have.. attributes
+							Report.error (source_reference, "No class %s found.".printf(fqan));
+						}
 						states.push (new State (StateId.SAX_PARSER_ATTRIBUTE_STATE, attribute_parent_class_definition, null, fqan));
 					}
 					if (Report.get_errors() > 0)  {
@@ -165,6 +168,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 						Report.error (source_reference, "No class %s found".printf (localname));
 					}
 					ComplexAttribute attr = new ComplexAttribute (strip_attribute_hyphens (state.attribute_name), attribute_value_definition);
+					state.attribute = attr;
 					
 					//add the attribute into the parent container
 					state.class_definition.add_attribute (attr);		
@@ -197,7 +201,17 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	public void end_element (string localname, string? prefix, string URI)
 	{
-		states.pop();
+		State last_state = states.pop();
+		//check if we were in 'attribute' state but no sub-tags or no text/cdata blocks were encountered
+		if ((last_state != null)
+			&& (last_state.state_id == StateId.SAX_PARSER_ATTRIBUTE_STATE)
+			&& (last_state.attribute == null)
+			&& (last_state.attribute_name != gtkaml_prefix+".preconstruct")
+			&& (last_state.attribute_name != gtkaml_prefix+".construct")) {
+				Report.error (create_source_reference (), 
+					"%s is not well defined or is not an attribute of %s".printf (last_state.attribute_name, last_state.class_definition.base_full_name));
+				stop_parsing ();
+			}
 	}
 	
 	public void cdata_block (string cdata, int len)

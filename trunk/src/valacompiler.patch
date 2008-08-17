@@ -27,27 +27,27 @@
  	static string library;
  	[NoArrayLength ()]
  	static string[] packages;
+	static string target_glib;
 +	static string[] implicits_directories; 
  
  	static bool ccode_only;
- 	static bool compile_only;
 @@ -73,6 +76,7 @@
- 		{ "cc", 0, 0, OptionArg.STRING, out cc_command, "Use COMMAND as C compiler command", "COMMAND" },
- 		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, out cc_options, "Pass OPTION to the C compiler", "OPTION..." },
- 		{ "save-temps", 0, 0, OptionArg.NONE, out save_temps, "Keep temporary files", null },
-+		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, out implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
+ 		{ "cc", 0, 0, OptionArg.STRING, ref cc_command, "Use COMMAND as C compiler command", "COMMAND" },
+ 		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, ref cc_options, "Pass OPTION to the C compiler", "OPTION..." },
+ 		{ "save-temps", 0, 0, OptionArg.NONE, ref save_temps, "Keep temporary files", null },
++		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, ref implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
  		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
- 		{ "verbose", 'v', 0, OptionArg.NONE, ref verbose, "Include the source line text when reporting errors or warnings." },
- 		{ "", 0, 0, OptionArg.FILENAME_ARRAY, out sources, null, "FILE..." },
+		{ "target-glib", 0, 0, OptionArg.STRING, ref target_glib, "Target version of glib for code generation", "MAJOR.MINOR" },
+ 		{ "", 0, 0, OptionArg.FILENAME_ARRAY, ref sources, null, "FILE..." },
 @@ -193,6 +197,8 @@
- 				var rpath = realpath (source);
- 				if (source.has_suffix (".vala")) {
- 					context.add_source_file (new SourceFile (context, rpath));
+					source_file.add_using_directive (new NamespaceReference ("GLib"));
+
+ 					context.add_source_file (source_file);
 +				} else if (source.has_suffix (".gtkaml")) {
 +					context.add_source_file (new SourceFile (context, rpath));
  				} else if (source.has_suffix (".vapi")) {
  					context.add_source_file (new SourceFile (context, rpath, true));
- 				} else if (source.has_suffix (".c")) {
+ 				} else {
 @@ -210,8 +216,8 @@
  			return quit ();
  		}
@@ -56,9 +56,9 @@
 -		parser.parse (context);
 +		var parser = new Gtkaml.Parser ();
 +		parser.parse (context, implicits_directories);
- 		
- 		if (Report.get_errors () > 0) {
- 			return quit ();
+
+		var genie_parser = new Genie.Parser ();
+		genie_parser.parse (context); 		
 @@ -372,7 +378,7 @@
  
  	static int main (string[] args) {

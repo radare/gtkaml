@@ -96,7 +96,7 @@ adds = insert
 adds = append_column;remove_column;insert_column
 
 [TreeViewColumn]
-adds = pack_start;pack_end;add_attribute;
+adds = pack_start;pack_end;add_attribute
 
 [Dialog]
 adds = add_action_widget

@@ -219,7 +219,7 @@ class Gtkaml.Compiler : Object {
 					var source_file = new SourceFile (context, rpath);
 
 					// import the GLib namespace by default (namespace of backend-specific standard library)
-					source_file.add_using_directive (new NamespaceReference ("GLib"));
+					source_file.add_using_directive (new UsingDirective (new UnresolvedSymbol (null, "GLib", null)));
 
 					context.add_source_file (source_file);
 				} else if (source.has_suffix (".gtkaml")) {

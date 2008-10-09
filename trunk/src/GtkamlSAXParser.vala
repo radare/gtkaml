@@ -29,8 +29,8 @@ using Gee;
 public class Gtkaml.SAXParser : GLib.Object {
 	/** the only reason this is public is to be accessible from the [Import]s */
 	public void* xmlCtxt;
-	public CodeContext context {get;construct;}
-	public weak SourceFile source_file {get;construct;}
+	public CodeContext context {get;private set;}
+	public weak SourceFile source_file {get;private set;}
 	private StateStack states {get;set;}
 	private Map<string,int> generated_identifiers_counter = new HashMap<string,int> (str_hash, str_equal);
 	private Collection<string> used_identifiers = new ArrayList<string> (str_equal);
@@ -95,7 +95,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 						if ( null == ns.prefix || null != ns.prefix && ns.prefix != gtkaml_prefix)
 						{
 							string[] uri_definition = ns.URI.split_set(":");	
-							var namespace_reference = new Vala.NamespaceReference (uri_definition[0], source_reference);
+							var namespace_reference = new Vala.UsingDirective(new UnresolvedSymbol (null, "GLib", null), source_reference);
 							source_file.add_using_directive (namespace_reference);
 							if (null == ns.prefix) {
 								//stderr.printf ("adding '%s':'%s' to prefixes_namespaces map\n", "", uri_definition[0]);

@@ -1,3 +1,6 @@
+2008-10-09
+  - replaced NamespaceReference with UsingDirective
+
 2008-08-17
   - fixed a bug that prevented gtkaml on erroring out when a tag looked like an attached attribute (i.e. it was not a class) but then had no attribute value (or subtags)
  

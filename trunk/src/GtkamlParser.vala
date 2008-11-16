@@ -36,7 +36,7 @@ public class Gtkaml.Parser : Vala.Parser {
 	
 	public Parser ()
 	{
-		
+		base ();		
 	}
 	
 	[NoArrayLength]

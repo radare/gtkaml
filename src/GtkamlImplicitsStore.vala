@@ -142,8 +142,10 @@ public class Gtkaml.ImplicitsStore : Object
 		//stderr.printf ("determine_parameter_names_and_default_values %s %s of %s.%s\n", class_definition.base_full_name, method.name, ns, clazz);
 		var result = new Gee.ArrayList<ImplicitsParameter> ();
 		string method_name = method.name;
-		if (method.name.has_prefix (".new"))
-			method_name = method.name.substring(1, method.name.len () - 1);
+		if (method is CreationMethod) {
+			if (method.name != "new")
+				method_name = "new." + method.name;
+		}
 		else
 			method_name = "add." + method.name;
 		var result_array = this.get_method_parameters (ns, clazz, method_name);

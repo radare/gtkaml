@@ -19,13 +19,11 @@
  *
  * Author:
  * 	Jürg Billeter <j@bitron.ch>
- * 	Vlad Grecescu (b100dian@gmail.com)
  */
 
 using GLib;
-using Vala;
 
-class Gtkaml.Compiler : Object {
+class Vala.Compiler {
 	static string basedir;
 	static string directory;
 	static bool version;
@@ -45,15 +43,13 @@ class Gtkaml.Compiler : Object {
 	static bool debug;
 	static bool thread;
 	static bool disable_assert;
-	static bool disable_checking;
+	static bool enable_checking;
 	static bool disable_non_null;
 	static bool non_null_experimental;
 	static string cc_command;
 	[NoArrayLength]
 	static string[] cc_options;
 	static bool save_temps;
-	[NoArrayLength]
-	static string[] defines;
 	static bool quiet_mode;
 
 	private CodeContext context;
@@ -70,9 +66,8 @@ class Gtkaml.Compiler : Object {
 		{ "output", 'o', 0, OptionArg.FILENAME, ref output, "Place output in file FILE", "FILE" },
 		{ "debug", 'g', 0, OptionArg.NONE, ref debug, "Produce debug information", null },
 		{ "thread", 0, 0, OptionArg.NONE, ref thread, "Enable multithreading support", null },
-		{ "define", 'D', 0, OptionArg.STRING_ARRAY, ref defines, "Define SYMBOL", "SYMBOL..." },
 		{ "disable-assert", 0, 0, OptionArg.NONE, ref disable_assert, "Disable assertions", null },
-		{ "disable-checking", 0, 0, OptionArg.NONE, ref disable_checking, "Disable run-time checks", null },
+		{ "enable-checking", 0, 0, OptionArg.NONE, ref enable_checking, "Enable additional run-time checks", null },
 		{ "disable-non-null", 0, 0, OptionArg.NONE, ref disable_non_null, "Disable non-null types", null },
 		{ "enable-non-null-experimental", 0, 0, OptionArg.NONE, ref non_null_experimental, "Enable experimental enhancements for non-null types", null },
 		{ "cc", 0, 0, OptionArg.STRING, ref cc_command, "Use COMMAND as C compiler command", "COMMAND" },
@@ -154,7 +149,7 @@ class Gtkaml.Compiler : Object {
 
 		context.library = library;
 		context.assert = !disable_assert;
-		context.checking = !disable_checking;
+		context.checking = enable_checking;
 		context.non_null = !disable_non_null || non_null_experimental;
 		context.non_null_experimental = non_null_experimental;
 		Report.set_verbose_errors (!quiet_mode);
@@ -186,19 +181,16 @@ class Gtkaml.Compiler : Object {
 			Report.error (null, "This version of valac only supports GLib 2");
 		}
 
-		if (defines != null) {
-			foreach (string define in defines) {
-				context.add_define (define);
-			}
-		}
-
 		context.codegen = new CCodeGenerator ();
 
-		/* default package */
+		/* default packages */
 		if (!add_package (context, "glib-2.0")) {
 			Report.error (null, "glib-2.0 not found in specified Vala API directories");
 		}
-		
+		if (!add_package (context, "gobject-2.0")) {
+			Report.error (null, "gobject-2.0 not found in specified Vala API directories");
+		}
+
 		if (packages != null) {
 			foreach (string package in packages) {
 				if (!add_package (context, package)) {
@@ -251,13 +243,6 @@ class Gtkaml.Compiler : Object {
 			return quit ();
 		}
 		
-		var attributeprocessor = new AttributeProcessor ();
-		attributeprocessor.process (context);
-		
-		if (Report.get_errors () > 0) {
-			return quit ();
-		}
-		
 		var resolver = new SymbolResolver ();
 		resolver.resolve (context);
 		
@@ -306,15 +291,15 @@ class Gtkaml.Compiler : Object {
 			interface_writer.write_file (context, vapi_filename);
 
 
-			var gidl_writer = new GIdlWriter ();
-			string gidl_filename = "%s.gidl".printf (library);
+			var gir_writer = new GIRWriter ();
+			string gir_filename = "%s.gir".printf (library);
 
-			// put .gidl file in current directory unless -d has been explicitly specified
-			if (directory != null && !Path.is_absolute( gidl_filename)) {
-				gidl_filename = "%s%c%s".printf (context.directory, Path.DIR_SEPARATOR, gidl_filename);
+			// put .gir file in current directory unless -d has been explicitly specified
+			if (directory != null && !Path.is_absolute (gir_filename)) {
+				gir_filename = "%s%c%s".printf (context.directory, Path.DIR_SEPARATOR, gir_filename);
 			}
 
-			gidl_writer.write_file (context, gidl_filename);
+			gir_writer.write_file (context, gir_filename);
 
 
 			library = null;
@@ -422,7 +407,7 @@ class Gtkaml.Compiler : Object {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s (based on Vala 0.3.5)\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s (based on Vala 0.5.1)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

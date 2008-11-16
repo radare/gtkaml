@@ -143,7 +143,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		//pass one: see if we find an explicitly specified constructor
 		foreach (Vala.Method constructor in constructors) {
 			foreach (Gtkaml.Attribute attr in class_definition.attrs) {
-				if ( attr is SimpleAttribute && ".new." + attr.name == constructor.name && (attr as SimpleAttribute).value == "true") {
+				if ( attr is SimpleAttribute && attr.name == constructor.name && (attr as SimpleAttribute).value == "true") {
 					determined_constructor = constructor;
 					to_remove.add (attr);
 					break;
@@ -290,8 +290,8 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	private Gee.List<Vala.Method> lookup_constructors (Class clazz) {
 		var constructors = new Gee.ArrayList<Vala.Method> ();
 		foreach (Vala.Method m in clazz.get_methods ()) {
-			//todo: if m is ConstructMethod ?
-			if (m.name.has_prefix (".new")) {
+			if (m is CreationMethod)
+			{
 				constructors.add (m);
 			}
 		}	

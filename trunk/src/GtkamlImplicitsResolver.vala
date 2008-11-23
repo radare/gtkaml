@@ -177,18 +177,24 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		
 		class_definition.construct_method =  new_method;
 	}
-	
-	private void lookup_container_add_methods_for_class (string ns, Class container_class_implicits_entry, string? ns2, Class? container_class_holding_methods, Gee.List<Vala.Method> methods)
+
+	private void lookup_container_add_methods_for_class (string ns, Class container_class_implicits_entry, string? ns2, ObjectTypeSymbol? container_class_holding_methods, Gee.List<Vala.Method> methods)
 	{
 		if (ns2 == null)
 			return;
+			
+		Gee.List<DataType> base_types;
+		if (container_class_holding_methods is Class?)
+			base_types = (container_class_holding_methods as Class).get_base_types ();
+		else if (container_class_holding_methods is Interface?)
+			base_types = (container_class_holding_methods as Interface).get_prerequisites ();
 
 		//recurse over base classes - ugly ugly ugly!
-		foreach (DataType dt in container_class_holding_methods.get_base_types ()) {
+		foreach (DataType dt in base_types) {
 			if (dt is UnresolvedType) {
 				string utns = get_unresolved_type_ns (dt as UnresolvedType);
 				if (utns == null) continue;
-				Class c = lookup_class (utns, (dt as UnresolvedType).unresolved_symbol.name);
+				ObjectTypeSymbol c = lookup_class (utns, (dt as UnresolvedType).unresolved_symbol.name);
 				if (c != null) {
 					lookup_container_add_methods_for_class (ns, container_class_implicits_entry, utns, c, methods);
 				}
@@ -202,7 +208,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				foreach (Vala.Method method in container_class_holding_methods.get_methods ())
 					if (method.name == add_method) {
 						methods.add (method);
-						//stderr.printf ("Found direct add method '%s.%s' for %s(%x), we now have %d\n", container_class_holding_methods.name, container_class_implicits_entry.name, method.name, methods.size);
+						//stderr.printf ("Found direct add method '%s.%s' for %s, we now have %d\n", container_class_holding_methods.name, method.name, container_class_implicits_entry.name, methods.size);
 						break;
 					}
 			}
@@ -216,13 +222,15 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		if (null == ns) 
 			return;
 
+		//first recurse over class hierarchy
 		lookup_container_add_methods_for_class (ns, container_class, ns, container_class, methods);
-		
+
+		//then recurse over implicits definitions		
 		foreach (DataType dt in container_class.get_base_types ()) {
 			if (dt is UnresolvedType) {
 				string utns = get_unresolved_type_ns (dt as UnresolvedType);
 				if (utns == null) continue;
-				Class c = lookup_class (utns, (dt as UnresolvedType).unresolved_symbol.name);
+				Class c = lookup_class (utns, (dt as UnresolvedType).unresolved_symbol.name) as Class;
 				if (c != null) {
 					//over inherited implicits definitions
 					lookup_container_add_methods (utns, c, methods);
@@ -265,7 +273,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 					ns = (dt as UnresolvedType).unresolved_symbol.inner.name;
 				else
 					ns = null;
-				var clazz = lookup_class (ns, name);
+				var clazz = lookup_class (ns, name) as Class;
 				if (clazz != null && ( null != (result = member_lookup_inherited (clazz, member) as Member)))
 					return result;
 			}
@@ -273,13 +281,13 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		return null;
 	}								
 
-	private Class? lookup_class (string xmlNamespace, string name)
+	private ObjectTypeSymbol? lookup_class (string xmlNamespace, string name)
 	{
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
 			if ( (ns.name == null && xmlNamespace == null ) || ns.name == xmlNamespace) {
 				Symbol s = ns.scope.lookup (name);
-				if (s is Class) {
-					return s as Class;
+				if (s is ObjectTypeSymbol) {
+					return s as ObjectTypeSymbol;
 				}
 			}
 		}

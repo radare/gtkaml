@@ -30,7 +30,6 @@ public class Gtkaml.Parser : Vala.Parser {
 
 
 	private CodeContext context;
-	private SourceFile current_source_file;
 	
 	private ImplicitsStore implicits_store = new ImplicitsStore ();
 	

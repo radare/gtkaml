@@ -33,7 +33,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 	public weak SourceFile source_file {get;private set;}
 	private StateStack states {get;set;}
 	private Map<string,int> generated_identifiers_counter = new HashMap<string,int> (str_hash, str_equal);
-	private Collection<string> used_identifiers = new ArrayList<string> (str_equal);
 	/** prefix/vala.namespace pair */
 	private Gee.Map<string,string> prefixes_namespaces {get;set;}
 
@@ -165,7 +164,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 					if (clazz != null) { //this is a member/container child object
 						attribute_value_definition = get_child_for_container (clazz, null, attrs, prefix);
 					} else {
-						Report.error (source_reference, "No class %s found".printf (localname));
+						Report.error (source_reference, "No class '%s' found".printf (localname));
+						stop_parsing();
+						return;
 					}
 					ComplexAttribute attr = new ComplexAttribute (strip_attribute_hyphens (state.attribute_name), attribute_value_definition);
 					state.attribute = attr;

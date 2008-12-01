@@ -79,8 +79,6 @@ namespace Gtkaml {
 		
 		public Vala.Method? determine_matching_method ()
 		{
-			Gee.List<ImplicitsParameter> defaulted_parameters;
-
 			//stderr.printf ("===%d candidates\n", methods.size);
 			foreach (Vala.Method method in methods) {
 				//stderr.printf ("CANDIDATE %s\n", method.name);

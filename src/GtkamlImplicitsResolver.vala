@@ -188,6 +188,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			base_types = (container_class_holding_methods as Class).get_base_types ();
 		else if (container_class_holding_methods is Interface?)
 			base_types = (container_class_holding_methods as Interface).get_prerequisites ();
+			else base_types = new Gee.ReadOnlyList<DataType> ();
 
 		//recurse over base classes - ugly ugly ugly!
 		foreach (DataType dt in base_types) {

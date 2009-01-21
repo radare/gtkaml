@@ -1,54 +1,39 @@
---- valacompiler.vala	Mon Mar 24 16:53:21 2008
-+++ GtkamlCompiler.vala	Wed Apr  9 11:22:40 2008
+--- vala-0.5.4/compiler/valacompiler.vala	2009-01-05 23:47:55.000000000 +0200
++++ gtkaml-0.2.x.x/src/GtkamlCompiler.vala	2009-01-11 16:39:58.000000000 +0200
 @@ -1,5 +1,5 @@
 -/* valacompiler.vala
 - *
 +/* GtkamlCompiler.vala
 + * 
-  * Copyright (C) 2006-2008  Jürg Billeter
+  * Copyright (C) 2006-2009  Jürg Billeter
   * Copyright (C) 1996-2002, 2004, 2005, 2006 Free Software Foundation, Inc.
   *
-@@ -19,11 +19,13 @@
-  *
-  * Author:
-  * 	Jürg Billeter <j@bitron.ch>
-+ * 	Vlad Grecescu (b100dian@gmail.com)
-  */
- 
- using GLib;
-+using Vala;
- 
--class Vala.Compiler : Object {
-+class Gtkaml.Compiler : Object {
- 	static string basedir;
- 	static string directory;
- 	static bool version;
-@@ -34,6 +36,7 @@
- 	static string library;
- 	[NoArrayLength ()]
+@@ -38,6 +38,7 @@
+ 	[NoArrayLength]
  	static string[] packages;
-	static string target_glib;
+ 	static string target_glib;
 +	static string[] implicits_directories; 
  
  	static bool ccode_only;
-@@ -73,6 +76,7 @@
- 		{ "cc", 0, 0, OptionArg.STRING, ref cc_command, "Use COMMAND as C compiler command", "COMMAND" },
+ 	static bool compile_only;
+@@ -80,6 +81,7 @@
  		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, ref cc_options, "Pass OPTION to the C compiler", "OPTION..." },
+ 		{ "dump-tree", 0, 0, OptionArg.FILENAME, ref dump_tree, "Write code tree to FILE", "FILE" },
  		{ "save-temps", 0, 0, OptionArg.NONE, ref save_temps, "Keep temporary files", null },
 +		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, ref implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
  		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
-		{ "target-glib", 0, 0, OptionArg.STRING, ref target_glib, "Target version of glib for code generation", "MAJOR.MINOR" },
+ 		{ "target-glib", 0, 0, OptionArg.STRING, ref target_glib, "Target version of glib for code generation", "MAJOR.MINOR" },
  		{ "", 0, 0, OptionArg.FILENAME_ARRAY, ref sources, null, "FILE..." },
-@@ -193,6 +197,8 @@
-					source_file.add_using_directive (new NamespaceReference ("GLib"));
-
+@@ -221,6 +223,8 @@
+ 					source_file.add_using_directive (new UsingDirective (new UnresolvedSymbol (null, "GLib", null)));
+ 
  					context.add_source_file (source_file);
 +				} else if (source.has_suffix (".gtkaml")) {
 +					context.add_source_file (new SourceFile (context, rpath));
  				} else if (source.has_suffix (".vapi")) {
  					context.add_source_file (new SourceFile (context, rpath, true));
- 				} else {
-@@ -210,8 +216,8 @@
+ 				} else if (source.has_suffix (".c")) {
+@@ -238,8 +242,8 @@
  			return quit ();
  		}
  		
@@ -56,10 +41,26 @@
 -		parser.parse (context);
 +		var parser = new Gtkaml.Parser ();
 +		parser.parse (context, implicits_directories);
-
-		var genie_parser = new Genie.Parser ();
-		genie_parser.parse (context); 		
-@@ -372,7 +378,7 @@
+ 
+ 		var genie_parser = new Genie.Parser ();
+ 		genie_parser.parse (context);
+@@ -257,12 +261,12 @@
+ 
+ 		var analyzer = new SemanticAnalyzer ();
+ 		analyzer.analyze (context);
+-
++		
+ 		if (dump_tree != null) {
+ 			var code_writer = new CodeWriter (true);
+ 			code_writer.write_file (context, dump_tree);
+-		}
+-
++        }
++		
+ 		if (Report.get_errors () > 0) {
+ 			return quit ();
+ 		}
+@@ -406,7 +410,7 @@
  
  	static int main (string[] args) {
  		try {
@@ -68,12 +69,12 @@
  			opt_context.set_help_enabled (true);
  			opt_context.add_main_entries (options, null);
  			opt_context.parse (ref args);
-@@ -383,7 +389,7 @@
+@@ -417,7 +421,7 @@
  		}
  		
  		if (version) {
 -			stdout.printf ("Vala %s\n", Config.PACKAGE_VERSION);
-+			stdout.printf ("Gtkaml %s (based on Vala 0.2.0)\n", Config.PACKAGE_VERSION);
++			stdout.printf ("Gtkaml %s (based on Vala 0.5.2)\n", Config.PACKAGE_VERSION);
  			return 0;
  		}
  		

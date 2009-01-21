@@ -74,13 +74,16 @@ public class Gtkaml.SAXParser : GLib.Object {
 	public extern int column_number();
 	
 	public extern int line_number();
-
-	[NoArrayLength]
+	
+	[NoArrayLength]	
 	public void start_element (string localname, string? prefix, 
-	                         string URI, int nb_namespaces, string[] namespaces, 
-	                         int nb_attributes, int nb_defaulted, string[] attributes)
+	                         string URI, int nb_namespaces, 
+	                         [CCode (array_length = false, array_null_terminated = false)] 
+	                         string[] namespaces, 
+	                         int nb_attributes, int nb_defaulted, 
+	                         [CCode (array_length = false, array_null_terminated = false)]
+	                         string[] attributes)
 	{
-
 		var attrs = parse_attributes( attributes, nb_attributes );
 		State state = states.peek();
 		var source_reference = create_source_reference ();
@@ -469,7 +472,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	
 	[NoArrayLength]
-	private Gee.List<XmlAttribute> parse_attributes (string[] attributes, int nb_attributes)
+	private Gee.List<XmlAttribute> parse_attributes ([CCode (array_length = false)] string[] attributes, int nb_attributes)
 	{	
 		int walker = 0;
 		string end;
@@ -489,8 +492,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return attribute_list;
 	}
 	
+	
 	[NoArrayLength]
-	private Gee.List<XmlNamespace> parse_namespaces (string[] namespaces, int nb_namespaces)
+	private Gee.List<XmlNamespace> parse_namespaces ([CCode (array_length = false)] string[] namespaces, int nb_namespaces)
 	{
 		int walker = 0;
 		var namespace_list = new Gee.ArrayList<XmlNamespace> ();

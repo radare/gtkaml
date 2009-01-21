@@ -41,13 +41,15 @@ class Vala.Compiler {
 	static string[] implicits_directories; 
 
 	static bool ccode_only;
+	static string header_filename;
 	static bool compile_only;
 	static string output;
 	static bool debug;
 	static bool thread;
 	static bool disable_assert;
 	static bool enable_checking;
-	static bool disable_non_null;
+	static bool deprecated;
+	static bool experimental;
 	static bool non_null_experimental;
 	static bool disable_dbus_transformation;
 	static string cc_command;
@@ -68,13 +70,15 @@ class Vala.Compiler {
 		{ "directory", 'd', 0, OptionArg.FILENAME, ref directory, "Output directory", "DIRECTORY" },
 		{ "version", 0, 0, OptionArg.NONE, ref version, "Display version number", null },
 		{ "ccode", 'C', 0, OptionArg.NONE, ref ccode_only, "Output C code", null },
+		{ "header", 'H', 0, OptionArg.FILENAME, ref header_filename, "Output C header file", "FILE" },
 		{ "compile", 'c', 0, OptionArg.NONE, ref compile_only, "Compile but do not link", null },
 		{ "output", 'o', 0, OptionArg.FILENAME, ref output, "Place output in file FILE", "FILE" },
 		{ "debug", 'g', 0, OptionArg.NONE, ref debug, "Produce debug information", null },
 		{ "thread", 0, 0, OptionArg.NONE, ref thread, "Enable multithreading support", null },
 		{ "disable-assert", 0, 0, OptionArg.NONE, ref disable_assert, "Disable assertions", null },
 		{ "enable-checking", 0, 0, OptionArg.NONE, ref enable_checking, "Enable additional run-time checks", null },
-		{ "disable-non-null", 0, 0, OptionArg.NONE, ref disable_non_null, "Disable non-null types", null },
+		{ "enable-deprecated", 0, 0, OptionArg.NONE, ref deprecated, "Enable deprecated features", null },
+		{ "enable-experimental", 0, 0, OptionArg.NONE, ref experimental, "Enable experimental features", null },
 		{ "enable-non-null-experimental", 0, 0, OptionArg.NONE, ref non_null_experimental, "Enable experimental enhancements for non-null types", null },
 		{ "disable-dbus-transformation", 0, 0, OptionArg.NONE, ref disable_dbus_transformation, "Disable transformation of D-Bus member names", null },
 		{ "cc", 0, 0, OptionArg.STRING, ref cc_command, "Use COMMAND as C compiler command", "COMMAND" },
@@ -158,13 +162,15 @@ class Vala.Compiler {
 		context.library = library;
 		context.assert = !disable_assert;
 		context.checking = enable_checking;
-		context.non_null = !disable_non_null || non_null_experimental;
+		context.deprecated = deprecated;
+		context.experimental = experimental;
 		context.non_null_experimental = non_null_experimental;
 		context.dbus_transformation = !disable_dbus_transformation;
 		Report.set_verbose_errors (!quiet_mode);
 
 		context.ccode_only = ccode_only;
 		context.compile_only = compile_only;
+		context.header_filename = header_filename;
 		context.output = output;
 		if (basedir != null) {
 			context.basedir = realpath (basedir);
@@ -261,12 +267,11 @@ class Vala.Compiler {
 
 		var analyzer = new SemanticAnalyzer ();
 		analyzer.analyze (context);
-		
 		if (dump_tree != null) {
 			var code_writer = new CodeWriter (true);
 			code_writer.write_file (context, dump_tree);
-        }
-		
+		}
+
 		if (Report.get_errors () > 0) {
 			return quit ();
 		}
@@ -325,7 +330,7 @@ class Vala.Compiler {
 				cc_command = Environment.get_variable ("CC");
 			}
 			if (cc_options == null) {
-				ccompiler.compile (context, cc_command, new string[] { null });
+				ccompiler.compile (context, cc_command, new string[] { });
 			} else {
 				ccompiler.compile (context, cc_command, cc_options);
 			}
@@ -421,7 +426,7 @@ class Vala.Compiler {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s (based on Vala 0.5.2)\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s (based on Vala 0.5.6)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

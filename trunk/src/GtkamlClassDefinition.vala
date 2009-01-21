@@ -34,8 +34,8 @@ public enum DefinitionScope {
 public class Gtkaml.ClassDefinition : GLib.Object {
 	public Vala.SourceReference source_reference {get;set;}
 	public string identifier {get;set;}
-	public string# base_full_name {
-		get { 
+	public string base_full_name {
+		owned get { 
 			//BUG return (ns == null)? base_type.name : ns + "." + base_type.name;
 			//BUG return (base_ns == null)? base_type.name : (base_ns + "." + base_type.name);
 			string baseful_name;

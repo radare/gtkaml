@@ -55,6 +55,7 @@ src/Makefile
 data/Makefile
 vapi/Makefile
 tests/Makefile
+tutorial/Makefile
 examples/SimpleViewer2/Makefile
 ])
 

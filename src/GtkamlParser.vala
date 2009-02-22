@@ -39,7 +39,7 @@ public class Gtkaml.Parser : Vala.Parser {
 	}
 	
 	[NoArrayLength]
-	public void parse (CodeContext context, string[]? implicits_directories = null)
+	public new void parse (CodeContext context, string[]? implicits_directories = null)
 	{
 		if (implicits_directories != null)
 			foreach (string? implicits_dirs in implicits_directories)
@@ -69,19 +69,12 @@ public class Gtkaml.Parser : Vala.Parser {
 				
 				var sax_parser = new SAXParser (context, dummy_file); 
 				RootClassDefinition root_class_definition = sax_parser.parse();
-				if (Report.get_errors() != 0)
-					return;
 
 				var implicitsResolver = new ImplicitsResolver (context, implicits_store); 
 				implicitsResolver.resolve (root_class_definition);
-				if (Report.get_errors() != 0)
-					return;
-
 				
 				Gtkaml.CodeGenerator code_generator = new CodeGenerator (context);	
 				code_generator.generate (root_class_definition);
-				if (Report.get_errors() != 0)
-					return;
 				
 				string vala_contents =  code_generator.yield ();
 				if (vala_contents != null) { 
@@ -89,7 +82,7 @@ public class Gtkaml.Parser : Vala.Parser {
 					FileUtils.set_contents (vala_filename, vala_contents);
 					gtkaml_source_file.filename = vala_filename;
 					base.visit_source_file (gtkaml_source_file);
-					if (Report.get_errors () == 0 && !context.save_temps) {
+					if (!context.save_temps) {
 						FileUtils.unlink (vala_filename);
 					}
 				} 

@@ -93,17 +93,17 @@ class Vala.Compiler {
 	};
 	
 	private int quit () {
-		if (Report.get_errors () == 0 && Report.get_warnings () == 0) {
+		if (context.report.get_errors () == 0 && context.report.get_warnings () == 0) {
 			return 0;
 		}
-		if (Report.get_errors () == 0) {
+		if (context.report.get_errors () == 0) {
 			if (!quiet_mode) {
-				stdout.printf ("Compilation succeeded - %d warning(s)\n", Report.get_warnings ());
+				stdout.printf ("Compilation succeeded - %d warning(s)\n", context.report.get_warnings ());
 			}
 			return 0;
 		} else {
 			if (!quiet_mode) {
-				stdout.printf ("Compilation failed: %d error(s), %d warning(s)\n", Report.get_errors (), Report.get_warnings ());
+				stdout.printf ("Compilation failed: %d error(s), %d warning(s)\n", context.report.get_errors (), context.report.get_warnings ());
 			}
 			return 1;
 		}
@@ -148,6 +148,7 @@ class Vala.Compiler {
 	
 	private int run () {
 		context = new CodeContext ();
+		CodeContext.push (context);
 
 		// default to build executable
 		if (!ccode_only && !compile_only && output == null) {
@@ -166,7 +167,7 @@ class Vala.Compiler {
 		context.experimental = experimental;
 		context.non_null_experimental = non_null_experimental;
 		context.dbus_transformation = !disable_dbus_transformation;
-		Report.set_verbose_errors (!quiet_mode);
+		context.report.set_verbose_errors (!quiet_mode);
 
 		context.ccode_only = ccode_only;
 		context.compile_only = compile_only;
@@ -215,7 +216,7 @@ class Vala.Compiler {
 			packages = null;
 		}
 		
-		if (Report.get_errors () > 0) {
+		if (context.report.get_errors () > 0) {
 			return quit ();
 		}
 		
@@ -244,7 +245,7 @@ class Vala.Compiler {
 		}
 		sources = null;
 		
-		if (Report.get_errors () > 0) {
+		if (context.report.get_errors () > 0) {
 			return quit ();
 		}
 		
@@ -254,14 +255,14 @@ class Vala.Compiler {
 		var genie_parser = new Genie.Parser ();
 		genie_parser.parse (context);
 
-		if (Report.get_errors () > 0) {
+		if (context.report.get_errors () > 0) {
 			return quit ();
 		}
 		
 		var resolver = new SymbolResolver ();
 		resolver.resolve (context);
 		
-		if (Report.get_errors () > 0) {
+		if (context.report.get_errors () > 0) {
 			return quit ();
 		}
 
@@ -272,14 +273,14 @@ class Vala.Compiler {
 			code_writer.write_file (context, dump_tree);
 		}
 
-		if (Report.get_errors () > 0) {
+		if (context.report.get_errors () > 0) {
 			return quit ();
 		}
 
 		var flow_analyzer = new FlowAnalyzer ();
 		flow_analyzer.analyze (context);
 
-		if (Report.get_errors () > 0) {
+		if (context.report.get_errors () > 0) {
 			return quit ();
 		}
 
@@ -287,14 +288,14 @@ class Vala.Compiler {
 			var null_checker = new NullChecker ();
 			null_checker.check (context);
 
-			if (Report.get_errors () > 0) {
+			if (context.report.get_errors () > 0) {
 				return quit ();
 			}
 		}
 
 		context.codegen.emit (context);
 		
-		if (Report.get_errors () > 0) {
+		if (context.report.get_errors () > 0) {
 			return quit ();
 		}
 		

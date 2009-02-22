@@ -118,11 +118,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 
 					this.root_class_definition = get_root_definition (clazz, attrs, prefix);
 															
-					if (Report.get_errors() > 0)  {
-						stop_parsing ();
-						return;
-					}
-
 					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, root_class_definition));
 					break;
 				}
@@ -144,10 +139,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 							Report.error (source_reference, "No class %s found.".printf(fqan));
 						}
 						states.push (new State (StateId.SAX_PARSER_ATTRIBUTE_STATE, attribute_parent_class_definition, null, fqan));
-					}
-					if (Report.get_errors() > 0)  {
-						stop_parsing ();
-						return;
 					}
 					break;
 				}
@@ -177,10 +168,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 					//add the attribute into the parent container
 					state.class_definition.add_attribute (attr);		
 					
-					if (Report.get_errors() > 0)  {
-						stop_parsing ();
-						return;
-					}
 					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, attribute_value_definition));
 					break;
 				}

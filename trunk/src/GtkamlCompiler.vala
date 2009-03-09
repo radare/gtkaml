@@ -38,6 +38,8 @@ class Vala.Compiler {
 	[NoArrayLength]
 	static string[] packages;
 	static string target_glib;
+	[CCode (array_length = false, array_null_terminated = true)]
+	[NoArrayLength]
 	static string[] implicits_directories; 
 
 	static bool ccode_only;

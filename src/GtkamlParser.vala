@@ -38,7 +38,7 @@ public class Gtkaml.Parser : Vala.Parser {
 		base ();		
 	}
 	
-	[NoArrayLength]
+	
 	public new void parse (CodeContext context, string[]? implicits_directories = null)
 	{
 		if (implicits_directories != null)

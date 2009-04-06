@@ -44,6 +44,7 @@ class Vala.Compiler {
 
 	static bool ccode_only;
 	static string header_filename;
+	static string internal_header_filename;
 	static bool compile_only;
 	static string output;
 	static bool debug;
@@ -60,6 +61,9 @@ class Vala.Compiler {
 	static string[] cc_options;
 	static string dump_tree;
 	static bool save_temps;
+	[CCode (array_length = false, array_null_terminated = true)]
+	[NoArrayLength]
+	static string[] defines;
 	static bool quiet_mode;
 
 	private CodeContext context;
@@ -73,10 +77,12 @@ class Vala.Compiler {
 		{ "version", 0, 0, OptionArg.NONE, ref version, "Display version number", null },
 		{ "ccode", 'C', 0, OptionArg.NONE, ref ccode_only, "Output C code", null },
 		{ "header", 'H', 0, OptionArg.FILENAME, ref header_filename, "Output C header file", "FILE" },
+		{ "internal-header", 'h', 0, OptionArg.FILENAME, ref internal_header_filename, "Output internal C header file", "FILE" },
 		{ "compile", 'c', 0, OptionArg.NONE, ref compile_only, "Compile but do not link", null },
 		{ "output", 'o', 0, OptionArg.FILENAME, ref output, "Place output in file FILE", "FILE" },
 		{ "debug", 'g', 0, OptionArg.NONE, ref debug, "Produce debug information", null },
 		{ "thread", 0, 0, OptionArg.NONE, ref thread, "Enable multithreading support", null },
+		{ "define", 'D', 0, OptionArg.STRING_ARRAY, ref defines, "Define SYMBOL", "SYMBOL..." },
 		{ "disable-assert", 0, 0, OptionArg.NONE, ref disable_assert, "Disable assertions", null },
 		{ "enable-checking", 0, 0, OptionArg.NONE, ref enable_checking, "Enable additional run-time checks", null },
 		{ "enable-deprecated", 0, 0, OptionArg.NONE, ref deprecated, "Enable deprecated features", null },
@@ -174,8 +180,11 @@ class Vala.Compiler {
 		context.ccode_only = ccode_only;
 		context.compile_only = compile_only;
 		context.header_filename = header_filename;
+		context.internal_header_filename = internal_header_filename;
 		context.output = output;
-		if (basedir != null) {
+		if (basedir == null) {
+			context.basedir = realpath (".");
+		} else {
 			context.basedir = realpath (basedir);
 		}
 		if (directory != null) {
@@ -186,6 +195,12 @@ class Vala.Compiler {
 		context.debug = debug;
 		context.thread = thread;
 		context.save_temps = save_temps;
+
+		if (defines != null) {
+			foreach (string define in defines) {
+				context.add_define (define);
+			}
+		}
 
 		int glib_major = 2;
 		int glib_minor = 12;
@@ -429,7 +444,7 @@ class Vala.Compiler {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s (based on Vala 0.5.6)\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s (based on Vala 0.7.0)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

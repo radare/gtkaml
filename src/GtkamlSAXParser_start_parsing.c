@@ -20,9 +20,10 @@
  *        Vlad Grecescu (b100dian@gmail.com)
  */
 
-#include "GtkamlSAXParser.h"
-#include <libxml/parser.h>
 #include <glib.h>
+#include <glib-object.h>
+#include "gtkamlc.h"
+#include <libxml/parser.h>
 
 
 void gtkaml_sax_parser_error (GtkamlSAXParser * self, char * message, ...)

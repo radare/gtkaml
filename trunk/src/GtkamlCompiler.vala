@@ -22,8 +22,9 @@
  */
 
 using GLib;
+using Vala;
 
-class Vala.Compiler {
+class Gtkaml.Compiler {
 	static string basedir;
 	static string directory;
 	static bool version;

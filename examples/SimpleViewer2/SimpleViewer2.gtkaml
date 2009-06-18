@@ -94,9 +94,9 @@
     int err = 0;
     try
     {
-    	string contents; int length;
+    	string contents; ulong length;
       FileUtils.get_contents (filename, out contents, out length);
-      textview1.buffer.set_text (contents, length);
+      textview1.buffer.set_text (contents, (int)length);
     }
     catch(Error e)
     {

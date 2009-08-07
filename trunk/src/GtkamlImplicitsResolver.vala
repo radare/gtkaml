@@ -31,7 +31,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 {
 	/** configuration file with some hints*/
 	public ImplicitsStore implicits_store {get;construct;}
-	public Vala.CodeContext context {get;private set;}
+	public Vala.CodeContext context {get;construct;}
 	
 	public ImplicitsResolver (Vala.CodeContext context, ImplicitsStore implicits_store) 
 	{

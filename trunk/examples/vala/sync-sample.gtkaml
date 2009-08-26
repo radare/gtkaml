@@ -1,0 +1,25 @@
+<Window xmlns:g="http://gtkaml.org/0.2" xmlns="Gtk"
+  title="Enter your age" position="{WindowPosition.CENTER}"
+  destroy="{Gtk.main_quit}" default-width="300" default-height="20"
+  g:name="SyncSample">
+  
+  <HBox spacing="5">
+    <SpinButton g:private="spin" with-range="true" min="0" max="130" step="1"
+      value="35"
+      value-changed="slider.set_value (target.get_value ())"/>
+    <HScale g:private="slider"   with-range="true" min="0" max="130" step="1"
+      value-changed="spin.set_value (target.get_value ())"/>
+  </HBox>
+
+<![CDATA[
+    public static int main (string[] args) {
+       Gtk.init (ref args);
+
+       var window = new SyncSample ();
+       window.show_all ();
+
+       Gtk.main ();
+       return 0;
+    }
+]]>
+</Window>

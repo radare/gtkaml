@@ -1,0 +1,46 @@
+<Window xmlns:g="http://gtkaml.org/0.2" xmlns="Gtk"
+  g:name="TreeViewSample" title="Tree View Sample"
+  default-width="250" default-height="100"
+  destroy="{Gtk.main_quit}">
+
+  <TreeView g:private="view" g:construct="setup_treeview()">
+  	<TreeViewColumn title="Account Name">
+		<CellRendererText g:private="column0" expand="false" />               <!-- gtk_cell_layout_pack_start call -->
+		<CellRendererText g:existing="column0" attribute="text" column="0" /> <!-- gtk_cell_layout_add_attribute call -->
+	</TreeViewColumn>
+ 	<TreeViewColumn title="Type">
+		<CellRendererText g:private="column1" expand="false"/>
+		<CellRendererText g:existing="column1" attribute="text" column="1" /> 
+	</TreeViewColumn>
+
+ 	<TreeViewColumn title="Balance">
+		<CellRendererText g:private="column2" expand="false" foreground-set="true"/> 
+		<CellRendererText g:existing="column2" attribute="text" column="2" />
+		<CellRendererText g:existing="column2" attribute="foreground" column="3" />
+	</TreeViewColumn>
+  </TreeView>
+
+<![CDATA[
+  private void setup_treeview () {
+    TreeIter iter;
+    var listmodel = new ListStore (4, typeof (string), typeof (string), typeof (string), typeof (string));
+    listmodel.append (out iter);
+    listmodel.set (iter, 0, "My Visacard", 1, "card", 2, "102,10", 3, "red", -1);
+
+    listmodel.append (out iter);
+    listmodel.set (iter, 0, "My Mastercard", 1, "card", 2, "10,20", 3, "red", -1);
+
+    view.model = listmodel;
+  }
+
+  public static int main (string[] args) {     
+    Gtk.init (ref args);
+
+    var sample = new TreeViewSample ();
+    sample.show_all ();
+    Gtk.main ();
+
+    return 0;
+  }
+]]>
+</Window>

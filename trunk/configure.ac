@@ -57,6 +57,7 @@ vapi/Makefile
 tests/Makefile
 tutorial/Makefile
 examples/SimpleViewer2/Makefile
+examples/vala/Makefile
 ])
 
 AC_OUTPUT

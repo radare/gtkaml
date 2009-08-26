@@ -1,0 +1,61 @@
+<Dialog xmlns:g="http://gtkaml.org/0.2" xmlns="Gtk"
+  g:name="SearchDialog" title="Find" has-separator="false"
+  border-width="5" default-width="350" default-height="100"
+  response="{on_response}" destroy="{Gtk.main_quit}">
+
+  <VBox spacing="10" g:existing="vbox" g:standalone="true"> <!-- Dialog already has a vbox (existing) and is already added to the Dialog (standalone) -->
+    <HBox homogeneous="false" spacing="20" expand="false">
+      <Label with-mnemonic="true" label="_Search for:" mnemonic-widget="{search_entry}" expand="false"/>
+      <Entry g:private="search_entry" />
+    </HBox>
+    <CheckButton g:private="match_case"     with-mnemonic="true" label="_Match case" expand="false"/>
+    <CheckButton g:private="find_backwards" with-mnemonic="true" label="Find _backwards" expand="false"/>
+  </VBox>
+   
+<![CDATA[
+
+  public signal void find_next (string text, bool case_sensitivity);
+  public signal void find_previous (string text, bool case_sensitivity);
+
+  private Widget find_button;
+
+  public SearchDialog () {
+    add_button (STOCK_HELP, ResponseType.HELP);
+    add_button (STOCK_CLOSE, ResponseType.CLOSE);
+    this.find_button = add_button (STOCK_FIND, ResponseType.APPLY);
+    this.find_button.sensitive = false;
+  }
+
+  private void on_response (Dialog source, int response_id) {
+    switch (response_id) {
+      case ResponseType.HELP:
+        // show_help ();
+        break;
+      case ResponseType.APPLY:
+        on_find_clicked ();
+        break;
+      case ResponseType.CLOSE:
+        destroy ();
+        break;
+    }
+  }
+
+  private void on_find_clicked () {
+    string text = this.search_entry.text;
+    bool cs = this.match_case.active;
+    if (this.find_backwards.active) {
+      find_previous (text, cs);
+    } else {
+      find_next (text, cs);
+    }
+  }
+
+  static int main (string[] args) {
+    Gtk.init (ref args);
+    var dialog = new SearchDialog ();
+    dialog.show_all ();
+    Gtk.main ();
+    return 0;
+  }
+]]>
+</Dialog>

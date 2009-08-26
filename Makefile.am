@@ -3,7 +3,8 @@ SUBDIRS = src \
 	vapi \
 	tests \
 	tutorial \
-	examples/SimpleViewer2
+	examples/SimpleViewer2 \
+	examples/vala
 
 gtkamldocdir = ${prefix}/doc/gtkaml
 

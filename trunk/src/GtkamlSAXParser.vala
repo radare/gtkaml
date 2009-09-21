@@ -182,8 +182,8 @@ public class Gtkaml.SAXParser : GLib.Object {
 	public void characters (string data, int len)
 	{
 		State state = states.peek ();
-		string value = data.ndup (len);
-		string stripped_value = value; stripped_value.strip ();
+		string @value = data.ndup (len);
+		string stripped_value = @value.strip ();
 		
 		if (stripped_value != "") {
 			parse_attribute_content_as_text (state, value);
@@ -254,7 +254,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 				}
 			}
 		} else {
-			Report.error (create_source_reference (), "Invalid non-whitespace text found");
+			Report.error (create_source_reference (), "Invalid non-whitespace text found: '%s'".printf (content));
 			stop_parsing ();
 			return;
 		}

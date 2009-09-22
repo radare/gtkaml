@@ -28,15 +28,15 @@ using Gee;
  * Generates vala source from a given ClassDefinition root tag
  */
 public class Gtkaml.CodeGenerator : GLib.Object {
-	private string using_directives;
-	private string class_start;
-	private string members_declarations;
-	private string code;
-	private string construct_signals;
-	private string constructors;
-	private string construct_body_locals;
-	private string construct_body;
-	private string class_end;
+	private string using_directives = "";
+	private string class_start = "";
+	private string members_declarations = "";
+	private string code = "";
+	private string construct_signals = ""; 
+	private string constructors = "";
+	private string construct_body_locals = "";
+	private string construct_body = "";
+	private string class_end = "";
 	
 	public CodeContext context {get;private set;}
 	private RootClassDefinition root_class_definition {get;set;}
@@ -230,7 +230,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	protected void write_constructor (ClassDefinition class_definition)
 	{
 		string construct_name = class_definition.construct_method.name;
-		if (construct_name != "new")
+		if (construct_name != ".new")
 			construct_name = "." + construct_name; // with_label->.with_label
 		else
 			construct_name = "";

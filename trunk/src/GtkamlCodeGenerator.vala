@@ -136,8 +136,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	protected void write_construct_call (string identifier, string identifier_type, string construct_type, string construct_code )
 	{
 		string construct_signal = identifier + "_" + construct_type;
-		string real_construct_code = construct_code;
-		real_construct_code.strip ();
+		string real_construct_code = construct_code.strip ();
 		if (real_construct_code.has_prefix ("{"))
 		{
 			if (real_construct_code.has_suffix ("}")) {
@@ -309,7 +308,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			return "<Invalid value>";
 		}
 		
-		string stripped_value = value; stripped_value.strip ();
+		string stripped_value = value.strip ();
 
 		if (stripped_value.has_prefix ("{")) {
 			if (stripped_value.has_suffix ("}")) {
@@ -352,8 +351,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		var simple_attribute = signal_attr as SimpleAttribute;
 		var the_signal = simple_attribute.target_type as Vala.Signal;
 		string parameters_joined = "";
-		string body = simple_attribute.value;
-		body.strip ();
+		string body = simple_attribute.value.strip ();
 		
 		if ( body.has_prefix ("{") )
 		{

@@ -333,7 +333,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 						case "implements":
 							var implementsv = attr.value.split (",");
 							for (int i = 0; implementsv[i]!=null; i++)
-								implementsv[i].strip ();
+								implementsv[i] = implementsv[i].strip ();
 							root_class_definition.implements = string.joinv (", ", implementsv);
 							break;
 						default:
@@ -431,8 +431,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 			}
 			class_definition = new ReferenceClassDefinition (create_source_reference (), reference, prefix_to_namespace (prefix), clazz, parent_container);
 			/* now post-process the reference FIXME put this in code generator or something*/
-			string reference_stripped = reference; 
-			reference_stripped.strip ();
+			string reference_stripped = reference.strip (); 
 			if (reference_stripped.has_prefix ("{")) {
 				if (reference_stripped.has_suffix ("}"))
 				{

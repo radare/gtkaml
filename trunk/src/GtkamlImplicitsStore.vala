@@ -143,14 +143,17 @@ public class Gtkaml.ImplicitsStore : Object
 		var result = new Gee.ArrayList<ImplicitsParameter> ();
 		string method_name = method.name;
 		if (method is CreationMethod) {
-			if (method.name != "new")
+			if (method.name != ".new")
 				method_name = "new." + method.name;
+			else
+				method_name = "new";
 		}
 		else
 			method_name = "add." + method.name;
 		var result_array = this.get_method_parameters (ns, clazz, method_name);
 		if (result_array.size != 0)
 		{
+			//stderr.printf ("found in implicits: %s|%s\n", clazz, method_name);
 			foreach (ImplicitsParameter result_item in result_array) {
 				if (result_item.default_value != null) {
 					//stderr.printf ("default value for %s=<%s>\n", result_item.name, result_item.default_value);
@@ -158,6 +161,7 @@ public class Gtkaml.ImplicitsStore : Object
 				result.add (result_item);
 			}
 		} else {
+			//stderr.printf ("NOT found in implicits: %s|%s\n", clazz, method_name);
 			foreach (FormalParameter p in method.get_parameters ()) {
 				if (!p.ellipsis) { //hack for add_with_parameters (widget, ...)
 					var new_implicits_parameter = new ImplicitsParameter ();

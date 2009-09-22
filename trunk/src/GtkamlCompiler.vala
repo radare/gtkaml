@@ -1,4 +1,4 @@
-/* GtkamlCompiler.vala
+/* valacompiler.vala
  * 
  * Copyright (C) 2006-2009  Jürg Billeter
  * Copyright (C) 1996-2002, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -19,6 +19,8 @@
  *
  * Author:
  * 	Jürg Billeter <j@bitron.ch>
+ * Adapted for Gtkaml:
+ *	Vlad Grecescu <b100dian@gmail.com>
  */
 
 using GLib;
@@ -49,6 +51,7 @@ class Gtkaml.Compiler {
 	static string header_filename;
 	static string internal_header_filename;
 	static string internal_vapi_filename;
+	static string includedir;
 	static bool compile_only;
 	static string output;
 	static bool debug;
@@ -85,6 +88,7 @@ class Gtkaml.Compiler {
 		{ "version", 0, 0, OptionArg.NONE, ref version, "Display version number", null },
 		{ "ccode", 'C', 0, OptionArg.NONE, ref ccode_only, "Output C code", null },
 		{ "header", 'H', 0, OptionArg.FILENAME, ref header_filename, "Output C header file", "FILE" },
+		{ "includedir", 0, 0, OptionArg.FILENAME, ref includedir, "Directory used to include the C header file", "DIRECTORY" },
 		{ "internal-header", 'h', 0, OptionArg.FILENAME, ref internal_header_filename, "Output internal C header file", "FILE" },
 		{ "internal-vapi", 0, 0, OptionArg.FILENAME, ref internal_vapi_filename, "Output vapi with internal api", "FILE" },
 		{ "compile", 'c', 0, OptionArg.NONE, ref compile_only, "Compile but do not link", null },
@@ -151,7 +155,7 @@ class Gtkaml.Compiler {
 				ulong deps_len;
 				FileUtils.get_contents (deps_filename, out deps_content, out deps_len);
 				foreach (string dep in deps_content.split ("\n")) {
-					dep.strip ();
+					dep = dep.strip ();
 					if (dep != "") {
 						if (!add_package (context, dep)) {
 							Report.error (null, "%s, dependency of %s, not found in specified Vala API directories".printf (dep, pkg));
@@ -193,6 +197,7 @@ class Gtkaml.Compiler {
 		context.compile_only = compile_only;
 		context.header_filename = header_filename;
 		context.internal_header_filename = internal_header_filename;
+		context.includedir = includedir;
 		context.output = output;
 		if (basedir == null) {
 			context.basedir = realpath (".");
@@ -214,6 +219,7 @@ class Gtkaml.Compiler {
 			// default profile
 			context.profile = Profile.GOBJECT;
 			context.add_define ("GOBJECT");
+			context.add_define ("VALA_0_7_6_NEW_METHODS");
 		} else {
 			Report.error (null, "Unknown profile %s".printf (profile));
 		}
@@ -319,6 +325,14 @@ class Gtkaml.Compiler {
 
 		var analyzer = new SemanticAnalyzer ();
 		analyzer.analyze (context);
+
+		if (!ccode_only && !compile_only && library == null) {
+			// building program, require entry point
+			if (context.entry_point == null) {
+				Report.error (null, "program does not contain a static `main' method");
+			}
+		}
+
 		if (dump_tree != null) {
 			var code_writer = new CodeWriter (true);
 			code_writer.write_file (context, dump_tree);
@@ -369,22 +383,29 @@ class Gtkaml.Compiler {
 		if (library != null) {
 			if (gir != null) {
 				if (context.profile == Profile.GOBJECT) {
-					string[] split_gir = Regex.split_simple("(.*)-([0-9]+(\\.[0-9]+)?)\\.gir$", gir);
+					long gir_len = gir.len ();
+					unowned string? last_hyphen = gir.rchr (gir_len, '-');
 
-					if (split_gir.length < 4) {
+					if (last_hyphen == null || !gir.has_suffix (".gir")) {
 						Report.error (null, "GIR file name `%s' is not well-formed, expected NAME-VERSION.gir".printf (gir));
 					} else {
-						var gir_writer = new GIRWriter ();
-						string gir_namespace = split_gir[1];
-						string gir_version = split_gir[2];
+						long offset = gir.pointer_to_offset (last_hyphen);
+						string gir_namespace = gir.substring (0, offset);
+						string gir_version = gir.substring (offset + 1, gir_len - offset - 5);
+						gir_version.canon ("0123456789.", '?');
+						if (gir_namespace == "" || gir_version == "" || !gir_version[0].isdigit () || gir_version.contains ("?")) {
+							Report.error (null, "GIR file name `%s' is not well-formed, expected NAME-VERSION.gir".printf (gir));
+						} else {
+							var gir_writer = new GIRWriter ();
 
-						// put .gir file in current directory unless -d has been explicitly specified
-						string gir_directory = ".";
-						if (directory != null) {
-							gir_directory = context.directory;
+							// put .gir file in current directory unless -d has been explicitly specified
+							string gir_directory = ".";
+							if (directory != null) {
+								gir_directory = context.directory;
+							}
+
+							gir_writer.write_file (context, gir_directory, gir_namespace, gir_version, library);
 						}
-
-						gir_writer.write_file (context, gir_directory, gir_namespace, gir_version, library);
 					}
 				}
 
@@ -516,7 +537,7 @@ class Gtkaml.Compiler {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s (based on Vala 0.7.3)\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s (based on Vala 0.7.6)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

@@ -1,4 +1,4 @@
-AC_INIT([gtkaml],[0.2.7.1])
+AC_INIT([gtkaml],[0.2.8])
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_CONFIG_HEADER(config.h)
@@ -55,9 +55,7 @@ src/Makefile
 data/Makefile
 vapi/Makefile
 tests/Makefile
-tutorial/Makefile
 examples/SimpleViewer2/Makefile
-examples/vala/Makefile
 ])
 
 AC_OUTPUT

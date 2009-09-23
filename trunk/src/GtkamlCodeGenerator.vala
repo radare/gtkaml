@@ -88,6 +88,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			write_construct (class_definition);
 		} else if (class_definition is ReferenceClassDefinition) {
 			generate_children (class_definition);
+			write_setters (class_definition);
 			write_add (class_definition);			
 		} else {
 			write_declaration (class_definition);

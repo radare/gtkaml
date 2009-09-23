@@ -1,6 +1,0 @@
-<Label xmlns:gtkaml="http://gtkaml.org/0.2" xmlns="Gtk"
-	gtkaml:name="Tutorial0"
-	label="Hello world"
-	/>
-	
-       

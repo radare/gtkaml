@@ -247,7 +247,10 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	protected void write_add (ClassDefinition child_definition) {
 		if (child_definition.parent_container == null)
 			return;
-		construct_body += "\t\t%s.%s (".printf (child_definition.parent_container.identifier, child_definition.add_method.name);
+		string method_name = child_definition.add_method.name;
+		if (method_name == "add_with_properties") //issue #7
+			method_name = "add";
+		construct_body += "\t\t%s.%s (".printf (child_definition.parent_container.identifier, method_name);
 		int i = 0;
 		for (; i < child_definition.add_method.parameter_attributes.size - 1 ; i++) {
 			Attribute attr = child_definition.add_method.parameter_attributes.get (i);

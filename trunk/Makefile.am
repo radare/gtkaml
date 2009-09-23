@@ -9,9 +9,7 @@ EXTRA_DIST = \
 	README\
 	COPYING\
 	AUTHORS\
-	ChangeLog\
 	INSTALL\
-	NEWS \
   debian/changelog \
 	debian/compat \
 	debian/control \
@@ -19,7 +17,14 @@ EXTRA_DIST = \
 	debian/docs \
 	debian/files \
 	debian/gtkaml.substvars \
-	debian/rules
+	debian/rules \
+  examples/SimpleViewer2/Makefile \
+  examples/SimpleViewer2/SimpleViewer2.gtkaml \
+  examples/vala/Makefile \
+  examples/vala/gtk-hello.gtkaml \
+  examples/vala/search-dialog.gtkaml \
+  examples/vala/sync-sample.gtkaml \
+  examples/vala/treeview-liststore-sample.gtkaml
 
 
 # Copy all the spec files. Of cource, only one is actually used.

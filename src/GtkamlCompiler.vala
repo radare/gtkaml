@@ -36,6 +36,9 @@ class Gtkaml.Compiler {
 	[CCode (array_length = false, array_null_terminated = true)]
 	[NoArrayLength]
 	static string[] vapi_directories;
+	[CCode (array_length = false, array_null_terminated = true)]
+	[NoArrayLength]
+	static string[] gir_directories;
 	static string vapi_filename;
 	static string library;
 	static string gir;
@@ -49,6 +52,7 @@ class Gtkaml.Compiler {
 
 	static bool ccode_only;
 	static string header_filename;
+	static bool use_header;
 	static string internal_header_filename;
 	static string internal_vapi_filename;
 	static string includedir;
@@ -60,8 +64,9 @@ class Gtkaml.Compiler {
 	static bool enable_checking;
 	static bool deprecated;
 	static bool experimental;
-	static bool non_null_experimental;
+	static bool experimental_non_null;
 	static bool disable_dbus_transformation;
+	static bool disable_warnings;
 	static string cc_command;
 	[CCode (array_length = false, array_null_terminated = true)]
 	[NoArrayLength]
@@ -75,9 +80,12 @@ class Gtkaml.Compiler {
 	static bool verbose_mode;
 	static string profile;
 
+	static string entry_point;
+
 	private CodeContext context;
 
 	const OptionEntry[] options = {
+		{ "girdir", 0, 0, OptionArg.FILENAME_ARRAY, ref gir_directories, "Look for .gir files in DIRECTORY", "DIRECTORY..." },
 		{ "vapidir", 0, 0, OptionArg.FILENAME_ARRAY, ref vapi_directories, "Look for package bindings in DIRECTORY", "DIRECTORY..." },
 		{ "pkg", 0, 0, OptionArg.STRING_ARRAY, ref packages, "Include binding for PACKAGE", "PACKAGE..." },
 		{ "vapi", 0, 0, OptionArg.FILENAME, ref vapi_filename, "Output VAPI file name", "FILE" },
@@ -88,6 +96,7 @@ class Gtkaml.Compiler {
 		{ "version", 0, 0, OptionArg.NONE, ref version, "Display version number", null },
 		{ "ccode", 'C', 0, OptionArg.NONE, ref ccode_only, "Output C code", null },
 		{ "header", 'H', 0, OptionArg.FILENAME, ref header_filename, "Output C header file", "FILE" },
+		{ "use-header", 0, 0, OptionArg.NONE, ref use_header, "Use C header file", null },
 		{ "includedir", 0, 0, OptionArg.FILENAME, ref includedir, "Directory used to include the C header file", "DIRECTORY" },
 		{ "internal-header", 'h', 0, OptionArg.FILENAME, ref internal_header_filename, "Output internal C header file", "FILE" },
 		{ "internal-vapi", 0, 0, OptionArg.FILENAME, ref internal_vapi_filename, "Output vapi with internal api", "FILE" },
@@ -96,11 +105,13 @@ class Gtkaml.Compiler {
 		{ "debug", 'g', 0, OptionArg.NONE, ref debug, "Produce debug information", null },
 		{ "thread", 0, 0, OptionArg.NONE, ref thread, "Enable multithreading support", null },
 		{ "define", 'D', 0, OptionArg.STRING_ARRAY, ref defines, "Define SYMBOL", "SYMBOL..." },
+		{ "main", 0, 0, OptionArg.STRING, ref entry_point, "Use SYMBOL as entry point", "SYMBOL..." },
 		{ "disable-assert", 0, 0, OptionArg.NONE, ref disable_assert, "Disable assertions", null },
 		{ "enable-checking", 0, 0, OptionArg.NONE, ref enable_checking, "Enable additional run-time checks", null },
 		{ "enable-deprecated", 0, 0, OptionArg.NONE, ref deprecated, "Enable deprecated features", null },
 		{ "enable-experimental", 0, 0, OptionArg.NONE, ref experimental, "Enable experimental features", null },
-		{ "enable-non-null-experimental", 0, 0, OptionArg.NONE, ref non_null_experimental, "Enable experimental enhancements for non-null types", null },
+		{ "disable-warnings", 0, 0, OptionArg.NONE, ref disable_warnings, "Disable warnings", null },
+		{ "enable-experimental-non-null", 0, 0, OptionArg.NONE, ref experimental_non_null, "Enable experimental enhancements for non-null types", null },
 		{ "disable-dbus-transformation", 0, 0, OptionArg.NONE, ref disable_dbus_transformation, "Disable transformation of D-Bus member names", null },
 		{ "cc", 0, 0, OptionArg.STRING, ref cc_command, "Use COMMAND as C compiler command", "COMMAND" },
 		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, ref cc_options, "Pass OPTION to the C compiler", "OPTION..." },
@@ -130,6 +141,18 @@ class Gtkaml.Compiler {
 			}
 			return 1;
 		}
+	}
+
+	private bool add_gir (CodeContext context, string gir) {
+		var gir_path = context.get_gir_path (gir, gir_directories);
+
+		if (gir_path == null) {
+			return false;
+		}
+
+		context.add_source_file (new SourceFile (context, gir_path, true));
+
+		return true;
 	}
 	
 	private bool add_package (CodeContext context, string pkg) {
@@ -188,14 +211,16 @@ class Gtkaml.Compiler {
 		context.checking = enable_checking;
 		context.deprecated = deprecated;
 		context.experimental = experimental;
-		context.non_null_experimental = non_null_experimental;
+		context.experimental_non_null = experimental || experimental_non_null;
 		context.dbus_transformation = !disable_dbus_transformation;
+		context.report.enable_warnings = !disable_warnings;
 		context.report.set_verbose_errors (!quiet_mode);
 		context.verbose_mode = verbose_mode;
 
 		context.ccode_only = ccode_only;
 		context.compile_only = compile_only;
 		context.header_filename = header_filename;
+		context.use_header = use_header;
 		context.internal_header_filename = internal_header_filename;
 		context.includedir = includedir;
 		context.output = output;
@@ -223,6 +248,8 @@ class Gtkaml.Compiler {
 		} else {
 			Report.error (null, "Unknown profile %s".printf (profile));
 		}
+
+		context.entry_point_name = entry_point;
 
 		if (defines != null) {
 			foreach (string define in defines) {
@@ -261,8 +288,8 @@ class Gtkaml.Compiler {
 
 		if (packages != null) {
 			foreach (string package in packages) {
-				if (!add_package (context, package)) {
-					Report.error (null, "%s not found in specified Vala API directories".printf (package));
+				if (!add_package (context, package) && !add_gir (context, package)) {
+					Report.error (null, "%s not found in specified Vala API directories or GObject-Introspection GIR directories".printf (package));
 				}
 			}
 			packages = null;
@@ -280,17 +307,21 @@ class Gtkaml.Compiler {
 
 					if (context.profile == Profile.POSIX) {
 						// import the Posix namespace by default (namespace of backend-specific standard library)
-						source_file.add_using_directive (new UsingDirective (new UnresolvedSymbol (null, "Posix", null)));
+						var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "Posix", null));
+						source_file.add_using_directive (ns_ref);
+						context.root.add_using_directive (ns_ref);
 					} else if (context.profile == Profile.GOBJECT) {
 						// import the GLib namespace by default (namespace of backend-specific standard library)
-						source_file.add_using_directive (new UsingDirective (new UnresolvedSymbol (null, "GLib", null)));
+						var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "GLib", null));
+						source_file.add_using_directive (ns_ref);
+						context.root.add_using_directive (ns_ref);
 					}
 
 					context.add_source_file (source_file);
-				} else if (source.has_suffix (".gtkaml")) {
-					context.add_source_file (new SourceFile (context, rpath));
-				} else if (source.has_suffix (".vapi")) {
+				} else if (source.has_suffix (".vapi") || source.has_suffix (".gir")) {
 					context.add_source_file (new SourceFile (context, rpath, true));
+                                } else if (source.has_suffix (".gtkaml")) {
+                                        context.add_source_file (new SourceFile (context, rpath));
 				} else if (source.has_suffix (".c")) {
 					context.add_c_source_file (rpath);
 				} else {
@@ -311,6 +342,15 @@ class Gtkaml.Compiler {
 
 		var genie_parser = new Genie.Parser ();
 		genie_parser.parse (context);
+
+		var gir_parser = new GirParser ();
+		gir_parser.parse (context);
+
+		if (gir_parser.get_package_names != null) {
+			foreach (var pkg in gir_parser.get_package_names ()) {
+				context.add_package (pkg);
+			}
+		}
 
 		if (context.report.get_errors () > 0) {
 			return quit ();
@@ -347,15 +387,6 @@ class Gtkaml.Compiler {
 
 		if (context.report.get_errors () > 0) {
 			return quit ();
-		}
-
-		if (context.non_null_experimental) {
-			var null_checker = new NullChecker ();
-			null_checker.check (context);
-
-			if (context.report.get_errors () > 0) {
-				return quit ();
-			}
 		}
 
 		context.codegen.emit (context);

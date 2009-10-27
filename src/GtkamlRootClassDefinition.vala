@@ -25,10 +25,10 @@ using Vala;
 
 /** represents the definition of the root tag */
 public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
-	public Gee.Map<string,string> prefixes_namespaces {get; set;}
+	public Vala.Map<string,string> prefixes_namespaces {get; set;}
 	public string target_name {get;set;}
 	public string target_namespace {get;set;}
-	public Gee.List<string> code {get;set;}
+	public Vala.List<string> code {get;set;}
 	public int original_first_code_line {get;set;}
 	public string implements {get;set;}
 	
@@ -38,7 +38,7 @@ public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
 		base (source_reference, identifier, base_ns, base_type, definition_scope, parent_container);
 		this.target_name = null;
 		this.target_namespace = null;
-		this.code = new Gee.ArrayList<string> ();
+		this.code = new Vala.ArrayList<string> ();
 		this.implements = null;
 		this.original_first_code_line = -1;
 	}

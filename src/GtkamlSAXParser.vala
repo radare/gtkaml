@@ -21,7 +21,7 @@
  */
 using GLib;
 using Vala;
-using Gee;
+
 
 
 
@@ -32,9 +32,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 	public CodeContext context {get;private set;}
 	public weak SourceFile source_file {get;private set;}
 	private StateStack states {get;set;}
-	private Map<string,int> generated_identifiers_counter = new HashMap<string,int> (str_hash, str_equal);
+	private Vala.Map<string,int> generated_identifiers_counter = new HashMap<string,int> (str_hash, str_equal);
 	/** prefix/vala.namespace pair */
-	private Gee.Map<string,string> prefixes_namespaces {get;set;}
+	private Vala.Map<string,string> prefixes_namespaces {get;set;}
 
 	private Gtkaml.RootClassDefinition root_class_definition {get;set;}	
 	public string gtkaml_prefix="gtkaml";	
@@ -46,7 +46,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	construct {
 		states = new StateStack ();	
-		prefixes_namespaces = new Gee.HashMap<string,string> (str_hash, str_equal, str_equal);
+		prefixes_namespaces = new Vala.HashMap<string,string> (str_hash, str_equal, str_equal);
 		root_class_definition = null;
 	}
 	
@@ -292,7 +292,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return string.joinv ("_", tokens);
 	}
 
-	public RootClassDefinition get_root_definition (Class clazz, Gee.List<XmlAttribute> attrs, string? prefix)
+	public RootClassDefinition get_root_definition (Class clazz, Vala.List<XmlAttribute> attrs, string? prefix)
 	{
 		RootClassDefinition root_class_definition = new Gtkaml.RootClassDefinition (create_source_reference (), "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
 		root_class_definition.prefixes_namespaces = prefixes_namespaces;
@@ -356,7 +356,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return root_class_definition;
 	}
 	
-	public ClassDefinition get_child_for_container (Class clazz, ClassDefinition? container_definition, Gee.List<XmlAttribute> attrs, string? prefix)
+	public ClassDefinition get_child_for_container (Class clazz, ClassDefinition? container_definition, Vala.List<XmlAttribute> attrs, string? prefix)
 	{
 		string identifier = null;
 		DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;
@@ -458,11 +458,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	
 	[NoArrayLength]
-	private Gee.List<XmlAttribute> parse_attributes ([CCode (array_length = false)] string[] attributes, int nb_attributes)
+	private Vala.List<XmlAttribute> parse_attributes ([CCode (array_length = false)] string[] attributes, int nb_attributes)
 	{	
 		int walker = 0;
 		string end;
-		var attribute_list = new Gee.ArrayList<XmlAttribute> ();
+		var attribute_list = new Vala.ArrayList<XmlAttribute> ();
 		for (int i = 0; i < nb_attributes; i++)
 		{
 			var attr = new XmlAttribute ();
@@ -480,10 +480,10 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	
 	[NoArrayLength]
-	private Gee.List<XmlNamespace> parse_namespaces ([CCode (array_length = false)] string[] namespaces, int nb_namespaces)
+	private Vala.List<XmlNamespace> parse_namespaces ([CCode (array_length = false)] string[] namespaces, int nb_namespaces)
 	{
 		int walker = 0;
-		var namespace_list = new Gee.ArrayList<XmlNamespace> ();
+		var namespace_list = new Vala.ArrayList<XmlNamespace> ();
 		for (int i = 0; i < nb_namespaces; i++) 
 		{
 			var ns = new XmlNamespace ();

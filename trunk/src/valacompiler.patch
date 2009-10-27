@@ -1,5 +1,5 @@
---- ../../vala/compiler/valacompiler.vala	2009-09-22 01:03:51.000000000 +0300
-+++ GtkamlCompiler.vala	2009-09-23 02:30:11.000000000 +0300
+--- ../../vala/compiler/valacompiler.vala	2009-10-27 09:43:28.000000000 +0200
++++ GtkamlCompiler.vala	2009-10-27 10:07:11.000000000 +0200
 @@ -1,5 +1,5 @@
  /* valacompiler.vala
 - *
@@ -23,7 +23,7 @@
  	static string basedir;
  	static string directory;
  	static bool version;
-@@ -40,6 +43,9 @@
+@@ -43,6 +46,9 @@
  	[NoArrayLength]
  	static string[] packages;
  	static string target_glib;
@@ -33,7 +33,7 @@
  
  	static bool ccode_only;
  	static string header_filename;
-@@ -100,6 +106,7 @@
+@@ -111,6 +117,7 @@
  		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, ref cc_options, "Pass OPTION to the C compiler", "OPTION..." },
  		{ "dump-tree", 0, 0, OptionArg.FILENAME, ref dump_tree, "Write code tree to FILE", "FILE" },
  		{ "save-temps", 0, 0, OptionArg.NONE, ref save_temps, "Keep temporary files", null },
@@ -41,16 +41,16 @@
  		{ "profile", 0, 0, OptionArg.STRING, ref profile, "Use the given profile instead of the default", "PROFILE" },
  		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
  		{ "verbose", 'v', 0, OptionArg.NONE, ref verbose_mode, "Print additional messages to the console", null },
-@@ -280,6 +287,8 @@
- 					}
- 
+@@ -313,6 +320,8 @@
  					context.add_source_file (source_file);
-+				} else if (source.has_suffix (".gtkaml")) {
-+					context.add_source_file (new SourceFile (context, rpath));
- 				} else if (source.has_suffix (".vapi")) {
+ 				} else if (source.has_suffix (".vapi") || source.has_suffix (".gir")) {
  					context.add_source_file (new SourceFile (context, rpath, true));
++                                } else if (source.has_suffix (".gtkaml")) {
++                                        context.add_source_file (new SourceFile (context, rpath));
  				} else if (source.has_suffix (".c")) {
-@@ -297,8 +306,8 @@
+ 					context.add_c_source_file (rpath);
+ 				} else {
+@@ -328,8 +337,8 @@
  			return quit ();
  		}
  		
@@ -61,7 +61,7 @@
  
  		var genie_parser = new Genie.Parser ();
  		genie_parser.parse (context);
-@@ -517,7 +526,7 @@
+@@ -548,7 +557,7 @@
  
  	static int main (string[] args) {
  		try {
@@ -70,7 +70,7 @@
  			opt_context.set_help_enabled (true);
  			opt_context.add_main_entries (options, null);
  			opt_context.parse (ref args);
-@@ -528,7 +537,7 @@
+@@ -559,7 +568,7 @@
  		}
  		
  		if (version) {

@@ -1,4 +1,109 @@
 ------------------------------------------------------------------------
+r495 | b100dian | 2009-08-27 00:43:16 +0300 (Thu, 27 Aug 2009) | 2 lines
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/configure.ac
+   A /trunk/examples/vala
+   A /trunk/examples/vala/gtk-hello.gtkaml
+   A /trunk/examples/vala/search-dialog.gtkaml
+   A /trunk/examples/vala/sync-sample.gtkaml
+   A /trunk/examples/vala/treeview-liststore-sample.gtkaml
+
+added 4 more examples from Vala's GTKSamples
+
+------------------------------------------------------------------------
+r404 | b100dian | 2009-08-08 01:05:59 +0300 (Sat, 08 Aug 2009) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+
+version 0.2.7.1
+
+------------------------------------------------------------------------
+r403 | b100dian | 2009-08-08 01:04:47 +0300 (Sat, 08 Aug 2009) | 2 lines
+Changed paths:
+   M /trunk/src/GtkamlImplicitsResolver.vala
+
+'private set' does not work anymore with Vala 0.7.5
+
+------------------------------------------------------------------------
+r402 | b100dian | 2009-06-18 10:11:32 +0300 (Thu, 18 Jun 2009) | 2 lines
+Changed paths:
+   M /trunk/examples/SimpleViewer2/SimpleViewer2.gtkaml
+
+patch for #17 by theCrux
+
+------------------------------------------------------------------------
+r399 | b100dian | 2009-06-02 00:23:46 +0300 (Tue, 02 Jun 2009) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+   M /trunk/src/GtkamlCompiler.vala
+   M /trunk/src/valacompiler.patch
+
+preparing for 0.2.7 release
+
+------------------------------------------------------------------------
+r396 | b100dian | 2009-05-04 19:55:15 +0300 (Mon, 04 May 2009) | 2 lines
+Changed paths:
+   M /trunk/src/GtkamlCompiler.vala
+   M /trunk/src/valacompiler.patch
+
+updated to vala 0.7.1
+
+------------------------------------------------------------------------
+r391 | b100dian | 2009-04-08 01:26:50 +0300 (Wed, 08 Apr 2009) | 2 lines
+Changed paths:
+   M /trunk/src/GtkamlCompiler.vala
+   M /trunk/src/GtkamlSAXParser_start_parsing.c
+   M /trunk/src/Makefile.am
+
+it is now that 0.7.0 header compatibility is actually there...:(
+
+------------------------------------------------------------------------
+r388 | b100dian | 2009-04-06 23:29:54 +0300 (Mon, 06 Apr 2009) | 2 lines
+Changed paths:
+   M /trunk/ChangeLog
+
+update Changelog to match SVN changelog
+
+------------------------------------------------------------------------
+r387 | b100dian | 2009-04-06 23:29:06 +0300 (Mon, 06 Apr 2009) | 2 lines
+Changed paths:
+   M /trunk/configure.ac
+   M /trunk/src/GtkamlCompiler.vala
+   M /trunk/src/valacompiler.patch
+
+updated compiler entry point to vala 0.7.0
+
+------------------------------------------------------------------------
+r384 | b100dian | 2009-03-10 01:16:23 +0200 (Tue, 10 Mar 2009) | 1 line
+Changed paths:
+   M /trunk/configure.ac
+
+bumped version to 0.2.4
+------------------------------------------------------------------------
+r383 | b100dian | 2009-03-10 01:09:45 +0200 (Tue, 10 Mar 2009) | 1 line
+Changed paths:
+   M /trunk/src/GtkamlCompiler.vala
+   M /trunk/src/GtkamlParser.vala
+   M /trunk/tutorial/Makefile.am
+
+fix building problems with tests and tutorial draft
+------------------------------------------------------------------------
+r382 | b100dian | 2009-02-22 23:04:30 +0200 (Sun, 22 Feb 2009) | 1 line
+Changed paths:
+   M /trunk/configure.ac
+
+bumped version to 0.2.3.4
+------------------------------------------------------------------------
+r381 | b100dian | 2009-02-22 22:44:10 +0200 (Sun, 22 Feb 2009) | 1 line
+Changed paths:
+   M /trunk/src/GtkamlCompiler.vala
+   M /trunk/src/GtkamlParser.vala
+   M /trunk/src/GtkamlSAXParser.vala
+   M /trunk/src/valacompiler.patch
+
+valac 0.5.7 compatibility
+------------------------------------------------------------------------
 r378 | b100dian | 2009-01-22 02:14:38 +0200 (Thu, 22 Jan 2009) | 1 line
 Changed paths:
    M /trunk/tutorial/main.vala

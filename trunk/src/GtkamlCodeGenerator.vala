@@ -22,7 +22,7 @@
 
 using GLib;
 using Vala;
-using Gee;
+
 
 /**
  * Generates vala source from a given ClassDefinition root tag

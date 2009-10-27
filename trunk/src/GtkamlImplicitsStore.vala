@@ -21,7 +21,6 @@
  */
 
 using GLib;
-using Gee;
 using Vala;
 
 /** a method parameter as it came from an .implicits file, with its default value */
@@ -63,8 +62,8 @@ private class Gtkaml.KeyFileWrapper : Object {
  */
 public class Gtkaml.ImplicitsStore : Object 
 {
-	private Gee.List<string> implicits_dirs = new ArrayList<string> (str_equal);
-	private Map<string,Gee.List<KeyFileWrapper> > loaded_ns = new HashMap<string,Gee.List<KeyFileWrapper> > (str_hash, str_equal);
+	private Vala.List<string> implicits_dirs = new ArrayList<string> (str_equal);
+	private Vala.Map<string,Vala.List<KeyFileWrapper> > loaded_ns = new HashMap<string,Vala.List<KeyFileWrapper> > (str_hash, str_equal);
 		
 	public ReadOnlyList<string> get_implicits_dirs ()
 	{
@@ -76,12 +75,12 @@ public class Gtkaml.ImplicitsStore : Object
 		implicits_dirs.add (directory);
 	}
 	
-	private Gee.List<KeyFileWrapper> get_ns (string ns)
+	private Vala.List<KeyFileWrapper> get_ns (string ns)
 	{
 		if (loaded_ns.contains (ns)) {
 			return loaded_ns.get (ns);
 		} else {
-			var key_file_list = new Gee.ArrayList<KeyFileWrapper> ();
+			var key_file_list = new Vala.ArrayList<KeyFileWrapper> ();
 			foreach (string implicits_dir in this.implicits_dirs) {
 				var file_name = Path.build_filename (implicits_dir, ns + ".implicits");
 				if (FileUtils.test (file_name, FileTest.EXISTS)) {
@@ -100,9 +99,9 @@ public class Gtkaml.ImplicitsStore : Object
 		}
 	}
 	
-	public Gee.List<string> get_adds (string ns, string class_name)
+	public Vala.List<string> get_adds (string ns, string class_name)
 	{
-		Gee.List<string> adds = new Gee.ArrayList<string> ();
+		Vala.List<string> adds = new Vala.ArrayList<string> ();
 		var kf_ns = get_ns (ns);
 		foreach (KeyFileWrapper kfw in kf_ns) {
 			if (kfw.has_key (class_name, "adds")) {
@@ -116,9 +115,9 @@ public class Gtkaml.ImplicitsStore : Object
 		return adds;
 	}
 
-	public Gee.List<ImplicitsParameter> get_method_parameters (string ns, string class_name, string method_name)
+	public Vala.List<ImplicitsParameter> get_method_parameters (string ns, string class_name, string method_name)
 	{
-		Gee.List<ImplicitsParameter> parameters = new Gee.ArrayList<ImplicitsParameter> ();
+		Vala.List<ImplicitsParameter> parameters = new Vala.ArrayList<ImplicitsParameter> ();
 		foreach (KeyFileWrapper kfw in get_ns (ns)) {
 			if (kfw.has_key (class_name, method_name)) {
 				var kf_parameters = kfw.get_string_list (class_name, method_name);
@@ -135,12 +134,12 @@ public class Gtkaml.ImplicitsStore : Object
 		return /*empty*/ parameters;
 	}
 	
-	public Gee.List<ImplicitsParameter> determine_parameter_names_and_default_values(ClassDefinition class_definition, Vala.Method method)
+	public Vala.List<ImplicitsParameter> determine_parameter_names_and_default_values(ClassDefinition class_definition, Vala.Method method)
 	{
 		var ns = method.parent_symbol.parent_symbol.get_full_name ();
 		var clazz = method.parent_symbol.name;
 		//stderr.printf ("determine_parameter_names_and_default_values %s %s of %s.%s\n", class_definition.base_full_name, method.name, ns, clazz);
-		var result = new Gee.ArrayList<ImplicitsParameter> ();
+		var result = new Vala.ArrayList<ImplicitsParameter> ();
 		string method_name = method.name;
 		if (method is CreationMethod) {
 			if (method.name != ".new")

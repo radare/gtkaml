@@ -55,7 +55,7 @@ namespace Gtkaml {
 			}
 		}
 		
-		private Gee.List<Vala.Method> methods = new Gee.ArrayList<Vala.Method> ();
+		private Vala.List<Vala.Method> methods = new Vala.ArrayList<Vala.Method> ();
 		
 		public void add_method (Vala.Method method) 
 		{
@@ -65,7 +65,7 @@ namespace Gtkaml {
 		/** the minimum number of parameters */ 
 		private int min_params = 999; /* use MAX_INT? */
 		/** the least you would need to call that minimal method */
-		private Gee.List<ImplicitsParameter> min_param_names = null;
+		private Vala.List<ImplicitsParameter> min_param_names = null;
 		/** the number of maximum matched parameters */
 		private int max_matches = -1;
 		/** the method most matched */
@@ -73,7 +73,7 @@ namespace Gtkaml {
 		/** the number of matched defaulted parameters */
 		private int max_matches_defaulted = 0;
 		/** the default parameters for the max matches method */
-		private Gee.List<ImplicitsParameter> max_matches_method_defaulted_parameters = null;
+		private Vala.List<ImplicitsParameter> max_matches_method_defaulted_parameters = null;
 		/** if there are more methods that match for the same parameters, this is > 1 */
 		private int count_with_max_match = 0;
 		
@@ -85,7 +85,7 @@ namespace Gtkaml {
 				var parameters = implicits_store.determine_parameter_names_and_default_values (class_owning_method, method);
 				int current_matches = 0;
 				int current_matches_defaulted = 0;
-				Gee.List<ImplicitsParameter> current_defaulted_parameters = new Gee.ArrayList<ImplicitsParameter> ();
+				Vala.List<ImplicitsParameter> current_defaulted_parameters = new Vala.ArrayList<ImplicitsParameter> ();
 				 
 				foreach (ImplicitsParameter parameter in parameters) {
 					//stderr.printf ("searching for %s =>", parameter.name); 
@@ -179,7 +179,7 @@ namespace Gtkaml {
 
 		public void set_method_parameters (Gtkaml.Method new_method, Vala.Method determined_method) 
 		{
-			Gee.List<Gtkaml.Attribute> to_remove = new Gee.ArrayList<Gtkaml.Attribute> ();
+			Vala.List<Gtkaml.Attribute> to_remove = new Vala.ArrayList<Gtkaml.Attribute> ();
 			
 			new_method.name = determined_method.name;
 			if (first_parameter != null) {
@@ -187,7 +187,7 @@ namespace Gtkaml {
 			}
 
 			//move the attributes from class definition to add method
-			Gee.List<ImplicitsParameter> parameters = implicits_store.determine_parameter_names_and_default_values (this.class_owning_method, determined_method);
+			Vala.List<ImplicitsParameter> parameters = implicits_store.determine_parameter_names_and_default_values (this.class_owning_method, determined_method);
 			foreach (ImplicitsParameter parameter in parameters) {
 				foreach (Gtkaml.Attribute attr in this.class_owning_parameters.attrs) {
 					if (parameter.name == attr.name) {
@@ -214,7 +214,7 @@ namespace Gtkaml {
 			} 
 			
 			//determine attr.target_types directly from method signature
-			Gee.Collection<FormalParameter> method_parameters = determined_method.get_parameters ();
+			Vala.Collection<FormalParameter> method_parameters = determined_method.get_parameters ();
 			i = 0;
 			foreach (FormalParameter formal_parameter in method_parameters)
 			{

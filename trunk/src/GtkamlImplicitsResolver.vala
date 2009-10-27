@@ -87,12 +87,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	 */	
 	private void determine_add_method (ClassDefinition child_definition)
 	{
-		Gee.List<Vala.Method> adds = new Gee.ArrayList<Vala.Method> ();
+		Vala.List<Vala.Method> adds = new Vala.ArrayList<Vala.Method> ();
 		lookup_container_add_methods( child_definition.parent_container.base_ns, child_definition.parent_container.base_type, adds );
 
 		Vala.Method determined_add = null;
 		Gtkaml.AddMethod new_method = new Gtkaml.AddMethod ();
-		Gee.List<Gtkaml.Attribute> to_remove = new Gee.ArrayList<Gtkaml.Attribute> ();
+		Vala.List<Gtkaml.Attribute> to_remove = new Vala.ArrayList<Gtkaml.Attribute> ();
 	
 		//pass one: see if we find an explicitly specified add method
 		foreach (Vala.Method add in adds) {
@@ -135,10 +135,10 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 
 	private void determine_construct_method (ClassDefinition class_definition)
 	{
-		Gee.List<Vala.Method> constructors = lookup_constructors (class_definition.base_type);
+		Vala.List<Vala.Method> constructors = lookup_constructors (class_definition.base_type);
 		Vala.Method determined_constructor = null;
 		Gtkaml.ConstructMethod new_method = new Gtkaml.ConstructMethod ();
-		Gee.List<Gtkaml.Attribute> to_remove = new Gee.ArrayList<Gtkaml.Attribute> ();
+		Vala.List<Gtkaml.Attribute> to_remove = new Vala.ArrayList<Gtkaml.Attribute> ();
 		
 		//pass one: see if we find an explicitly specified constructor
 		foreach (Vala.Method constructor in constructors) {
@@ -178,17 +178,17 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		class_definition.construct_method =  new_method;
 	}
 
-	private void lookup_container_add_methods_for_class (string ns, Class container_class_implicits_entry, string? ns2, ObjectTypeSymbol? container_class_holding_methods, Gee.List<Vala.Method> methods)
+	private void lookup_container_add_methods_for_class (string ns, Class container_class_implicits_entry, string? ns2, ObjectTypeSymbol? container_class_holding_methods, Vala.List<Vala.Method> methods)
 	{
 		if (ns2 == null)
 			return;
 			
-		Gee.List<DataType> base_types;
+		Vala.List<DataType> base_types;
 		if (container_class_holding_methods is Class?)
 			base_types = (container_class_holding_methods as Class).get_base_types ();
 		else if (container_class_holding_methods is Interface?)
 			base_types = (container_class_holding_methods as Interface).get_prerequisites ();
-			else base_types = new Gee.ReadOnlyList<DataType> ();
+			else base_types = new Vala.ReadOnlyList<DataType> ();
 
 		//recurse over base classes - ugly ugly ugly!
 		foreach (DataType dt in base_types) {
@@ -217,7 +217,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 
 	}
 	
-	public void lookup_container_add_methods (string? ns, Class? container_class, Gee.List<Vala.Method> methods)
+	public void lookup_container_add_methods (string? ns, Class? container_class, Vala.List<Vala.Method> methods)
 	{
 		//FIXME workaround to stop recursion at TypeInstance and Object
 		if (null == ns) 
@@ -296,8 +296,8 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	}
 
 
-	private Gee.List<Vala.Method> lookup_constructors (Class clazz) {
-		var constructors = new Gee.ArrayList<Vala.Method> ();
+	private Vala.List<Vala.Method> lookup_constructors (Class clazz) {
+		var constructors = new Vala.ArrayList<Vala.Method> ();
 		foreach (Vala.Method m in clazz.get_methods ()) {
 			if (m is CreationMethod)
 			{

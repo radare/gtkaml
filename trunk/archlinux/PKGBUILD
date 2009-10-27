@@ -10,7 +10,7 @@ license=('LGPL')
 depends=('vala>=0.7.6' 'gtk2' 'libxml2')
 makedepends=('pkgconfig')
 source=(http://gtkaml.googlecode.com/files/gtkaml-$pkgver.tar.bz2)
-sha1sums=('dec7b17b0ff0fa1b4753f778dfdc310b3d514ec6')
+sha1sums=('1686341cb26a99ffe3dca26f9fd683b2848e2ad2')
 
 build() {
 	cd $startdir/src/gtkaml-$pkgver

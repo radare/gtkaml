@@ -3,7 +3,7 @@
 	<VBox spacing="4">
         <Label expand="false" use_markup="true" 
 					label="&lt;b&gt;Dialog Box Title Here&lt;/b&gt;"/>
-        <Notebook can_focus="false" tab_vborder="1" gtkaml:private="my_notebook">
+        <Notebook tab_vborder="1" gtkaml:private="my_notebook">
                 <Label label="gg">
                 	<tab-label>
                 		<Label label="Yes!" />

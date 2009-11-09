@@ -19,6 +19,7 @@ CLEANFILES = gtkamlc.vala.stamp
 
 gtkamlc_VALASOURCES = \
 	GtkamlCompiler.vala \
+	GtkamlCodeContext.vala \
 	GtkamlSAXParser.vala \
 	GtkamlParser.vala \
 	GtkamlCodeGenerator.vala \

@@ -82,7 +82,7 @@ class Gtkaml.Compiler {
 
 	static string entry_point;
 
-	private CodeContext context;
+	private Gtkaml.CodeContext context;
 
 	const OptionEntry[] options = {
 		{ "girdir", 0, 0, OptionArg.FILENAME_ARRAY, ref gir_directories, "Look for .gir files in DIRECTORY", "DIRECTORY..." },
@@ -127,6 +127,8 @@ class Gtkaml.Compiler {
 	};
 	
 	private int quit () {
+		context.remove_generated_files ();
+
 		if (context.report.get_errors () == 0 && context.report.get_warnings () == 0) {
 			return 0;
 		}
@@ -194,8 +196,8 @@ class Gtkaml.Compiler {
 	}
 	
 	private int run () {
-		context = new CodeContext ();
-		CodeContext.push (context);
+		context = new Gtkaml.CodeContext ();
+		Vala.CodeContext.push (context);
 
 		// default to build executable
 		if (!ccode_only && !compile_only && output == null) {
@@ -379,7 +381,6 @@ class Gtkaml.Compiler {
 		}
 
 		if (context.report.get_errors () > 0) {
-			parser.remove_generated_files ();
 			return quit ();
 		}
 

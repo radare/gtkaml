@@ -29,7 +29,7 @@ using Vala;
 public class Gtkaml.SAXParser : GLib.Object {
 	/** the only reason this is public is to be accessible from the [Import]s */
 	public void* xmlCtxt;
-	public CodeContext context {get;private set;}
+	public Vala.CodeContext context {get;private set;}
 	public weak SourceFile source_file {get;private set;}
 	private StateStack states {get;set;}
 	private Vala.Map<string,int> generated_identifiers_counter = new HashMap<string,int> (str_hash, str_equal);

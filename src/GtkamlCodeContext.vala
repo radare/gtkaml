@@ -1,4 +1,4 @@
-/* valacompiler.vala
+/* GtkamlCodeContext.vala
  * 
  * Copyright (C) 2006-2009  Jürg Billeter
  * Copyright (C) 1996-2002, 2004, 2005, 2006 Free Software Foundation, Inc.

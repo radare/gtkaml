@@ -11,9 +11,7 @@
     <CheckButton g:private="match_case"     with-mnemonic="true" label="_Match case" expand="false"/>
     <CheckButton g:private="find_backwards" with-mnemonic="true" label="Find _backwards" expand="false"/>
   </VBox>
-   
 <![CDATA[
-
   public signal void find_next (string text, bool case_sensitivity);
   public signal void find_previous (string text, bool case_sensitivity);
 

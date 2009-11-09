@@ -2,7 +2,7 @@
 	gtkaml:name="MyWindow" title="gtktest" destroy="{Gtk.main_quit}">
 	<VBox spacing="4">
         <Label expand="false" use_markup="true" 
-					label="&lt;b&gt;Dialog Box Title Here&lt;/b&gt;"/>
+		label="&lt;b&gt;Dialog Box Title Here&lt;/b&gt;"/>
         <Notebook tab_vborder="1" gtkaml:private="my_notebook">
                 <Label label="gg">
                 	<tab-label>
@@ -13,32 +13,32 @@
                         <Label>
                         	<label>Nothing to see here, 
 please move along</label>
-						</Label>
+			</Label>
                 </HBox>
         </Notebook>
         <HButtonBox expand="false" fill="true" padding="0">
-                <Button with_mnemonic="true" label="_abort" clicked="on_click()"/>
+                <Button with_mnemonic="true" label="_abort" clicked="on_click ()"/>
                 <Button label="gtk-redo" use_stock="true">
                 	<clicked> { 
                 		target => {
                 			target.sensitive = false;
                 		}	
-                	}</clicked>
+                	} </clicked>
                 </Button>
                 <Button label="fail"/>
         </HButtonBox>
 	</VBox>
 <![CDATA[
-        private static void on_click() { message("you clicked me!"); }
+        private static void on_click() {
+		message ("you clicked me!");
+	}
 
-		static int main ( string [] args ) {
-			Gtk.init (ref args);
-			MyWindow g = new MyWindow();
-			g.show_all ();
-			Gtk.main ();
-			return 0;	
-		}
-			
-			
+	static int main (string[] args) {
+		Gtk.init (ref args);
+		MyWindow g = new MyWindow ();
+		g.show_all ();
+		Gtk.main ();
+		return 0;
+	}
 ]]>
 </Window>

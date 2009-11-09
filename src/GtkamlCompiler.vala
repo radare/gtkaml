@@ -570,7 +570,7 @@ class Gtkaml.Compiler {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s (based on Vala 0.7.6)\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s (based on Vala 0.7.8)\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

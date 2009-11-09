@@ -33,8 +33,6 @@ public class Gtkaml.Parser : Vala.Parser {
 	
 	private ImplicitsStore implicits_store = new ImplicitsStore ();
 	
-	private Vala.List<string> generated_files = new Vala.ArrayList<string> ();	
-
 	public Parser ()
 	{
 		base ();		
@@ -82,7 +80,7 @@ public class Gtkaml.Parser : Vala.Parser {
 				if (vala_contents != null) { 
 					string vala_filename = gtkaml_source_file.filename.ndup (gtkaml_source_file.filename.len () - ".gtkaml".len ()) + ".vala";
 					FileUtils.set_contents (vala_filename, vala_contents);
-					generated_files.add (vala_filename);
+					context.generated_files.add (vala_filename);
 					gtkaml_source_file.filename = vala_filename;
 					base.visit_source_file (gtkaml_source_file);
 				} 
@@ -92,13 +90,5 @@ public class Gtkaml.Parser : Vala.Parser {
 		} else {
 			Report.error (null, "%s not found".printf(gtkaml_source_file.filename));
 		} 
-	}
-	
-	public void remove_generated_files () {
-		if (!context.save_temps) {
-			foreach (string filename in generated_files) {
-				FileUtils.unlink (filename);
-			}
-		}
 	}
 }

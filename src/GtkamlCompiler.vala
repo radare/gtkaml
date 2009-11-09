@@ -379,6 +379,7 @@ class Gtkaml.Compiler {
 		}
 
 		if (context.report.get_errors () > 0) {
+			parser.remove_generated_files ();
 			return quit ();
 		}
 

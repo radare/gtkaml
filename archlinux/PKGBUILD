@@ -1,16 +1,16 @@
 # Archlinux build script
 # Maintainer: Vlad Grecescu <b100dian at gmail dot com>
 pkgname=gtkaml
-pkgver=0.2.8
+pkgver=0.2.9.1
 pkgrel=1
 pkgdesc="Gtk+Vala application markup language"
 arch=('i686' 'x86_64')
 url="http://gtkaml.googlecode.com"
 license=('LGPL')
-depends=('vala>=0.7.6' 'gtk2' 'libxml2')
+depends=('vala>=0.7.8' 'gtk2' 'libxml2')
 makedepends=('pkgconfig')
 source=(http://gtkaml.googlecode.com/files/gtkaml-$pkgver.tar.bz2)
-sha1sums=('1686341cb26a99ffe3dca26f9fd683b2848e2ad2')
+sha1sums=('75d5f9a5dc695f5887768603837420d010791401')
 
 build() {
 	cd $startdir/src/gtkaml-$pkgver

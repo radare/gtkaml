@@ -26,15 +26,13 @@ using Vala;
 /** 
  * Simple, specialized, stack implementation using a Vala.List
  */
-public class Gtkaml.StateStack : GLib.Object
-{
+public class Gtkaml.StateStack : GLib.Object {
 	private Vala.ArrayList<State> array_list {get;set;}
 	
 	construct {
 		array_list = new ArrayList<State>();
 	}
-		
-	
+
 	public void push (State element) {
 		array_list.add (element);
 	}
@@ -42,9 +40,8 @@ public class Gtkaml.StateStack : GLib.Object
 	public State peek (int backtrack = 0) {
 		State element = null;
 		int size = (array_list as Vala.List).size;
-		if (size != 0) {
+		if (size != 0)
 			element = array_list.get (size - 1 - backtrack);
-		}
 		return element;
 	}		
 	
@@ -53,9 +50,7 @@ public class Gtkaml.StateStack : GLib.Object
 		if (element != null) {
 			array_list.remove(element);
 			return element;
-		} else {
-			return null;
 		}
+		return null;
 	}
-	
 }

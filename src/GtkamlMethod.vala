@@ -29,8 +29,8 @@ using Vala;
 public abstract class Gtkaml.Method : GLib.Object {
 	public string name {get;set;}
 	public Vala.List<Gtkaml.Attribute> parameter_attributes{get;set;}
-	construct
-	{
+
+	construct {
 		parameter_attributes = new Vala.ArrayList<Gtkaml.Attribute> ();
 	}
 }

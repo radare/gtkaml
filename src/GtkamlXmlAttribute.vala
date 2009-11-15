@@ -30,5 +30,3 @@ public class Gtkaml.XmlAttribute : GLib.Object {
 	public string URI;
 	public string value;
 }
-	
-

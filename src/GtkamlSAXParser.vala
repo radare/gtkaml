@@ -22,9 +22,6 @@
 using GLib;
 using Vala;
 
-
-
-
 /** this is the Flying Spaghetti Monster */
 public class Gtkaml.SAXParser : GLib.Object {
 	/** the only reason this is public is to be accessible from the [Import]s */
@@ -50,8 +47,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		root_class_definition = null;
 	}
 	
-	public virtual RootClassDefinition parse ()
-	{
+	public virtual RootClassDefinition parse () {
 		string contents;
 		ulong length;
 		
@@ -77,121 +73,108 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	[NoArrayLength]	
 	public void start_element (string localname, string? prefix, 
-	                         string URI, int nb_namespaces, 
-	                         [CCode (array_length = false, array_null_terminated = false)] 
-	                         string[] namespaces, 
-	                         int nb_attributes, int nb_defaulted, 
-	                         [CCode (array_length = false, array_null_terminated = false)]
-	                         string[] attributes)
+		 string URI, int nb_namespaces, 
+		 [CCode (array_length = false, array_null_terminated = false)] 
+		 string[] namespaces, 
+		 int nb_attributes, int nb_defaulted, 
+		 [CCode (array_length = false, array_null_terminated = false)]
+		 string[] attributes)
 	{
 		var attrs = parse_attributes( attributes, nb_attributes );
 		State state = states.peek();
 		var source_reference = create_source_reference ();
 		switch (state.state_id) {
-			case StateId.SAX_PARSER_INITIAL_STATE:
-				{	
-					
-					//Frist Tag! - that means, add "using" directives first
-					var nss = parse_namespaces (namespaces, nb_namespaces);
-					foreach (XmlNamespace ns in nss) {
-						if ( null == ns.prefix || null != ns.prefix && ns.prefix != gtkaml_prefix)
-						{
-							string[] uri_definition = ns.URI.split_set(":");	
-							var namespace_reference = new Vala.UsingDirective(new UnresolvedSymbol (null, "GLib", null), source_reference);
-							source_file.add_using_directive (namespace_reference);
-							if (null == ns.prefix) {
-								//stderr.printf ("adding '%s':'%s' to prefixes_namespaces map\n", "", uri_definition[0]);
-								prefixes_namespaces.set ("", uri_definition[0]); 
-							} else {
-								//stderr.printf ("adding '%s':'%s' to prefixes_namespaces map\n", ns.prefix, uri_definition[0]);
-								prefixes_namespaces.set (ns.prefix, uri_definition[0]); 
-							}
-						}
-					}
-					
-					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
-					if (clazz == null) {
- 						Report.error ( source_reference, "%s not a class".printf (localname));
-						stop_parsing (); 
-						return;
-					}
-
-					this.root_class_definition = get_root_definition (clazz, attrs, prefix);
-															
-					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, root_class_definition));
-					break;
-				}
-			case StateId.SAX_PARSER_CONTAINER_STATE:	
+		case StateId.SAX_PARSER_INITIAL_STATE:
+			//Frist Tag! - that means, add "using" directives first
+			var nss = parse_namespaces (namespaces, nb_namespaces);
+			foreach (XmlNamespace ns in nss) {
+				if ( null == ns.prefix || null != ns.prefix && ns.prefix != gtkaml_prefix)
 				{
-					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
-					string fqan;
-					
-					if (clazz != null) { //this is a member/container child object
-						ClassDefinition class_definition = get_child_for_container (clazz, state.class_definition, attrs, prefix);
-						states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, class_definition));
-					} else { //no class with this name found, assume it's an attribute
-						ClassDefinition attribute_parent_class_definition = state.class_definition;
-						if (prefix != null) 
-							fqan = prefix + "." + localname;
-						else 
-							fqan = localname;
-						if (attrs.size > 0) { //an attribute cannot have.. attributes
-							Report.error (source_reference, "No class %s found.".printf(fqan));
-						}
-						states.push (new State (StateId.SAX_PARSER_ATTRIBUTE_STATE, attribute_parent_class_definition, null, fqan));
-					}
-					break;
-				}
-			case StateId.SAX_PARSER_ATTRIBUTE_STATE:
-				{
-					//a tag found within an attribute state switches us to container_state
-					
-					if (state.attribute != null) { //this was created by non-discardable text nodes
-						Report.error (source_reference, "Incorrect attribute definition for %s".printf (state.attribute_name));
-						stop_parsing ();
-						return;
-					}
-
-					Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
-					
-					ClassDefinition attribute_value_definition;
-					if (clazz != null) { //this is a member/container child object
-						attribute_value_definition = get_child_for_container (clazz, null, attrs, prefix);
+					string[] uri_definition = ns.URI.split_set(":");	
+					var namespace_reference = new Vala.UsingDirective(new UnresolvedSymbol (null, "GLib", null), source_reference);
+					source_file.add_using_directive (namespace_reference);
+					if (null == ns.prefix) {
+						//stderr.printf ("adding '%s':'%s' to prefixes_namespaces map\n", "", uri_definition[0]);
+						prefixes_namespaces.set ("", uri_definition[0]); 
 					} else {
-						Report.error (source_reference, "No class '%s' found".printf (localname));
-						stop_parsing();
-						return;
+						//stderr.printf ("adding '%s':'%s' to prefixes_namespaces map\n", ns.prefix, uri_definition[0]);
+						prefixes_namespaces.set (ns.prefix, uri_definition[0]); 
 					}
-					ComplexAttribute attr = new ComplexAttribute (strip_attribute_hyphens (state.attribute_name), attribute_value_definition);
-					state.attribute = attr;
-					
-					//add the attribute into the parent container
-					state.class_definition.add_attribute (attr);		
-					
-					states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, attribute_value_definition));
-					break;
 				}
-			default:
-				Report.error( source_reference, "Invalid Gtkaml SAX Parser state");
-				stop_parsing(); 
+			}
+			
+			Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
+			if (clazz == null) {
+				Report.error ( source_reference, "%s not a class".printf (localname));
+				stop_parsing (); 
 				return;
+			}
+
+			this.root_class_definition = get_root_definition (clazz, attrs, prefix);
+													
+			states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, root_class_definition));
+			break;
+		case StateId.SAX_PARSER_CONTAINER_STATE:	
+			Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
+			string fqan;
+			
+			if (clazz != null) { //this is a member/container child object
+				ClassDefinition class_definition = get_child_for_container (clazz, state.class_definition, attrs, prefix);
+				states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, class_definition));
+			} else { //no class with this name found, assume it's an attribute
+				ClassDefinition attribute_parent_class_definition = state.class_definition;
+				if (prefix != null) 
+					fqan = prefix + "." + localname;
+				else 
+					fqan = localname;
+				if (attrs.size > 0) { //an attribute cannot have.. attributes
+					Report.error (source_reference, "No class %s found.".printf(fqan));
+				}
+				states.push (new State (StateId.SAX_PARSER_ATTRIBUTE_STATE, attribute_parent_class_definition, null, fqan));
+			}
+			break;
+		case StateId.SAX_PARSER_ATTRIBUTE_STATE:
+			//a tag found within an attribute state switches us to container_state
+			if (state.attribute != null) { //this was created by non-discardable text nodes
+				Report.error (source_reference, "Incorrect attribute definition for %s".printf (state.attribute_name));
+				stop_parsing ();
+				return;
+			}
+
+			Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
+			
+			ClassDefinition attribute_value_definition;
+			if (clazz != null) { //this is a member/container child object
+				attribute_value_definition = get_child_for_container (clazz, null, attrs, prefix);
+			} else {
+				Report.error (source_reference, "No class '%s' found".printf (localname));
+				stop_parsing();
+				return;
+			}
+			ComplexAttribute attr = new ComplexAttribute (strip_attribute_hyphens (state.attribute_name), attribute_value_definition);
+			state.attribute = attr;
+
+			//add the attribute into the parent container
+			state.class_definition.add_attribute (attr);		
+			states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, attribute_value_definition));
+			break;
+		default:
+			Report.error( source_reference, "Invalid Gtkaml SAX Parser state");
+			stop_parsing(); 
+			return;
 		}
-		
 	}
 	
-	public void characters (string data, int len)
-	{
+	public void characters (string data, int len) {
 		State state = states.peek ();
 		string @value = data.ndup (len);
 		string stripped_value = @value.strip ();
 		
-		if (stripped_value != "") {
+		if (stripped_value != "")
 			parse_attribute_content_as_text (state, value);
-		}
 	}
 	
-	public void end_element (string localname, string? prefix, string URI)
-	{
+	public void end_element (string localname, string? prefix, string URI) {
 		State last_state = states.pop();
 		//check if we were in 'attribute' state but no sub-tags or no text/cdata blocks were encountered
 		if ((last_state != null)
@@ -202,11 +185,10 @@ public class Gtkaml.SAXParser : GLib.Object {
 				Report.error (create_source_reference (), 
 					"%s is not well defined or is not an attribute of %s".printf (last_state.attribute_name, last_state.class_definition.base_full_name));
 				stop_parsing ();
-			}
+		}
 	}
 	
-	public void cdata_block (string cdata, int len)
-	{
+	public void cdata_block (string cdata, int len) {
 		State state = states.peek ();
 		if (state.state_id != StateId.SAX_PARSER_INITIAL_STATE){
 			State previous_state = states.peek (1);
@@ -222,8 +204,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		} 
 	}
 
-	private void parse_attribute_content_as_text (State state, string content)
-	{
+	private void parse_attribute_content_as_text (State state, string content) {
 		if (state.state_id == StateId.SAX_PARSER_ATTRIBUTE_STATE) {
 			if (state.attribute_name == gtkaml_prefix+".preconstruct") {
 				if (state.class_definition.preconstruct_code != null) {
@@ -254,116 +235,119 @@ public class Gtkaml.SAXParser : GLib.Object {
 				}
 			}
 		} else {
-			Report.error (create_source_reference (), "Invalid non-whitespace text found: '%s'".printf (content));
+			Report.error (create_source_reference (),
+				"Invalid non-whitespace text found: '%s'".printf (content));
 			stop_parsing ();
 			return;
 		}
 	}
 	
-	private string prefix_to_namespace (string? prefix)
-	{
-		if (prefix==null) {
+	private string prefix_to_namespace (string? prefix) {
+		if (prefix == null)
 			return prefixes_namespaces.get ("");		
-		} 
 		return prefixes_namespaces.get (prefix);		
 	}
 	
 	public SourceReference create_source_reference () {
-		return new SourceReference (source_file, line_number (), column_number (), line_number (), column_number ()); 
+		return new SourceReference (source_file, line_number (),
+			column_number (), line_number (), column_number ()); 
 	}
 	
-	private Class? lookup_class (string? xmlNamespace, string name)
-	{
+	private Class? lookup_class (string? xmlNamespace, string name) {
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
 			if (xmlNamespace == ns.name) {
 				Symbol s = ns.scope.lookup (name);
-				if (s is Class) {
+				if (s is Class)
 					return (s as Class);
-				}
 			}
 		}
 		return null;
 	}
 
-	private string strip_attribute_hyphens (string attrname)
-	{
+	private string strip_attribute_hyphens (string attrname) {
 		//see TDWTF, "The Hard Way"
 		var tokens = attrname.split ("-");
 		return string.joinv ("_", tokens);
 	}
 
-	public RootClassDefinition get_root_definition (Class clazz, Vala.List<XmlAttribute> attrs, string? prefix)
-	{
+	public RootClassDefinition get_root_definition (Class clazz, Vala.List<XmlAttribute> attrs, string? prefix) {
 		RootClassDefinition root_class_definition = new Gtkaml.RootClassDefinition (create_source_reference (), "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
 		root_class_definition.prefixes_namespaces = prefixes_namespaces;
 		foreach (XmlAttribute attr in attrs) {
-			if (attr.prefix != null)
-			{ 
-				if (attr.prefix == gtkaml_prefix) {
-					switch (attr.localname) {
-						case "public":
-						case "name":
-							if (root_class_definition.target_name != null) {
-								Report.error (create_source_reference (), "A name for the class already exists ('%s')".printf (root_class_definition.target_name));
-								stop_parsing ();
-							}
-							root_class_definition.target_name = attr.value;
-							break;
-						case "namespace":
-							root_class_definition.target_namespace = attr.value;
-							break;
-						case "private":
-							Report.error (create_source_reference (), "'private' not allowed on root tag.");
-							stop_parsing ();
-							break;
-						case "construct":
-							if (root_class_definition.construct_code != null) {
-								Report.error (create_source_reference (), "A construct attribute already exists for the root class");
-								stop_parsing ();
-							}
-							root_class_definition.construct_code = attr.value;
-							break;
-						case "preconstruct":
-							if (root_class_definition.preconstruct_code != null) {
-								Report.error (create_source_reference (), "A preconstruct attribute already exists for the root class");
-								stop_parsing ();
-							}
-							root_class_definition.preconstruct_code = attr.value;
-							break;
-						case "implements":
-							var implementsv = attr.value.split (",");
-							for (int i = 0; implementsv[i]!=null; i++)
-								implementsv[i] = implementsv[i].strip ();
-							root_class_definition.implements = string.joinv (", ", implementsv);
-							break;
-						default:
-							Report.warning (create_source_reference (), "Unknown gtkaml attribute '%s'.".printf (attr.localname));
-							break;
-					}
-				} else  {
-					Report.error (create_source_reference (), "'%s' is the only allowed prefix for attributes. Other attributes must be left unprefixed".printf (gtkaml_prefix));
-					stop_parsing ();
-				}
-			} else {
+			if (attr.prefix == null) {
 				var simple_attribute = new SimpleAttribute (strip_attribute_hyphens (attr.localname), attr.value);
 				root_class_definition.add_attribute (simple_attribute);
+				continue;
+			}
+			if (attr.prefix != gtkaml_prefix) {
+				Report.error (create_source_reference (),
+					"'%s' is the only allowed prefix for attributes. Other attributes must be left unprefixed".printf (gtkaml_prefix));
+				stop_parsing ();
+			} else
+			switch (attr.localname) {
+			case "public":
+			case "name":
+				if (root_class_definition.target_name != null) {
+					Report.error (create_source_reference (),
+						"A name for the class already exists ('%s')".printf (
+						root_class_definition.target_name));
+					stop_parsing ();
+				}
+				root_class_definition.target_name = attr.value;
+				break;
+			case "namespace":
+				root_class_definition.target_namespace = attr.value;
+				break;
+			case "private":
+				Report.error (create_source_reference (),
+					"'private' not allowed on root tag.");
+				stop_parsing ();
+				break;
+			case "construct":
+				if (root_class_definition.construct_code != null) {
+					Report.error (create_source_reference (),
+						"A construct attribute already exists for the root class");
+					stop_parsing ();
+				}
+				root_class_definition.construct_code = attr.value;
+				break;
+			case "preconstruct":
+				if (root_class_definition.preconstruct_code != null) {
+					Report.error (create_source_reference (),
+						"A preconstruct attribute already exists for the root class");
+					stop_parsing ();
+				}
+				root_class_definition.preconstruct_code = attr.value;
+				break;
+			case "implements":
+				var implementsv = attr.value.split (",");
+				for (int i = 0; implementsv[i]!=null; i++)
+					implementsv[i] = implementsv[i].strip ();
+				root_class_definition.implements = string.joinv (", ", implementsv);
+				break;
+			default:
+				Report.warning (create_source_reference (),
+					"Unknown gtkaml attribute '%s'.".printf (attr.localname));
+				break;
 			}
 		}
 		
-		if (root_class_definition.target_name == null) {
-			Report.error (create_source_reference (), "No class name specified: use %s:name for this".printf (gtkaml_prefix));
-		}
+		if (root_class_definition.target_name == null)
+			Report.error (create_source_reference (),
+				"No class name specified: use %s:name for this".printf (gtkaml_prefix));
 		return root_class_definition;
 	}
 	
-	public ClassDefinition get_child_for_container (Class clazz, ClassDefinition? container_definition, Vala.List<XmlAttribute> attrs, string? prefix)
+	public ClassDefinition get_child_for_container (Class clazz,
+		ClassDefinition? container_definition, Vala.List<XmlAttribute> attrs,
+		string? prefix)
 	{
-		string identifier = null;
-		DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;
 		string reference = null;
+		string identifier = null;
 		string construct_code = null;
 		string preconstruct_code = null;
 		ClassDefinition parent_container = container_definition;
+		DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;
 
 		foreach (XmlAttribute attr in attrs) {
 			if (attr.prefix!=null && attr.prefix==gtkaml_prefix) {
@@ -374,11 +358,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 						break;
 					}
 					identifier = attr.value;
-					if (attr.localname == "public") {
+					if (attr.localname == "public")
 						identifier_scope = DefinitionScope.PUBLIC;
-					} else {
-						identifier_scope = DefinitionScope.PRIVATE;
-					}
+					else identifier_scope = DefinitionScope.PRIVATE;
 				} else if (attr.localname=="existing") {
 					reference = attr.value;
 				} else if (attr.localname=="construct") {
@@ -397,7 +379,8 @@ public class Gtkaml.SAXParser : GLib.Object {
 					stop_parsing ();
 				}
 			} else if (attr.prefix != null) {
-				Report.error (create_source_reference (), "%s is the only allowed prefix for attributes. Other attributes must be left unprefixed".printf (gtkaml_prefix));
+				Report.error (create_source_reference (),
+					"%s is the only allowed prefix for attributes. Other attributes must be left unprefixed".printf (gtkaml_prefix));
 				stop_parsing ();
 			}
 		}
@@ -421,7 +404,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 				generated_identifiers_counter.set (clazz.name.down (clazz.name.len ()), counter);
 			}
 
-			class_definition = new ClassDefinition (create_source_reference (), identifier, prefix_to_namespace (prefix), clazz, identifier_scope, parent_container);
+			class_definition = new ClassDefinition (create_source_reference (),
+				identifier, prefix_to_namespace (prefix), clazz,
+				identifier_scope, parent_container);
 			class_definition.construct_code = construct_code;
 			class_definition.preconstruct_code = preconstruct_code;
 		} else {
@@ -431,17 +416,12 @@ public class Gtkaml.SAXParser : GLib.Object {
 			}
 			class_definition = new ReferenceClassDefinition (create_source_reference (), reference, prefix_to_namespace (prefix), clazz, parent_container);
 			/* now post-process the reference FIXME put this in code generator or something*/
-			string reference_stripped = reference.strip (); 
+			string reference_stripped = reference.strip ();
 			if (reference_stripped.has_prefix ("{")) {
 				if (reference_stripped.has_suffix ("}"))
-				{
 					class_definition.identifier = reference_stripped.substring (1, reference_stripped.len () -2 );
-				} else {
-					Report.error (create_source_reference (), "'existing' attribute not properly ended");
-				}
-			} else {
-				class_definition.identifier = "(%s as %s)".printf (reference, class_definition.base_full_name);
-			}
+				else Report.error (create_source_reference (), "'existing' attribute not properly ended");
+			} else class_definition.identifier = "(%s as %s)".printf (reference, class_definition.base_full_name);
 		}
 		
 		if (container_definition != null)
@@ -458,13 +438,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	
 	[NoArrayLength]
-	private Vala.List<XmlAttribute> parse_attributes ([CCode (array_length = false)] string[] attributes, int nb_attributes)
-	{	
-		int walker = 0;
+	private Vala.List<XmlAttribute> parse_attributes ([CCode (array_length = false)] string[] attributes, int nb_attributes) {	
 		string end;
+		int walker = 0;
 		var attribute_list = new Vala.ArrayList<XmlAttribute> ();
-		for (int i = 0; i < nb_attributes; i++)
-		{
+		for (int i = 0; i < nb_attributes; i++) {
 			var attr = new XmlAttribute ();
 			attr.localname = attributes[walker];
 			attr.prefix = attributes[walker+1];
@@ -477,27 +455,25 @@ public class Gtkaml.SAXParser : GLib.Object {
 		}
 		return attribute_list;
 	}
-	
-	
+
 	[NoArrayLength]
-	private Vala.List<XmlNamespace> parse_namespaces ([CCode (array_length = false)] string[] namespaces, int nb_namespaces)
-	{
+	private Vala.List<XmlNamespace> parse_namespaces ([CCode (array_length = false)] string[] namespaces, int nb_namespaces) {
 		int walker = 0;
 		var namespace_list = new Vala.ArrayList<XmlNamespace> ();
-		for (int i = 0; i < nb_namespaces; i++) 
-		{
+		for (int i = 0; i < nb_namespaces; i++) {
 			var ns = new XmlNamespace ();
 			ns.prefix = namespaces[walker];
 			ns.URI = namespaces[walker+1];
 			if (ns.URI != null && ns.URI.has_prefix ("http://gtkaml.org/")) {
-				if (ns.prefix != null) {
-					gtkaml_prefix = ns.prefix;
-					string version = ns.URI.substring ("http://gtkaml.org/".len (), ns.URI.len () - "http://gtkaml.org/".len ());
-					if (version > Config.PACKAGE_VERSION) {
-						Report.warning (create_source_reference (), "Source file version (%s) newer than gtkaml compiler version (%s)".printf (version, Config.PACKAGE_VERSION));
-					}
-				} else {
-					Report.error (create_source_reference (), "You cannot use the gtkaml namespace as default namespace");
+				if (ns.prefix == null)
+					Report.error (create_source_reference (),
+						"You cannot use the gtkaml namespace as default namespace");
+				gtkaml_prefix = ns.prefix;
+				string version = ns.URI.substring ("http://gtkaml.org/".len (),
+					ns.URI.len () - "http://gtkaml.org/".len ());
+				if (version > Config.PACKAGE_VERSION) {
+					Report.warning (create_source_reference (),
+						"Source file version (%s) newer than gtkaml compiler version (%s)".printf (version, Config.PACKAGE_VERSION));
 				}
 			}
 			namespace_list.add (ns);
@@ -505,5 +481,4 @@ public class Gtkaml.SAXParser : GLib.Object {
 		}
 		return namespace_list;
 	}
-
 }

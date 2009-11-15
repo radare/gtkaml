@@ -29,19 +29,18 @@ public enum Gtkaml.StateId {
 	SAX_PARSER_ATTRIBUTE_STATE,   /* the characters are then used as value, string literal - we need the current instance.property */
 }
 
-public class Gtkaml.State : GLib.Object
-{
+public class Gtkaml.State : GLib.Object {
 	public StateId state_id {get;set;}
 	public Gtkaml.ClassDefinition class_definition {get;set;}
 	public Gtkaml.Attribute attribute {get;set;}
 	public string attribute_name{get;set;}
 	
-	public State (StateId state_id, Gtkaml.ClassDefinition? class_definition, Gtkaml.Attribute? attribute = null, string? attribute_name = null)
+	public State (StateId state_id, Gtkaml.ClassDefinition? class_definition,
+		Gtkaml.Attribute? attribute = null, string? attribute_name = null)
 	{
 		this.state_id = state_id;
 		this.class_definition = class_definition;
 		this.attribute = attribute;
 		this.attribute_name = attribute_name;
 	}
-
 }

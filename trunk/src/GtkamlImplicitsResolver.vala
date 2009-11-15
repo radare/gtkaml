@@ -33,8 +33,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 	public Vala.CodeContext context {get;construct;}
 	
 	public ImplicitsResolver (Vala.CodeContext context, ImplicitsStore implicits_store) {
-		this.context = context;
-		this.implicits_store = implicits_store;
+		base (context: context, implicits_store: implicits_store);
 	}
 	
 	public void resolve (ClassDefinition class_definition) {
@@ -48,8 +47,14 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 			determine_add_method (class_definition);
 
 		//References should have no other attributes than the 'attached' ones (woa.. i learned xaml)
-		if (class_definition is ReferenceClassDefinition && class_definition.attrs.size != 0 && class_definition.parent_container != null) {
-			Report.error (class_definition.source_reference, "No attributes other than the container add parameters are allowed on existing widgets which are not standalone");
+		if (class_definition is ReferenceClassDefinition &&
+			class_definition.attrs.size != 0 &&
+			class_definition.parent_container != null)
+		{
+			Report.error (class_definition.source_reference,
+				"No attributes other than the container "+
+				"add parameters are allowed on existing "+
+				"widgets which are not standalone");
 		}
 		
 		//resolve the rest of the attr types
@@ -64,11 +69,14 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 			if (attr is ComplexAttribute)
 				resolve ( (attr as ComplexAttribute).complex_type );
 		}
-		if (class_definition.construct_method != null && class_definition.construct_method.parameter_attributes != null)
+		if (class_definition.construct_method != null &&
+			class_definition.construct_method.parameter_attributes != null)
+		{
 			foreach (Attribute attr in class_definition.construct_method.parameter_attributes) {
 				if (attr is ComplexAttribute)
 					resolve ( (attr as ComplexAttribute).complex_type );
 			}
+		}
 		bool first=true; //do not generate the first parameter of the container add child method
 		if (class_definition.add_method != null && class_definition.add_method.parameter_attributes != null)
 			foreach (Attribute attr in class_definition.add_method.parameter_attributes) {
@@ -84,7 +92,8 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 	 */	
 	private void determine_add_method (ClassDefinition child_definition) {
 		Vala.List<Vala.Method> adds = new Vala.ArrayList<Vala.Method> ();
-		lookup_container_add_methods( child_definition.parent_container.base_ns, child_definition.parent_container.base_type, adds );
+		lookup_container_add_methods (child_definition.parent_container.base_ns,
+			child_definition.parent_container.base_type, adds );
 
 		Vala.Method determined_add = null;
 		Gtkaml.AddMethod new_method = new Gtkaml.AddMethod ();
@@ -93,7 +102,9 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		//pass one: see if we find an explicitly specified add method
 		foreach (Vala.Method add in adds) {
 			foreach (Gtkaml.Attribute attr in child_definition.attrs) {
-				if (attr is SimpleAttribute && attr.name == add.name && (attr as SimpleAttribute).value == "true") {
+				if (attr is SimpleAttribute && attr.name == add.name
+					&& (attr as SimpleAttribute).value == "true")
+				{
 					determined_add = add;
 					to_remove.add (attr);
 					break;
@@ -101,7 +112,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 			}
 		}
 		
-		ComplexAttribute first_parameter = new ComplexAttribute ( "widget", child_definition);
+		ComplexAttribute first_parameter = new ComplexAttribute ("widget", child_definition);
 		MethodMatcher method_matcher = new MethodMatcher (implicits_store, child_definition.parent_container, "container add method", first_parameter);
 		
 		//pass two: the first who matches the most parameters + warning if there are more
@@ -135,7 +146,9 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		//pass one: see if we find an explicitly specified constructor
 		foreach (Vala.Method constructor in constructors) {
 			foreach (Gtkaml.Attribute attr in class_definition.attrs) {
-				if ( attr is SimpleAttribute && attr.name == constructor.name && (attr as SimpleAttribute).value == "true") {
+				if (attr is SimpleAttribute && attr.name == constructor.name &&
+					(attr as SimpleAttribute).value == "true")
+				{
 					determined_constructor = constructor;
 					to_remove.add (attr);
 					break;
@@ -167,7 +180,11 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		class_definition.construct_method =  new_method;
 	}
 
-	private void lookup_container_add_methods_for_class (string ns, Class container_class_implicits_entry, string? ns2, ObjectTypeSymbol? container_class_holding_methods, Vala.List<Vala.Method> methods) {
+	private void lookup_container_add_methods_for_class (string ns,
+		Class container_class_implicits_entry, string? ns2,
+		ObjectTypeSymbol? container_class_holding_methods,
+		Vala.List<Vala.Method> methods)
+	{
 		if (ns2 == null)
 			return;
 			
@@ -184,9 +201,11 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 				string utns = get_unresolved_type_ns (dt as UnresolvedType);
 				if (utns == null)
 					continue;
-				ObjectTypeSymbol c = lookup_class (utns, (dt as UnresolvedType).unresolved_symbol.name);
+				ObjectTypeSymbol c = lookup_class (utns,
+					(dt as UnresolvedType).unresolved_symbol.name);
 				if (c != null)
-					lookup_container_add_methods_for_class (ns, container_class_implicits_entry, utns, c, methods);
+					lookup_container_add_methods_for_class (ns,
+						container_class_implicits_entry, utns, c, methods);
 			}
 		}
 			

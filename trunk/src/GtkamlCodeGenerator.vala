@@ -197,6 +197,9 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 
 	protected void write_declaration (ClassDefinition class_definition) {
 		switch (class_definition.definition_scope) {
+		case DefinitionScope.MAIN_CLASS:
+			/* do something here? */
+			break;
 		case DefinitionScope.PUBLIC:
 			members_declarations += "\tpublic " + class_definition.base_full_name +
 				" " + class_definition.identifier + ";\n";

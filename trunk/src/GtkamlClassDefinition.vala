@@ -32,8 +32,8 @@ public enum DefinitionScope {
 
 /** represents a gtkaml tag */
 public class Gtkaml.ClassDefinition : GLib.Object {
-	public Vala.SourceReference source_reference {get;set;}
-	public string identifier {get;set;}
+	public Vala.SourceReference source_reference { get; set; }
+	public string identifier { get; set; }
 	public string base_full_name {
 		owned get { 
 			//BUG return (ns == null)? base_type.name : ns + "." + base_type.name;
@@ -46,22 +46,21 @@ public class Gtkaml.ClassDefinition : GLib.Object {
 			return baseful_name;
 		} 
 	}
-	public string base_ns {get;set;}
-	public Vala.Class base_type {get;set;}
 
-	public Vala.List<Gtkaml.Attribute> attrs {get;set;}
+	public string base_ns { get; set; }
+	public Vala.Class base_type { get; set; }
+	public Vala.List<Gtkaml.Attribute> attrs { get; set; }
+	public weak ClassDefinition parent_container { get; set; }
+	public Vala.List<ClassDefinition> children { get; set; }
+	public DefinitionScope definition_scope { get; set; }
+	public ConstructMethod construct_method { get; set; }
+	public AddMethod add_method { get; set; }
+	public string construct_code { get; set; }
+	public string preconstruct_code { get; set; }
 
-	public weak ClassDefinition parent_container {get;set;}
-	
-	public Vala.List<ClassDefinition> children {get;set;}
-	public DefinitionScope definition_scope {get;set;}
-	public ConstructMethod construct_method {get;set;}
-	public AddMethod add_method {get;set;}
-	public string construct_code{get;set;}
-	public string preconstruct_code{get;set;}
-
-	public ClassDefinition (SourceReference source_reference, string identifier, string base_ns, Vala.Class base_type, 
-		DefinitionScope definition_scope, ClassDefinition? parent_container = null)
+	public ClassDefinition (SourceReference source_reference, string identifier,
+		string base_ns, Vala.Class base_type, DefinitionScope definition_scope,
+		ClassDefinition? parent_container = null)
 	{
 		this.source_reference = source_reference;
 		this.base_ns = base_ns;
@@ -84,6 +83,4 @@ public class Gtkaml.ClassDefinition : GLib.Object {
 	{
 		children.add (child);
 	}
-
-	
 }

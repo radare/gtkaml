@@ -79,9 +79,7 @@ class Gtkaml.Compiler {
 	static bool quiet_mode;
 	static bool verbose_mode;
 	static string profile;
-
 	static string entry_point;
-
 	private Gtkaml.CodeContext context;
 
 	const OptionEntry[] options = {
@@ -129,28 +127,27 @@ class Gtkaml.Compiler {
 	private int quit () {
 		context.remove_generated_files ();
 
-		if (context.report.get_errors () == 0 && context.report.get_warnings () == 0) {
+		if (context.report.get_errors () == 0 && context.report.get_warnings () == 0)
 			return 0;
-		}
+
 		if (context.report.get_errors () == 0) {
-			if (!quiet_mode) {
-				stdout.printf ("Compilation succeeded - %d warning(s)\n", context.report.get_warnings ());
-			}
-			return 0;
+			if (!quiet_mode)
+				stdout.printf ("Compilation succeeded - %d warning(s)\n",
+					context.report.get_warnings ());
 		} else {
-			if (!quiet_mode) {
-				stdout.printf ("Compilation failed: %d error(s), %d warning(s)\n", context.report.get_errors (), context.report.get_warnings ());
-			}
+			if (!quiet_mode)
+				print ("Compilation failed: %d error(s), %d warning(s)\n",
+					context.report.get_errors (), context.report.get_warnings ());
 			return 1;
 		}
+		return 0;
 	}
 
 	private bool add_gir (CodeContext context, string gir) {
 		var gir_path = context.get_gir_path (gir, gir_directories);
 
-		if (gir_path == null) {
+		if (gir_path == null)
 			return false;
-		}
 
 		context.add_source_file (new SourceFile (context, gir_path, true));
 
@@ -158,19 +155,16 @@ class Gtkaml.Compiler {
 	}
 	
 	private bool add_package (CodeContext context, string pkg) {
-		if (context.has_package (pkg)) {
-			// ignore multiple occurences of the same package
+		// Ignore multiple occurences of the same package
+		if (context.has_package (pkg))
 			return true;
-		}
-	
+
 		var package_path = context.get_package_path (pkg, vapi_directories);
-		
-		if (package_path == null) {
+
+		if (package_path == null)
 			return false;
-		}
-		
+
 		context.add_package (pkg);
-		
 		context.add_source_file (new SourceFile (context, package_path, true));
 		
 		var deps_filename = Path.build_filename (Path.get_dirname (package_path), "%s.deps".printf (pkg));
@@ -181,20 +175,16 @@ class Gtkaml.Compiler {
 				FileUtils.get_contents (deps_filename, out deps_content, out deps_len);
 				foreach (string dep in deps_content.split ("\n")) {
 					dep = dep.strip ();
-					if (dep != "") {
-						if (!add_package (context, dep)) {
-							Report.error (null, "%s, dependency of %s, not found in specified Vala API directories".printf (dep, pkg));
-						}
-					}
+					if (dep != "" && !add_package (context, dep))
+						Report.error (null, "%s, dependency of %s, not found in specified Vala API directories".printf (dep, pkg));
 				}
 			} catch (FileError e) {
 				Report.error (null, "Unable to read dependency file: %s".printf (e.message));
 			}
 		}
-		
 		return true;
 	}
-	
+
 	private int run () {
 		context = new Gtkaml.CodeContext ();
 		Vala.CodeContext.push (context);
@@ -218,7 +208,6 @@ class Gtkaml.Compiler {
 		context.report.enable_warnings = !disable_warnings;
 		context.report.set_verbose_errors (!quiet_mode);
 		context.verbose_mode = verbose_mode;
-
 		context.ccode_only = ccode_only;
 		context.compile_only = compile_only;
 		context.header_filename = header_filename;
@@ -226,16 +215,15 @@ class Gtkaml.Compiler {
 		context.internal_header_filename = internal_header_filename;
 		context.includedir = includedir;
 		context.output = output;
-		if (basedir == null) {
+
+		if (basedir == null)
 			context.basedir = realpath (".");
-		} else {
-			context.basedir = realpath (basedir);
-		}
-		if (directory != null) {
+		else context.basedir = realpath (basedir);
+
+		if (directory != null)
 			context.directory = realpath (directory);
-		} else {
-			context.directory = context.basedir;
-		}
+		else context.directory = context.basedir;
+
 		context.debug = debug;
 		context.thread = thread;
 		context.save_temps = save_temps;
@@ -261,9 +249,8 @@ class Gtkaml.Compiler {
 
 		if (context.profile == Profile.POSIX) {
 			/* default package */
-			if (!add_package (context, "posix")) {
+			if (!add_package (context, "posix"))
 				Report.error (null, "posix not found in specified Vala API directories");
-			}
 		} else if (context.profile == Profile.GOBJECT) {
 			int glib_major = 2;
 			int glib_minor = 12;
@@ -278,29 +265,25 @@ class Gtkaml.Compiler {
 			}
 
 			/* default packages */
-			if (!add_package (context, "glib-2.0")) {
+			if (!add_package (context, "glib-2.0"))
 				Report.error (null, "glib-2.0 not found in specified Vala API directories");
-			}
-			if (!add_package (context, "gobject-2.0")) {
+			if (!add_package (context, "gobject-2.0"))
 				Report.error (null, "gobject-2.0 not found in specified Vala API directories");
-			}
 		}
 
 		context.codegen = new CCodeGenerator ();
 
 		if (packages != null) {
 			foreach (string package in packages) {
-				if (!add_package (context, package) && !add_gir (context, package)) {
+				if (!add_package (context, package) && !add_gir (context, package))
 					Report.error (null, "%s not found in specified Vala API directories or GObject-Introspection GIR directories".printf (package));
-				}
 			}
 			packages = null;
 		}
 		
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0)
 			return quit ();
-		}
-		
+
 		foreach (string source in sources) {
 			if (FileUtils.test (source, FileTest.EXISTS)) {
 				var rpath = realpath (source);
@@ -335,10 +318,9 @@ class Gtkaml.Compiler {
 		}
 		sources = null;
 		
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0)
 			return quit ();
-		}
-		
+
 		var parser = new Gtkaml.Parser ();
 		parser.parse (context, implicits_directories);
 
@@ -354,16 +336,14 @@ class Gtkaml.Compiler {
 			}
 		}
 
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0)
 			return quit ();
-		}
-		
+
 		var resolver = new SymbolResolver ();
 		resolver.resolve (context);
-		
-		if (context.report.get_errors () > 0) {
+
+		if (context.report.get_errors () > 0)
 			return quit ();
-		}
 
 		var analyzer = new SemanticAnalyzer ();
 		analyzer.analyze (context);
@@ -380,22 +360,19 @@ class Gtkaml.Compiler {
 			code_writer.write_file (context, dump_tree);
 		}
 
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0)
 			return quit ();
-		}
 
 		var flow_analyzer = new FlowAnalyzer ();
 		flow_analyzer.analyze (context);
 
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0)
 			return quit ();
-		}
 
 		context.codegen.emit (context);
 		
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0)
 			return quit ();
-		}
 
 		if (vapi_filename == null && library != null) {
 			// keep backward compatibility with --library option
@@ -404,12 +381,9 @@ class Gtkaml.Compiler {
 
 		if (vapi_filename != null) {
 			var interface_writer = new CodeWriter ();
-
 			// put .vapi file in current directory unless -d has been explicitly specified
-			if (directory != null && !Path.is_absolute (vapi_filename)) {
+			if (directory != null && !Path.is_absolute (vapi_filename))
 				vapi_filename = "%s%c%s".printf (context.directory, Path.DIR_SEPARATOR, vapi_filename);
-			}
-
 			interface_writer.write_file (context, vapi_filename);
 		}
 
@@ -433,18 +407,15 @@ class Gtkaml.Compiler {
 
 							// put .gir file in current directory unless -d has been explicitly specified
 							string gir_directory = ".";
-							if (directory != null) {
+							if (directory != null)
 								gir_directory = context.directory;
-							}
 
 							gir_writer.write_file (context, gir_directory, gir_namespace, gir_version, library);
 						}
 					}
 				}
-
 				gir = null;
 			}
-
 			library = null;
 		}
 		if (internal_vapi_filename != null) {
@@ -459,9 +430,8 @@ class Gtkaml.Compiler {
 			string vapi_filename = internal_vapi_filename;
 
 			// put .vapi file in current directory unless -d has been explicitly specified
-			if (directory != null && !Path.is_absolute (vapi_filename)) {
+			if (directory != null && !Path.is_absolute (vapi_filename))
 				vapi_filename = "%s%c%s".printf (context.directory, Path.DIR_SEPARATOR, vapi_filename);
-			}
 
 			interface_writer.write_file (context, vapi_filename);
 
@@ -470,14 +440,11 @@ class Gtkaml.Compiler {
 
 		if (!ccode_only) {
 			var ccompiler = new CCodeCompiler ();
-			if (cc_command == null && Environment.get_variable ("CC") != null) {
+			if (cc_command == null && Environment.get_variable ("CC") != null)
 				cc_command = Environment.get_variable ("CC");
-			}
-			if (cc_options == null) {
+			if (cc_options == null)
 				ccompiler.compile (context, cc_command, new string[] { });
-			} else {
-				ccompiler.compile (context, cc_command, cc_options);
-			}
+			else ccompiler.compile (context, cc_command, cc_options);
 		}
 
 		return quit ();
@@ -523,9 +490,10 @@ class Gtkaml.Compiler {
 				len++;
 			}
 
-			if (len == 0) {
+			if (len == 0)
 				break;
-			} else if (len == 1 && start.get_char () == '.') {
+
+			if (len == 1 && start.get_char () == '.') {
 				// do nothing
 			} else if (len == 2 && start.has_prefix ("..")) {
 				// back up to previous component, ignore if at root already
@@ -543,9 +511,8 @@ class Gtkaml.Compiler {
 			}
 		}
 
-		if (rpath.len () > root_len && ends_with_dir_separator (rpath)) {
+		if (rpath.len () > root_len && ends_with_dir_separator (rpath))
 			rpath = rpath.substring (0, rpath.len () - 1);
-		}
 
 		if (Path.DIR_SEPARATOR != '/') {
 			// don't use backslashes internally,

@@ -32,18 +32,16 @@ public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
 	public int original_first_code_line {get;set;}
 	public string implements {get;set;}
 	
-	public RootClassDefinition (SourceReference source_reference, string identifier, string base_ns, Vala.Class base_type, 
-		DefinitionScope definition_scope, Gtkaml.ClassDefinition? parent_container = null)
+	public RootClassDefinition (SourceReference source_reference, string identifier,
+		string base_ns, Vala.Class base_type, DefinitionScope definition_scope,
+		Gtkaml.ClassDefinition? parent_container = null)
 	{
-		base (source_reference, identifier, base_ns, base_type, definition_scope, parent_container);
+		base (source_reference, identifier, base_ns, base_type, definition_scope,
+			parent_container);
 		this.target_name = null;
 		this.target_namespace = null;
 		this.code = new Vala.ArrayList<string> ();
 		this.implements = null;
 		this.original_first_code_line = -1;
 	}
-	
-	
-	 
 }
-

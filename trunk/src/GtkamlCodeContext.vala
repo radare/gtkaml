@@ -27,13 +27,12 @@ using GLib;
 using Vala;
 
 public class Gtkaml.CodeContext : Vala.CodeContext {
-	public Vala.List<string> generated_files = new Vala.ArrayList<string> ();	
+	public Vala.List<string> generated_files = new Vala.ArrayList<string> ();
 
 	public void remove_generated_files () {
-		if (!save_temps) {
+		if (!save_temps)
 			foreach (string filename in generated_files) {
 				FileUtils.unlink (filename);
 			}
-		}
 	}
 }

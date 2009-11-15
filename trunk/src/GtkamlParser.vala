@@ -27,20 +27,15 @@ using Vala;
  * gtkaml entry point
  */
 public class Gtkaml.Parser : Vala.Parser {
-
-
 	private CodeContext context;
 	
 	private ImplicitsStore implicits_store = new ImplicitsStore ();
 	
-	public Parser ()
-	{
-		base ();		
+	public Parser () {
+		base ();
 	}
-	
-	
-	public new void parse (CodeContext context, string[]? implicits_directories = null)
-	{
+
+	public new void parse (CodeContext context, string[]? implicits_directories = null) {
 		if (implicits_directories != null)
 			foreach (string? implicits_dirs in implicits_directories)
 				implicits_store.add_implicits_dir (implicits_dirs);
@@ -53,7 +48,7 @@ public class Gtkaml.Parser : Vala.Parser {
 		this.context = context;
 		base.parse( context );
 	}
-	
+
 	public override void visit_source_file (SourceFile source_file) {
 		if (source_file.filename.has_suffix (".vala") || source_file.filename.has_suffix (".vapi")) {
 			base.visit_source_file (source_file);
@@ -61,7 +56,7 @@ public class Gtkaml.Parser : Vala.Parser {
 			parse_gtkaml_file (source_file);
 		}
 	}
-	
+
 	public virtual void parse_gtkaml_file (SourceFile gtkaml_source_file) {
 		if (FileUtils.test (gtkaml_source_file.filename, FileTest.EXISTS)) {
 			try {
@@ -87,8 +82,6 @@ public class Gtkaml.Parser : Vala.Parser {
 			} catch (FileError e) {
 				Report.error (null, e.message);
 			}
-		} else {
-			Report.error (null, "%s not found".printf(gtkaml_source_file.filename));
-		} 
+		} else Report.error (null, "%s not found".printf(gtkaml_source_file.filename));
 	}
 }

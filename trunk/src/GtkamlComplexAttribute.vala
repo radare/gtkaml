@@ -35,7 +35,4 @@ public class Gtkaml.ComplexAttribute : Gtkaml.Attribute {
 		this.name = name;
 		this.complex_type = complex_type;	
 	}
-	
-
-	
 }

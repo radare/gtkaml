@@ -27,28 +27,26 @@ using Vala;
  * determines which constructors to use or which container add functions to use;
  * moves attributes from their ClassDefinition to the add or construct methods
  */
-public class Gtkaml.ImplicitsResolver : GLib.Object 
-{
+public class Gtkaml.ImplicitsResolver : GLib.Object {
 	/** configuration file with some hints*/
 	public ImplicitsStore implicits_store {get;construct;}
 	public Vala.CodeContext context {get;construct;}
 	
-	public ImplicitsResolver (Vala.CodeContext context, ImplicitsStore implicits_store) 
-	{
+	public ImplicitsResolver (Vala.CodeContext context, ImplicitsStore implicits_store) {
 		this.context = context;
 		this.implicits_store = implicits_store;
 	}
 	
-	public void resolve (ClassDefinition class_definition)
-	{
+	public void resolve (ClassDefinition class_definition) {
 		//determine which constructor shall we use
 		//references don't have to be constructed
-		if (!(class_definition is ReferenceClassDefinition)) {
+		if (!(class_definition is ReferenceClassDefinition))
 			determine_construct_method (class_definition);
-		}
+
 		//then determine the container add function, if applicable
 		if (class_definition.parent_container != null)
 			determine_add_method (class_definition);
+
 		//References should have no other attributes than the 'attached' ones (woa.. i learned xaml)
 		if (class_definition is ReferenceClassDefinition && class_definition.attrs.size != 0 && class_definition.parent_container != null) {
 			Report.error (class_definition.source_reference, "No attributes other than the container add parameters are allowed on existing widgets which are not standalone");
@@ -61,8 +59,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			resolve (child); 
 	}
 
-	public void resolve_complex_attributes (ClassDefinition class_definition)
-	{
+	public void resolve_complex_attributes (ClassDefinition class_definition) {
 		foreach (Attribute attr in class_definition.attrs) {
 			if (attr is ComplexAttribute)
 				resolve ( (attr as ComplexAttribute).complex_type );
@@ -85,8 +82,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 	/**
 	 * Determines which add method of parent container would be useful
 	 */	
-	private void determine_add_method (ClassDefinition child_definition)
-	{
+	private void determine_add_method (ClassDefinition child_definition) {
 		Vala.List<Vala.Method> adds = new Vala.ArrayList<Vala.Method> ();
 		lookup_container_add_methods( child_definition.parent_container.base_ns, child_definition.parent_container.base_type, adds );
 
@@ -97,7 +93,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		//pass one: see if we find an explicitly specified add method
 		foreach (Vala.Method add in adds) {
 			foreach (Gtkaml.Attribute attr in child_definition.attrs) {
-				if ( attr is SimpleAttribute && attr.name == add.name && (attr as SimpleAttribute).value == "true") {
+				if (attr is SimpleAttribute && attr.name == add.name && (attr as SimpleAttribute).value == "true") {
 					determined_add = add;
 					to_remove.add (attr);
 					break;
@@ -114,15 +110,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				method_matcher.add_method (method);
 			}
 			determined_add = method_matcher.determine_matching_method ();
-			if (determined_add == null) {
+			if (determined_add == null)
 				return;
-			}
 		} else {
 			method_matcher.add_method (determined_add);
 			if (null == method_matcher.determine_matching_method ())
-			{
 				return;
-			}
 		}
 		
 		method_matcher.set_method_parameters (new_method, determined_add);
@@ -133,8 +126,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		child_definition.add_method =  new_method;
 	}
 
-	private void determine_construct_method (ClassDefinition class_definition)
-	{
+	private void determine_construct_method (ClassDefinition class_definition) {
 		Vala.List<Vala.Method> constructors = lookup_constructors (class_definition.base_type);
 		Vala.Method determined_constructor = null;
 		Gtkaml.ConstructMethod new_method = new Gtkaml.ConstructMethod ();
@@ -159,15 +151,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 				method_matcher.add_method (method);
 			}
 			determined_constructor = method_matcher.determine_matching_method ();
-			if (determined_constructor == null) {
+			if (determined_constructor == null)
 				return;
-			}
 		} else {
 			method_matcher.add_method (determined_constructor);
 			if (null == method_matcher.determine_matching_method ())
-			{
 				return;
-			}
 		}
 		
 		method_matcher.set_method_parameters (new_method, determined_constructor);
@@ -178,8 +167,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		class_definition.construct_method =  new_method;
 	}
 
-	private void lookup_container_add_methods_for_class (string ns, Class container_class_implicits_entry, string? ns2, ObjectTypeSymbol? container_class_holding_methods, Vala.List<Vala.Method> methods)
-	{
+	private void lookup_container_add_methods_for_class (string ns, Class container_class_implicits_entry, string? ns2, ObjectTypeSymbol? container_class_holding_methods, Vala.List<Vala.Method> methods) {
 		if (ns2 == null)
 			return;
 			
@@ -194,17 +182,16 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		foreach (DataType dt in base_types) {
 			if (dt is UnresolvedType) {
 				string utns = get_unresolved_type_ns (dt as UnresolvedType);
-				if (utns == null) continue;
+				if (utns == null)
+					continue;
 				ObjectTypeSymbol c = lookup_class (utns, (dt as UnresolvedType).unresolved_symbol.name);
-				if (c != null) {
+				if (c != null)
 					lookup_container_add_methods_for_class (ns, container_class_implicits_entry, utns, c, methods);
-				}
 			}
 		}
 			
 		var add_methods = implicits_store.get_adds (ns, container_class_implicits_entry.name);
-		if (add_methods.size != 0)
-		{
+		if (add_methods.size != 0) {
 			foreach (string add_method in add_methods) {
 				foreach (Vala.Method method in container_class_holding_methods.get_methods ())
 					if (method.name == add_method) {
@@ -214,11 +201,9 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 					}
 			}
 		}
-
 	}
 	
-	public void lookup_container_add_methods (string? ns, Class? container_class, Vala.List<Vala.Method> methods)
-	{
+	public void lookup_container_add_methods (string? ns, Class? container_class, Vala.List<Vala.Method> methods) {
 		//FIXME workaround to stop recursion at TypeInstance and Object
 		if (null == ns) 
 			return;
@@ -241,22 +226,19 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 		}
 	}
 
-	private string? get_unresolved_type_ns (UnresolvedType? dt)
-	{
-		if (dt.unresolved_symbol.inner == null) {
+	private string? get_unresolved_type_ns (UnresolvedType? dt) {
+		if (dt.unresolved_symbol.inner == null)
 			return null;
-		}
 		return dt.unresolved_symbol.inner.name; 
 	}
 	
-	private void determine_attribute_types (ClassDefinition class_definition)
-	{
-		foreach (Attribute attr in class_definition.attrs)
-		{
+	private void determine_attribute_types (ClassDefinition class_definition) {
+		foreach (Attribute attr in class_definition.attrs) {
 			attr.target_type = member_lookup_inherited (class_definition.base_type, attr.name);
-			if (attr.target_type == null) {
-				Report.error (class_definition.source_reference, "Cannot find member %s of class %s\n".printf (attr.name, class_definition.base_full_name));
-			}
+			if (attr.target_type == null)
+				Report.error (class_definition.source_reference,
+					"Cannot find member %s of class %s\n".printf (attr.name,
+					class_definition.base_full_name));
 		}
 	}
 	
@@ -266,8 +248,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			return result;
 		
 		foreach (DataType dt in clazz.get_base_types ()) {
-			if (dt is UnresolvedType)
-			{
+			if (dt is UnresolvedType) {
 				var name = (dt as UnresolvedType).unresolved_symbol.name;
 				string ns;
 				if ((dt as UnresolvedType).unresolved_symbol.inner != null)
@@ -280,29 +261,24 @@ public class Gtkaml.ImplicitsResolver : GLib.Object
 			}
 		}
 		return null;
-	}								
+	}
 
-	private ObjectTypeSymbol? lookup_class (string xmlNamespace, string name)
-	{
+	private ObjectTypeSymbol? lookup_class (string xmlNamespace, string name) {
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
-			if ( (ns.name == null && xmlNamespace == null ) || ns.name == xmlNamespace) {
+			if ((ns.name == null && xmlNamespace == null ) || ns.name == xmlNamespace) {
 				Symbol s = ns.scope.lookup (name);
-				if (s is ObjectTypeSymbol) {
+				if (s is ObjectTypeSymbol)
 					return s as ObjectTypeSymbol;
-				}
 			}
 		}
 		return null;
 	}
 
-
 	private Vala.List<Vala.Method> lookup_constructors (Class clazz) {
 		var constructors = new Vala.ArrayList<Vala.Method> ();
 		foreach (Vala.Method m in clazz.get_methods ()) {
 			if (m is CreationMethod)
-			{
 				constructors.add (m);
-			}
 		}	
 		return constructors;
 	}

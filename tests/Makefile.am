@@ -28,7 +28,7 @@ test0_LDADD = \
 	$(EXTRA_LDFLAGS)
 
 test0.stamp : $(test0_GTKAMLSOURCES)
-	../src/gtkamlc -C $(VALAFLAGS) --implicitsdir ../data --pkg gtk+-2.0 $^
+	../src/gtkamlc -C $(VALAFLAGS) --implicitsdir $(top_srcdir)/data --pkg gtk+-2.0 $^
 	touch $@
 
 ## Example 1
@@ -46,7 +46,7 @@ test1_LDADD = \
 	$(EXTRA_LDFLAGS)
 
 test1.stamp : $(test1_GTKAMLSOURCES)
-	../src/gtkamlc -C $(VALAFLAGS) --implicitsdir ../data --pkg gtk+-2.0 $^
+	../src/gtkamlc -C $(VALAFLAGS) --implicitsdir $(top_srcdir)/data --pkg gtk+-2.0 $^
 	touch $@
 
 

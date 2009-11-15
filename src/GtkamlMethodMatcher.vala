@@ -38,18 +38,16 @@ public class Gtkaml.MethodMatcher : Object {
 	public MethodMatcher (ImplicitsStore implicits_store, ClassDefinition class_owning_method, 
 		string wording, ComplexAttribute? first_parameter = null)
 	{
-		this.implicits_store = implicits_store;
-		this.class_owning_method = class_owning_method;
-		this.wording = wording;
-		this.first_parameter = first_parameter;
+		base ( implicits_store: implicits_store,
+			class_owning_method: class_owning_method,
+			wording: wording,
+			first_parameter: first_parameter);
 	}
 	
 	construct {
-		if (first_parameter == null) {
+		if (first_parameter == null)
 			this.class_owning_parameters = class_owning_method;
-		} else {
-			this.class_owning_parameters = first_parameter.complex_type;
-		}
+		else this.class_owning_parameters = first_parameter.complex_type;
 	}
 	
 	private Vala.List<Vala.Method> methods = new Vala.ArrayList<Vala.Method> ();

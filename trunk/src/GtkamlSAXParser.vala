@@ -71,7 +71,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	public extern int line_number();
 	
-	[NoArrayLength]	
 	public void start_element (string localname, string? prefix, 
 		 string URI, int nb_namespaces, 
 		 [CCode (array_length = false, array_null_terminated = false)] 
@@ -437,7 +436,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 	}
 	
 	
-	[NoArrayLength]
 	private Vala.List<XmlAttribute> parse_attributes ([CCode (array_length = false)] string[] attributes, int nb_attributes) {	
 		string end;
 		int walker = 0;
@@ -456,7 +454,6 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return attribute_list;
 	}
 
-	[NoArrayLength]
 	private Vala.List<XmlNamespace> parse_namespaces ([CCode (array_length = false)] string[] namespaces, int nb_namespaces) {
 		int walker = 0;
 		var namespace_list = new Vala.ArrayList<XmlNamespace> ();

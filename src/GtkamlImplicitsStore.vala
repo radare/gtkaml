@@ -63,8 +63,8 @@ public class Gtkaml.ImplicitsStore : Object {
 	private Vala.List<string> implicits_dirs = new ArrayList<string> (str_equal);
 	private Vala.Map<string, Vala.List<KeyFileWrapper>> loaded_ns = new HashMap<string, Vala.List<KeyFileWrapper>> (str_hash, str_equal);
 		
-	public ReadOnlyList<string> get_implicits_dirs () {
-		return new ReadOnlyList<string> (implicits_dirs);
+	public Vala.List<string> get_implicits_dirs () {
+		return implicits_dirs;
 	}
 	
 	public void add_implicits_dir (string directory) {

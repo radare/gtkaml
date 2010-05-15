@@ -198,7 +198,7 @@ class Gtkaml.Compiler {
 	
 	private int run () {
 		context = new CodeContext ();
-		CodeContext.push (context);
+		Vala.CodeContext.push (context);
 
 		// default to build executable
 		if (!ccode_only && !compile_only && output == null) {
@@ -604,7 +604,7 @@ class Gtkaml.Compiler {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s based on Vala 0.8.1\n", Config.BUILD_VERSION);
+			stdout.printf ("Gtkaml %s based on Vala 0.8.1\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

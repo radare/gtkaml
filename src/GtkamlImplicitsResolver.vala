@@ -282,7 +282,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		return null;
 	}
 
-	private ObjectTypeSymbol? lookup_class (string xmlNamespace, string name) {
+	private ObjectTypeSymbol? lookup_class (string? xmlNamespace, string name) {
 		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
 			if ((ns.name == null && xmlNamespace == null ) || ns.name == xmlNamespace) {
 				Symbol s = ns.scope.lookup (name);

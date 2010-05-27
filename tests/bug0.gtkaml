@@ -1,0 +1,24 @@
+<!--
+This example tests a segmentation fault produced in gtkaml
+It is already fixed in svn head
+Maybe it would be good to have a test suite to avoid regressions
+-->
+<Window xmlns:class="http://gtkaml.org/0.2"
+	xmlns="Gtk"
+	xmlns:Gtk="Gtk"
+	xmlns:GLib="GLib"
+	delete-event="{OnWindowCloseEvent}"
+	title="ragui">
+  <VBox>
+    <Notebook expand="true" tab-vborder="1">
+      <VBox>
+        <Label>
+  	   <tab-label>
+  	     <Label label="TabLabel" />
+  	   </tab-label>
+  	   <Label label="This entry makes gtkaml segfault if gtkaml is old" />
+        </Label>
+      </VBox>
+    </Notebook>
+  </VBox>
+</Window>

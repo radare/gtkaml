@@ -222,6 +222,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	}
 	
 	protected void write_constructor (ClassDefinition class_definition) {
+		if (class_definition.construct_method.parameter_attributes == null)
+			return;
 		string construct_name = class_definition.construct_method.name;
 		if (construct_name != ".new")
 			construct_name = "." + construct_name; // with_label->.with_label
@@ -239,6 +241,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	}
 	
 	protected void write_add (ClassDefinition child_definition) {
+		if (child_definition.add_method.parameter_attributes == null)
+			return;
 		if (child_definition.parent_container == null)
 			return;
 		string method_name = child_definition.add_method.name;

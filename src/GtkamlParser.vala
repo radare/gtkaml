@@ -73,7 +73,7 @@ public class Gtkaml.Parser : Vala.Parser {
 				
 				string vala_contents =  code_generator.yield ();
 				if (vala_contents != null) { 
-					string vala_filename = gtkaml_source_file.filename.ndup (gtkaml_source_file.filename.len () - ".gtkaml".len ()) + ".vala";
+					string vala_filename = gtkaml_source_file.filename.ndup (gtkaml_source_file.filename.length - ".gtkaml".length) + ".vala";
 					FileUtils.set_contents (vala_filename, vala_contents);
 					context.generated_files.add (vala_filename);
 					gtkaml_source_file.filename = vala_filename;

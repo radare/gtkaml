@@ -394,13 +394,13 @@ public class Gtkaml.SAXParser : GLib.Object {
 			int counter = 0;
 			if (identifier == null) {
 				//generate a name for the identifier
-				identifier = clazz.name.down (clazz.name.len ());
+				identifier = clazz.name.down (clazz.name.length);
 				if (generated_identifiers_counter.contains (identifier)) {
 					counter = generated_identifiers_counter.get (identifier);
 				}
 				identifier = "_%s%d".printf (identifier, counter);
 				counter++;
-				generated_identifiers_counter.set (clazz.name.down (clazz.name.len ()), counter);
+				generated_identifiers_counter.set (clazz.name.down (clazz.name.length), counter);
 			}
 
 			class_definition = new ClassDefinition (create_source_reference (),
@@ -418,7 +418,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 			string reference_stripped = reference.strip ();
 			if (reference_stripped.has_prefix ("{")) {
 				if (reference_stripped.has_suffix ("}"))
-					class_definition.identifier = reference_stripped.substring (1, reference_stripped.len () -2 );
+					class_definition.identifier = reference_stripped.substring (1, reference_stripped.length -2 );
 				else Report.error (create_source_reference (), "'existing' attribute not properly ended");
 			} else class_definition.identifier = "(%s as %s)".printf (reference, class_definition.base_full_name);
 		}
@@ -447,7 +447,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 			attr.URI = attributes[walker+2];
 			attr.value = attributes[walker+3];
 			end = attributes[walker+4];
-			attr.value = attr.value.ndup (attr.value.len () - end.len () );
+			attr.value = attr.value.ndup (attr.value.length - end.length);
 			attribute_list.add (attr);
 			walker += 5;
 		}
@@ -466,8 +466,8 @@ public class Gtkaml.SAXParser : GLib.Object {
 					Report.error (create_source_reference (),
 						"You cannot use the gtkaml namespace as default namespace");
 				gtkaml_prefix = ns.prefix;
-				string version = ns.URI.substring ("http://gtkaml.org/".len (),
-					ns.URI.len () - "http://gtkaml.org/".len ());
+				string version = ns.URI.substring ("http://gtkaml.org/".length,
+					ns.URI.length - "http://gtkaml.org/".length);
 				if (version > Config.PACKAGE_VERSION) {
 					Report.warning (create_source_reference (),
 						"Source file version (%s) newer than gtkaml compiler version (%s)".printf (version, Config.PACKAGE_VERSION));

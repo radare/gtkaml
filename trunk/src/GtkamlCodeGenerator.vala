@@ -139,7 +139,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 
 		if (real_construct_code.has_prefix ("{")) {
 			if (real_construct_code.has_suffix ("}"))
-				real_construct_code = real_construct_code.substring (1, real_construct_code.len () - 2);
+				real_construct_code = real_construct_code.substring (1, real_construct_code.length - 2);
 			else Report.error (null, "%s for %s not properly ended".printf (construct_type, identifier));
 		} else real_construct_code = " (thiz, target) => { %s; }".printf (construct_code);
 
@@ -306,7 +306,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 
 		if (stripped_value.has_prefix ("{")) {
 			if (stripped_value.has_suffix ("}")) {
-				literal = stripped_value.substring (1, stripped_value.len () - 2);
+				literal = stripped_value.substring (1, stripped_value.length - 2);
 			} else {
 				Report.error( null, "Attribute %s not properly ended".printf (attr.name));
 				return "<Invalid value>";
@@ -347,7 +347,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		
 		if (body.has_prefix ("{")) {
 			if ( body.has_suffix ("}") ) {
-				parameters_joined = body.substring (1, body.len () - 2);
+				parameters_joined = body.substring (1, body.length - 2);
 				construct_body += "\t\t%s.%s += %s;\n".printf (class_definition.identifier,
 					signal_attr.name, parameters_joined);
 			} else {

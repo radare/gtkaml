@@ -29,7 +29,7 @@
 		var w = new Gtk.Window (WindowType.TOPLEVEL);
 		var g = new MyVBox();
 	
-		g.destroy+=Gtk.main_quit;
+		g.destroy.connect (Gtk.main_quit);
 		g.show_all ();
 		w.add (g);
 		w.show ();

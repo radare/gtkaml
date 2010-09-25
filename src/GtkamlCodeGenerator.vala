@@ -1,6 +1,6 @@
 /* GtkamlCodeGenerator.vala
  *
- * Copyright (C) 2008 Vlad Grecescu
+ * Copyright (C) 2008-2010 Vlad Grecescu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,6 +18,8 @@
  *
  * Author:
  *        Vlad Grecescu (b100dian@gmail.com)
+ * Contributors:
+ *        pancake (pancake@nopcode.org)
  */
 
 using GLib;
@@ -144,7 +146,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		} else real_construct_code = " (thiz, target) => { %s; }".printf (construct_code);
 
 		this.construct_signals += "\tprivate signal void %s (%s target);\n".printf (construct_signal, identifier_type);
-		string to_append = "\t\t%s += %s;\n".printf (construct_signal, real_construct_code)
+		string to_append = "\t\t%s.connect (%s);\n".printf (construct_signal, real_construct_code)
 			+ "\t\t" + construct_signal + " (" + identifier + ");\n";
 		if (construct_type == "preconstruct")
 			this.constructors += to_append;
@@ -229,7 +231,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			construct_name = "." + construct_name; // with_label->.with_label
 		else construct_name = "";
 
-		constructors += "\t\t" + class_definition.identifier + " = new " + class_definition.base_full_name + construct_name + " (";
+		constructors += "\t\t" + class_definition.identifier + " = new " +
+			class_definition.base_full_name + construct_name + " (";
 		int i = 0;
 		for (; i < class_definition.construct_method.parameter_attributes.size - 1 ; i++) {
 			Attribute attr = class_definition.construct_method.parameter_attributes.get (i);
@@ -279,7 +282,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 	}
 
 	protected void write_using (string ns) {
-		using_directives+="using %s;\n".printf(ns);
+		using_directives += "using %s;\n".printf(ns);
 	}
 
 	protected string generate_literal (Attribute attr) {
@@ -298,7 +301,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		} else if (attr.target_type is FormalParameter) {
 			type = (attr.target_type as FormalParameter).parameter_type;
 		} else {		
-			Report.error(null, "The attribute %s with value %s is not Field, Property or FormalParameter".printf (attr.name, value));
+			Report.error (null, "The attribute %s with value %s is not Field, Property or FormalParameter".printf (attr.name, value));
 			return "<Invalid value>";
 		}
 		
@@ -308,7 +311,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			if (stripped_value.has_suffix ("}")) {
 				literal = stripped_value.substring (1, stripped_value.length - 2);
 			} else {
-				Report.error( null, "Attribute %s not properly ended".printf (attr.name));
+				Report.error (null, "Attribute %s not properly ended".printf (attr.name));
 				return "<Invalid value>";
 			}
 		} else if (type is UnresolvedType) {
@@ -337,7 +340,8 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 
 	protected void write_signal_setter (ClassDefinition class_definition, Attribute signal_attr) {
 		if (! (signal_attr is SimpleAttribute) ) {
-			Report.error (class_definition.source_reference, "Cannot set the signal '%s' to this value.".printf (signal_attr.name));
+			Report.error (class_definition.source_reference,
+				"Cannot set the signal '%s' to this value.".printf (signal_attr.name));
 			return;
 		}
 		var simple_attribute = signal_attr as SimpleAttribute;
@@ -348,7 +352,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		if (body.has_prefix ("{")) {
 			if ( body.has_suffix ("}") ) {
 				parameters_joined = body.substring (1, body.length - 2);
-				construct_body += "\t\t%s.%s += %s;\n".printf (class_definition.identifier,
+				construct_body += "\t\t%s.%s.connect (%s);\n".printf (class_definition.identifier,
 					signal_attr.name, parameters_joined);
 			} else {
 				Report.error (class_definition.source_reference,
@@ -369,16 +373,15 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			}
 			parameter_names[ parameters.size ] = null;
 			parameters_joined += ", " + string.joinv (",", parameter_names);
-			construct_body += "\t\t%s.%s += (%s) => { %s; };\n".printf (
+			construct_body += "\t\t%s.%s.connect( (%s) => { %s; } );\n".printf (
 				class_definition.identifier, signal_attr.name, parameters_joined,
 				simple_attribute.value);
 		} else {
-			construct_body += "\t\t%s.%s += %s => { %s; };\n".printf (class_definition.identifier,
+			construct_body += "\t\t%s.%s.connect ( %s => { %s; } );\n".printf (class_definition.identifier,
 				signal_attr.name, parameters_joined, simple_attribute.value);
 		}
-		
 	}
-	
+
 	protected void add_code (string value) {
 		code += value + "\n";
 	}

@@ -9,11 +9,11 @@ AM_CFLAGS = \
 	 $(EXTRA_CFLAGS) \
 	 $(GTK_CFLAGS)
 
-BUILT_SOURCES = test0.stamp test1.stamp
-noinst_PROGRAMS = test0 test1
+BUILT_SOURCES = test0.stamp test1.stamp test3.stamp
+noinst_PROGRAMS = test0 test1 test3
 
 
-CLEANFILES = test0.h test0.c test1.h test1.c test0.vala test1.vala test0.stamp test1.stamp
+CLEANFILES = test0.h test0.c test1.h test1.c test0.vala test1.vala test0.stamp test1.stamp test3.h test3.c test3.vala test3.stamp
 
 ## Example 0
 test0_GTKAMLSOURCES = \
@@ -23,6 +23,7 @@ nodist_test0_SOURCES = \
 	$(test0_GTKAMLSOURCES:.gtkaml=.c) \
 	$(test0_GTKAMLSOURCES:.gtkaml=.h) \
 	test0.stamp	
+
 test0_LDADD = \
 	$(GTK_LIBS) \
 	$(EXTRA_LDFLAGS)
@@ -49,7 +50,30 @@ test1.stamp : $(test1_GTKAMLSOURCES)
 	../src/gtkamlc -C $(VALAFLAGS) --implicitsdir $(top_srcdir)/data --pkg gtk+-2.0 $^
 	touch $@
 
+## Example 3
+
+test3_GTKAMLSOURCES = \
+	test3.gtkaml
+
+test3_VALASOURCES = \
+	WindowController.vala 
+
+nodist_test3_SOURCES = \
+	$(test3_VALASOURCES:.vala=.c) \
+	$(test3_VALASOURCES:.vala=.h) \
+	$(test3_GTKAMLSOURCES:.gtkaml=.c) \
+	$(test3_GTKAMLSOURCES:.gtkaml=.h) \
+	test3.stamp
+
+test3_LDADD = \
+	$(GTK_LIBS) \
+	$(EXTRA_LDFLAGS)
+
+test3.stamp : $(test3_VALASOURCES) $(test3_GTKAMLSOURCES)
+	../src/gtkamlc -C $(VALAFLAGS) --implicitsdir $(top_srcdir)/data --pkg gtk+-2.0 $^
+	touch $@
 
 EXTRA_DIST = \
 	$(test0_GTKAMLSOURCES) \
-	$(test1_GTKAMLSOURCES)
+	$(test1_GTKAMLSOURCES) \
+	$(test3_GTKAMLSOURCES)

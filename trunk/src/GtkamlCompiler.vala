@@ -26,6 +26,8 @@
 using GLib;
 using Vala;
 
+public extern string VERSION;
+
 class Gtkaml.Compiler {
 	static string basedir;
 	static string directory;
@@ -77,8 +79,11 @@ class Gtkaml.Compiler {
 	static bool nostdpkg;
 	static bool enable_version_header;
 	static bool disable_version_header;
+	static bool fatal_warnings;
 
 	static string entry_point;
+
+	static bool run_output;
 
 	private CodeContext context;
 
@@ -112,6 +117,7 @@ class Gtkaml.Compiler {
 		{ "enable-deprecated", 0, 0, OptionArg.NONE, ref deprecated, "Enable deprecated features", null },
 		{ "enable-experimental", 0, 0, OptionArg.NONE, ref experimental, "Enable experimental features", null },
 		{ "disable-warnings", 0, 0, OptionArg.NONE, ref disable_warnings, "Disable warnings", null },
+		{ "fatal-warnings", 0, 0, OptionArg.NONE, ref fatal_warnings, "Treat warnings as fatal", null },
 		{ "enable-experimental-non-null", 0, 0, OptionArg.NONE, ref experimental_non_null, "Enable experimental enhancements for non-null types", null },
 		{ "disable-dbus-transformation", 0, 0, OptionArg.NONE, ref disable_dbus_transformation, "Disable transformation of D-Bus member names", null },
 		{ "cc", 0, 0, OptionArg.STRING, ref cc_command, "Use COMMAND as C compiler command", "COMMAND" },
@@ -133,7 +139,7 @@ class Gtkaml.Compiler {
 		if (context.report.get_errors () == 0 && context.report.get_warnings () == 0) {
 			return 0;
 		}
-		if (context.report.get_errors () == 0) {
+		if (context.report.get_errors () == 0 && (!fatal_warnings || context.report.get_warnings () == 0)) {
 			if (!quiet_mode) {
 				stdout.printf ("Compilation succeeded - %d warning(s)\n", context.report.get_warnings ());
 			}
@@ -219,7 +225,7 @@ class Gtkaml.Compiler {
 		context.report.enable_warnings = !disable_warnings;
 		context.report.set_verbose_errors (!quiet_mode);
 		context.verbose_mode = verbose_mode;
-		context.version_header = enable_version_header;
+		context.version_header = !disable_version_header;
 
 		context.ccode_only = ccode_only;
 		context.compile_only = compile_only;
@@ -259,13 +265,20 @@ class Gtkaml.Compiler {
 		} else {
 			Report.error (null, "Unknown profile %s".printf (profile));
 		}
+		context.nostdpkg = nostdpkg;
 
 		context.entry_point_name = entry_point;
+
+		context.run_output = run_output;
 
 		if (defines != null) {
 			foreach (string define in defines) {
 				context.add_define (define);
 			}
+		}
+
+		for (int i = 2; i <= 10; i += 2) {
+			context.add_define ("VALA_0_%d".printf (i));
 		}
 
 		if (context.profile == Profile.POSIX) {
@@ -310,28 +323,45 @@ class Gtkaml.Compiler {
 			}
 		}
 
-		context.codegen = new CCodeGenerator ();
-
 		if (packages != null) {
 			foreach (string package in packages) {
 				if (!add_package (context, package) && !add_gir (context, package)) {
 					Report.error (null, "%s not found in specified Vala API directories or GObject-Introspection GIR directories".printf (package));
 				}
+				if (context.profile == Profile.GOBJECT && package == "dbus-glib-1") {
+					context.add_define ("DBUS_GLIB");
+				}
 			}
 			packages = null;
 		}
 		
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0 || (fatal_warnings && context.report.get_warnings () > 0)) {
 			return quit ();
 		}
-		
+
+		if (context.profile == Profile.GOBJECT) {
+			if (context.has_package ("dbus-glib-1")) {
+				if (!context.deprecated) {
+					Report.warning (null, "D-Bus GLib is deprecated, use GDBus");
+				}
+				context.codegen = new DBusServerModule ();
+			} else {
+				context.codegen = new GDBusServerModule ();
+			}
+		} else if (context.profile == Profile.DOVA) {
+			context.codegen = new DovaErrorModule ();
+		} else {
+			context.codegen = new CCodeDelegateModule ();
+		}
+
 		bool has_c_files = false;
 
 		foreach (string source in sources) {
 			if (FileUtils.test (source, FileTest.EXISTS)) {
 				var rpath = realpath (source);
-				if (source.has_suffix (".vala") || source.has_suffix (".gs")) {
+				if (run_output || source.has_suffix (".vala") || source.has_suffix (".gs") || source.has_suffix (".gtkaml")) {
 					var source_file = new SourceFile (context, rpath);
+					source_file.relative_filename = source;
 
 					if (context.profile == Profile.POSIX) {
 						// import the Posix namespace by default (namespace of backend-specific standard library)
@@ -352,9 +382,10 @@ class Gtkaml.Compiler {
 
 					context.add_source_file (source_file);
 				} else if (source.has_suffix (".vapi") || source.has_suffix (".gir")) {
-					context.add_source_file (new SourceFile (context, rpath, true));
-                                } else if (source.has_suffix (".gtkaml")) {
-                                        context.add_source_file (new SourceFile (context, rpath));
+					var source_file = new SourceFile (context, rpath, true);
+					source_file.relative_filename = source;
+
+					context.add_source_file (source_file);
 				} else if (source.has_suffix (".c")) {
 					context.add_c_source_file (rpath);
 					has_c_files = true;
@@ -367,7 +398,7 @@ class Gtkaml.Compiler {
 		}
 		sources = null;
 		
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0 || (fatal_warnings && context.report.get_warnings () > 0)) {
 			return quit ();
 		}
 		
@@ -386,14 +417,14 @@ class Gtkaml.Compiler {
 			}
 		}
 
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0 || (fatal_warnings && context.report.get_warnings () > 0)) {
 			return quit ();
 		}
 		
 		var resolver = new SymbolResolver ();
 		resolver.resolve (context);
 		
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0 || (fatal_warnings && context.report.get_warnings () > 0)) {
 			return quit ();
 		}
 
@@ -412,20 +443,20 @@ class Gtkaml.Compiler {
 			code_writer.write_file (context, dump_tree);
 		}
 
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0 || (fatal_warnings && context.report.get_warnings () > 0)) {
 			return quit ();
 		}
 
 		var flow_analyzer = new FlowAnalyzer ();
 		flow_analyzer.analyze (context);
 
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0 || (fatal_warnings && context.report.get_warnings () > 0)) {
 			return quit ();
 		}
 
 		context.codegen.emit (context);
 
-		if (context.report.get_errors () > 0) {
+		if (context.report.get_errors () > 0 || (fatal_warnings && context.report.get_warnings () > 0)) {
 			return quit ();
 		}
 
@@ -437,7 +468,7 @@ class Gtkaml.Compiler {
 		if (library != null) {
 			if (gir != null) {
 				if (context.profile == Profile.GOBJECT) {
-					long gir_len = gir.length ;
+					long gir_len = gir.length;
 					unowned string? last_hyphen = gir.rchr (gir_len, '-');
 
 					if (last_hyphen == null || !gir.has_suffix (".gir")) {
@@ -591,6 +622,85 @@ class Gtkaml.Compiler {
 		return rpath;
 	}
 
+	static int run_source (string[] args) {
+		int i = 1;
+		if (args[i] != null && args[i].has_prefix ("-")) {
+			try {
+				string[] compile_args;
+				Shell.parse_argv ("valac " + args[1], out compile_args);
+
+				var opt_context = new OptionContext ("- Vala");
+				opt_context.set_help_enabled (true);
+				opt_context.add_main_entries (options, null);
+				opt_context.parse (ref compile_args);
+			} catch (ShellError e) {
+				stdout.printf ("%s\n", e.message);
+				return 1;
+			} catch (OptionError e) {
+				stdout.printf ("%s\n", e.message);
+				stdout.printf ("Run '%s --help' to see a full list of available command line options.\n", args[0]);
+				return 1;
+			}
+
+			i++;
+		}
+
+		if (args[i] == null) {
+			stderr.printf ("No source file specified.\n");
+			return 1;
+		}
+
+		sources = { args[i] };
+		output = "%s/%s.XXXXXX".printf (Environment.get_tmp_dir (), Path.get_basename (args[i]));
+		int outputfd = FileUtils.mkstemp (output);
+		if (outputfd < 0) {
+			return 1;
+		}
+
+		run_output = true;
+		disable_warnings = true;
+		quiet_mode = true;
+
+		var compiler = new Compiler ();
+		int ret = compiler.run ();
+		if (ret != 0) {
+			return ret;
+		}
+
+		FileUtils.close (outputfd);
+		if (FileUtils.chmod (output, 0700) != 0) {
+			FileUtils.unlink (output);
+			return 1;
+		}
+
+		string[] target_args = { output };
+		while (i < args.length) {
+			target_args += args[i];
+			i++;
+		}
+
+		try {
+			Pid pid;
+			var loop = new MainLoop ();
+			int child_status = 0;
+
+			Process.spawn_async (null, target_args, null, SpawnFlags.CHILD_INHERITS_STDIN | SpawnFlags.DO_NOT_REAP_CHILD | SpawnFlags.FILE_AND_ARGV_ZERO, null, out pid);
+
+			FileUtils.unlink (output);
+			ChildWatch.add (pid, (pid, status) => {
+				child_status = (status & 0xff00) >> 8;
+				loop.quit ();
+			});
+
+			loop.run ();
+
+			return child_status;
+		} catch (SpawnError e) {
+			stdout.printf ("%s\n", e.message);
+			return 1;
+		}
+	}
+
 	static int main (string[] args) {
 		try {
 			var opt_context = new OptionContext ("- Vala Gtkaml Compiler");
@@ -604,7 +714,7 @@ class Gtkaml.Compiler {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s based on Vala 0.8.1\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s based on Vala 0.10\n", VERSION);
 			return 0;
 		}
 		

@@ -1,0 +1,13 @@
+<Window xmlns="Gtk" xmlns:g="http://gtkaml.org/0.2" xmlns:controllers="Controllers" g:name="Views.Window">
+	<controllers:Window view="{this}" g:standalone="true" g:private="controller" />
+	<Button clicked="{controller.click}" label="test controller" />
+<![CDATA[
+	public static void main (string [] argv) {
+		Gtk.init (ref argv);
+		var w = new Views.Window ();
+		w.destroy.connect (Gtk.main_quit);
+		w.show_all ();
+		Gtk.main ();
+	}
+]]>
+</Window>

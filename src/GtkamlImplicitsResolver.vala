@@ -261,8 +261,8 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		}
 	}
 	
-	private Member? member_lookup_inherited (Class clazz, string member) {
-		Member result = clazz.scope.lookup (member) as Member;
+	private Symbol? member_lookup_inherited (Class clazz, string member) {
+		Symbol result = clazz.scope.lookup (member) as Symbol;
 		if (result != null)
 			return result;
 		
@@ -275,7 +275,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 				else
 					ns = null;
 				var otherclazz = lookup_class (ns, name) as Class;
-				if (otherclazz != null && ( null != (result = member_lookup_inherited (otherclazz, member) as Member)))
+				if (otherclazz != null && ( null != (result = member_lookup_inherited (otherclazz, member) as Symbol)))
 					return result;
 			}
 		}

@@ -295,11 +295,11 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		string value = (attr as SimpleAttribute).value;
 		
 		if (attr.target_type is Field) {
-			type = (attr.target_type as Field).field_type;
+			type = ((Field)attr.target_type).variable_type;
 		} else if (attr.target_type is Property) {
-			type = (attr.target_type as Property).property_type;
+			type = ((Property)attr.target_type).property_type;
 		} else if (attr.target_type is FormalParameter) {
-			type = (attr.target_type as FormalParameter).parameter_type;
+			type = ((FormalParameter)attr.target_type).variable_type;
 		} else {		
 			Report.error (null, "The attribute %s with value %s is not Field, Property or FormalParameter".printf (attr.name, value));
 			return "<Invalid value>";

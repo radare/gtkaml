@@ -60,7 +60,7 @@ public class Gtkaml.Parser : Vala.Parser {
 	public virtual void parse_gtkaml_file (SourceFile gtkaml_source_file) {
 		if (FileUtils.test (gtkaml_source_file.filename, FileTest.EXISTS)) {
 			try {
-				SourceFile dummy_file = new SourceFile( context, gtkaml_source_file.filename );
+				SourceFile dummy_file = new SourceFile (context, SourceFileType.FAST, gtkaml_source_file.filename );
 				
 				var sax_parser = new SAXParser (context, dummy_file); 
 				RootClassDefinition root_class_definition = sax_parser.parse();

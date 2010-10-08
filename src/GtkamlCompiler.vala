@@ -21,6 +21,7 @@
  * 	Jürg Billeter <j@bitron.ch>
  * Adapted for Gtkaml:
  *	Vlad Grecescu <b100dian@gmail.com>
+ *      pancake <pancake@nopcode.org>
  */
 
 using GLib;
@@ -153,13 +154,13 @@ class Gtkaml.Compiler {
 	}
 
 	private bool add_gir (CodeContext context, string gir) {
-		var gir_path = context.get_gir_path (gir, gir_directories);
+		context.gir_directories = gir_directories;
+		var gir_path = context.get_gir_path (gir);
 
-		if (gir_path == null) {
+		if (gir_path == null)
 			return false;
-		}
 
-		context.add_source_file (new SourceFile (context, gir_path, true));
+		context.add_source_file (new SourceFile (context, SourceFileType.SOURCE, gir_path));
 
 		return true;
 	}
@@ -170,15 +171,15 @@ class Gtkaml.Compiler {
 			return true;
 		}
 	
-		var package_path = context.get_package_path (pkg, vapi_directories);
+		context.vapi_directories = vapi_directories;
+		var package_path = context.get_vapi_path (pkg);
 		
-		if (package_path == null) {
+		if (package_path == null)
 			return false;
-		}
 		
 		context.add_package (pkg);
 		
-		context.add_source_file (new SourceFile (context, package_path, true));
+		context.add_source_file (new SourceFile (context, SourceFileType.PACKAGE, package_path));
 		
 		var deps_filename = Path.build_filename (Path.get_dirname (package_path), "%s.deps".printf (pkg));
 		if (FileUtils.test (deps_filename, FileTest.EXISTS)) {
@@ -360,7 +361,7 @@ class Gtkaml.Compiler {
 			if (FileUtils.test (source, FileTest.EXISTS)) {
 				var rpath = realpath (source);
 				if (run_output || source.has_suffix (".vala") || source.has_suffix (".gs") || source.has_suffix (".gtkaml")) {
-					var source_file = new SourceFile (context, rpath);
+					var source_file = new SourceFile (context, SourceFileType.SOURCE, rpath);
 					source_file.relative_filename = source;
 
 					if (context.profile == Profile.POSIX) {
@@ -382,7 +383,7 @@ class Gtkaml.Compiler {
 
 					context.add_source_file (source_file);
 				} else if (source.has_suffix (".vapi") || source.has_suffix (".gir")) {
-					var source_file = new SourceFile (context, rpath, true);
+					var source_file = new SourceFile (context, SourceFileType.SOURCE, rpath);
 					source_file.relative_filename = source;
 
 					context.add_source_file (source_file);
@@ -439,7 +440,7 @@ class Gtkaml.Compiler {
 		}
 
 		if (dump_tree != null) {
-			var code_writer = new CodeWriter (true);
+			var code_writer = new CodeWriter ();
 			code_writer.write_file (context, dump_tree);
 		}
 
@@ -519,7 +520,7 @@ class Gtkaml.Compiler {
 				return quit();
 			}
 
-			var interface_writer = new CodeWriter (false, true);
+			var interface_writer = new CodeWriter (CodeWriterType.INTERNAL);
 			interface_writer.set_cheader_override(header_filename, internal_header_filename);
 			string vapi_filename = internal_vapi_filename;
 
@@ -600,10 +601,8 @@ class Gtkaml.Compiler {
 					} while (!ends_with_dir_separator (rpath));
 				}
 			} else {
-				if (!ends_with_dir_separator (rpath)) {
+				if (!ends_with_dir_separator (rpath))
 					rpath += Path.DIR_SEPARATOR_S;
-				}
-
 				rpath += start.substring (0, len);
 			}
 		}
@@ -627,21 +626,19 @@ class Gtkaml.Compiler {
 		if (args[i] != null && args[i].has_prefix ("-")) {
 			try {
 				string[] compile_args;
-				Shell.parse_argv ("valac " + args[1], out compile_args);
-
-				var opt_context = new OptionContext ("- Vala");
+				Shell.parse_argv ("gtkamlc " + args[1], out compile_args);
+				var opt_context = new OptionContext ("- GtkAML");
 				opt_context.set_help_enabled (true);
 				opt_context.add_main_entries (options, null);
 				opt_context.parse (ref compile_args);
 			} catch (ShellError e) {
-				stdout.printf ("%s\n", e.message);
+				stderr.printf ("%s\n", e.message);
 				return 1;
 			} catch (OptionError e) {
-				stdout.printf ("%s\n", e.message);
-				stdout.printf ("Run '%s --help' to see a full list of available command line options.\n", args[0]);
+				stderr.printf ("%s\n", e.message);
+				stderr.printf ("Run '%s --help' to see a full list of available command line options.\n", args[0]);
 				return 1;
 			}
-
 			i++;
 		}
 
@@ -663,9 +660,8 @@ class Gtkaml.Compiler {
 
 		var compiler = new Compiler ();
 		int ret = compiler.run ();
-		if (ret != 0) {
+		if (ret != 0)
 			return ret;
-		}
 
 		FileUtils.close (outputfd);
 		if (FileUtils.chmod (output, 0700) != 0) {
@@ -674,17 +670,16 @@ class Gtkaml.Compiler {
 		}
 
 		string[] target_args = { output };
-		while (i < args.length) {
-			target_args += args[i];
-			i++;
-		}
+		while (i < args.length)
+			target_args += args[i++];
 
 		try {
 			Pid pid;
 			var loop = new MainLoop ();
 			int child_status = 0;
 
-			Process.spawn_async (null, target_args, null, SpawnFlags.CHILD_INHERITS_STDIN | SpawnFlags.DO_NOT_REAP_CHILD | SpawnFlags.FILE_AND_ARGV_ZERO, null, out pid);
+			Process.spawn_async (null, target_args, null, SpawnFlags.CHILD_INHERITS_STDIN |
+				SpawnFlags.DO_NOT_REAP_CHILD | SpawnFlags.FILE_AND_ARGV_ZERO, null, out pid);
 
 			FileUtils.unlink (output);
 			ChildWatch.add (pid, (pid, status) => {
@@ -702,6 +697,10 @@ class Gtkaml.Compiler {
 	}
 
 	static int main (string[] args) {
+		if (Path.get_basename (args[0]) == "gtkaml") {
+			return run_source (args);
+		}
+
 		try {
 			var opt_context = new OptionContext ("- Vala Gtkaml Compiler");
 			opt_context.set_help_enabled (true);
@@ -714,7 +713,7 @@ class Gtkaml.Compiler {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s based on Vala 0.10\n", VERSION);
+			stdout.printf ("Gtkaml %s based on Vala 0.12\n", VERSION);
 			return 0;
 		}
 		

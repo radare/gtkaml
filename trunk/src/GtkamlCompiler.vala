@@ -27,8 +27,6 @@
 using GLib;
 using Vala;
 
-public extern string VERSION;
-
 class Gtkaml.Compiler {
 	static string basedir;
 	static string directory;
@@ -713,7 +711,7 @@ class Gtkaml.Compiler {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s based on Vala 0.12\n", VERSION);
+			stdout.printf ("Gtkaml %s based on Vala 0.12\n", Config.PACKAGE_VERSION);
 			return 0;
 		}
 		

@@ -76,4 +76,5 @@ test3.stamp : $(test3_VALASOURCES) $(test3_GTKAMLSOURCES)
 EXTRA_DIST = \
 	$(test0_GTKAMLSOURCES) \
 	$(test1_GTKAMLSOURCES) \
-	$(test3_GTKAMLSOURCES)
+	$(test3_GTKAMLSOURCES) \
+	$(test3_VALASOURCES)

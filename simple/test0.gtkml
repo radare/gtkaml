@@ -1,6 +1,5 @@
-Gtk:VBox gtkaml:name=MyVBox xmlns:gtkaml=http://gtkaml.org/0.1
-	xmlns=GLib xmlns:Gtk=Gtk homogeneous=false spacing=0
-{
+Gtk:VBox gtkml:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
+
 	gtkaml:preconstruct {
 		/*- message ("root preconstruct code"); -*/
 	}
@@ -18,18 +17,13 @@ Gtk:VBox gtkaml:name=MyVBox xmlns:gtkaml=http://gtkaml.org/0.1
                 message("clicked!\n");
         }   
 
-        static int main (string[] args) {
+        static void main (string[] args) {
                 Gtk.init (ref args);
                 var w = new Gtk.Window (WindowType.TOPLEVEL);
-                var g = new MyVBox();
-    
-                g.destroy.connect (Gtk.main_quit);
-                g.show_all (); 
-                w.add (g);
-                w.show (); 
-    
+                w.add (new MyVBox ());
+                w.destroy.connect (Gtk.main_quit);
+                w.show_all (); 
                 Gtk.main (); 
-                return 0;
         }   
 -*/
 }

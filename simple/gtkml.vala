@@ -141,6 +141,8 @@ public class GtkmlToken {
 				bos =">";
 			return bos+"</"+node+">\n";
 		case GtkmlTokenType.ATTRIBUTE:
+			if (str == "gtkml:root")
+				return "xmlns:gtkaml=\"http://gtkaml.org/0.1\" xmlns=\"GLib\" xmlns:Gtk=\"Gtk\"";
 			var foo = str.split ("=");
 			if (foo.length != 2)
 				error ("Missing value in attribute '%s'", str);

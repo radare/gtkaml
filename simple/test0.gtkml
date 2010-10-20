@@ -3,7 +3,7 @@
 VBox gtkml:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
 
 	gtkaml:preconstruct {
-		/*- message ("root preconstruct code"); -*/
+		-{ message ("root preconstruct code"); }-
 	}
 
 	VBox homogeneous=true spacing=0 {
@@ -14,18 +14,19 @@ VBox gtkml:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
 		}
 		Entry;
 	}
-/*-
-        static void clicked () {
-                message("clicked!\n");
-        }   
 
-        static void main (string[] args) {
-                Gtk.init (ref args);
-                var w = new Gtk.Window (WindowType.TOPLEVEL);
-                w.add (new MyVBox ());
-                w.destroy.connect (Gtk.main_quit);
-                w.show_all (); 
-                Gtk.main (); 
-        }   
--*/
+	-{
+		static void clicked () {
+			message("clicked!\n");
+		}   
+
+		static void main (string[] args) {
+			Gtk.init (ref args);
+			var w = new Gtk.Window (WindowType.TOPLEVEL);
+			w.add (new MyVBox ());
+			w.destroy.connect (Gtk.main_quit);
+			w.show_all (); 
+			Gtk.main (); 
+		}
+	}-
 }

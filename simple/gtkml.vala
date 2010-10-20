@@ -76,11 +76,6 @@ public class GtkmlToken {
 			str += "%c".printf (ch);
 			return true;
 		case GtkmlTokenType.COMMENT_BLOCK:
-			if (str[0] == '-') {
-				type = GtkmlTokenType.CODE;
-				str = "";
-				return true;
-			}
 			str += "%c".printf (ch);
 			if (str.has_suffix ("*/")) {
 				str = str[0:str.length-2];
@@ -88,11 +83,11 @@ public class GtkmlToken {
 			}
 			return true;
 		case GtkmlTokenType.CODE:
-			if (str.str ("-*/") != null) {
-				str = str[0:str.length-3];
+			str += "%c".printf (ch);
+			if (str.has_suffix ("}-")) {
+				str = str[0:str.length-2];
 				return false;
 			}
-			str += "%c".printf (ch);
 			return true;
 		}
 		if (is_separator (ch))
@@ -108,7 +103,11 @@ public class GtkmlToken {
 			type = GtkmlTokenType.ATTRIBUTE;
 			break;
 		case '{':
-			type = GtkmlTokenType.BEGIN;
+			if (str == "-") {
+				type = GtkmlTokenType.CODE;
+				str = "";
+				return true;
+			} else type = GtkmlTokenType.BEGIN;
 			return false;
 		case ';':
 			ignorelast = (type!=GtkmlTokenType.CLASS);

@@ -1,16 +1,18 @@
-Gtk:VBox gtkml:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
+/* Fuck yeah example */
+
+VBox gtkml:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
 
 	gtkaml:preconstruct {
 		/*- message ("root preconstruct code"); -*/
 	}
 
-	Gtk:VBox homogeneous=true spacing=0 {
-		Gtk:HBox homogeneous=true spacing=0 {
-			Gtk:Label label=One gtkaml:public=label;
-			Gtk:Button label=Two clicked="clicked()";
-			Gtk:Label label=Tri gtkaml:public=label2;
+	VBox homogeneous=true spacing=0 {
+		HBox homogeneous=true spacing=0 {
+			Label label=One gtkaml:public=label;
+			Button label=Two clicked="clicked()";
+			Label label=Tri gtkaml:public=label2;
 		}
-		Gtk:Entry;
+		Entry;
 	}
 /*-
         static void clicked () {

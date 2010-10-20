@@ -1,4 +1,4 @@
-/* gtkml parser -- author: pancake<nopcode.org> */
+/* gtkml parser -- Copyleft 2010 -- author: pancake<nopcode.org> */
 
 int tok_idx = 0;
 string tokens[64];
@@ -8,25 +8,26 @@ GtkmlTokenType last_type = GtkmlTokenType.INVALID;
 private static void pushtoken (string token) {
 	if (tok_idx>=tokens.length)
 		error ("Cannot push more tokens");
-	print (">> [%d]=%s\n", tok_idx, token);
+	//print (">> [%d]=%s\n", tok_idx, token);
 	tokens[tok_idx++] = token;
 }
 
 private static string poptoken () {
 	if (tok_idx == 0)
-return "";
+		return "";
 	//	error ("Cannot pop more tokens");
-	print ("<< [%d]=%s\n", tok_idx-1, tokens[tok_idx-1]);
+	//print ("<< [%d]=%s\n", tok_idx-1, tokens[tok_idx-1]);
 	return tokens[--tok_idx];
 }
 
 public enum GtkmlTokenType {
-	CODE,      // /*- ... -*/
-	CLASS,     // ????
-	COMMENT,   // ????
-	ATTRIBUTE, // ???=???
-	BEGIN,     // {
-	END,       // ; }
+	CODE,
+	CLASS,
+	COMMENT_LINE,
+	COMMENT_BLOCK,
+	ATTRIBUTE,
+	BEGIN,
+	END,
 	INVALID
 }
 
@@ -60,7 +61,7 @@ public class GtkmlToken {
 
 	public GtkmlToken(DataInputStream? dis = null) throws Error {
 		str = "";
-		type = GtkmlTokenType.INVALID;
+		type = GtkmlTokenType.CLASS;
 		if (dis != null) {
 			skip_spaces (dis);
 			while (update (dis.read_byte ()));
@@ -69,10 +70,22 @@ public class GtkmlToken {
 
 	public bool update (uchar ch) {
 		switch (type) {
-		case GtkmlTokenType.COMMENT:
+		case GtkmlTokenType.COMMENT_LINE:
 			if (ch == '\n' || ch == '\r') 
 				return false;
 			str += "%c".printf (ch);
+			return true;
+		case GtkmlTokenType.COMMENT_BLOCK:
+			if (str[0] == '-') {
+				type = GtkmlTokenType.CODE;
+				str = "";
+				return true;
+			}
+			str += "%c".printf (ch);
+			if (str.has_suffix ("*/")) {
+				str = str[0:str.length-2];
+				return false;
+			}
 			return true;
 		case GtkmlTokenType.CODE:
 			if (str.str ("-*/") != null) {
@@ -88,6 +101,8 @@ public class GtkmlToken {
 		case ':':
 			if (str.str ("=") == null)
 				type = GtkmlTokenType.CLASS;
+			if (last_type == GtkmlTokenType.CLASS)
+				type = GtkmlTokenType.ATTRIBUTE;
 			break;
 		case '=':
 			type = GtkmlTokenType.ATTRIBUTE;
@@ -104,11 +119,11 @@ public class GtkmlToken {
 		}
 		str += "%c".printf (ch);
 		if (str == "//") {
-			type = GtkmlTokenType.COMMENT;
+			type = GtkmlTokenType.COMMENT_LINE;
 			str = "";
 		}
-		if (str == "/*-") {
-			type = GtkmlTokenType.CODE;
+		if (str == "/*") {
+			type = GtkmlTokenType.COMMENT_BLOCK;
 			str = "";
 		}
 		return true;
@@ -131,7 +146,8 @@ public class GtkmlToken {
 		case GtkmlTokenType.CLASS:
 			pushtoken (str);
 			return bos+"<"+str+eos;
-		case GtkmlTokenType.COMMENT:
+		case GtkmlTokenType.COMMENT_BLOCK:
+		case GtkmlTokenType.COMMENT_LINE:
 			return bos+"<!-- "+str+" -->\n";
 		case GtkmlTokenType.BEGIN:
 			return ">\n";
@@ -142,7 +158,7 @@ public class GtkmlToken {
 			return bos+"</"+node+">\n";
 		case GtkmlTokenType.ATTRIBUTE:
 			if (str == "gtkml:root")
-				return "xmlns:gtkaml=\"http://gtkaml.org/0.1\" xmlns=\"GLib\" xmlns:Gtk=\"Gtk\"";
+				return " xmlns:gtkaml=\"http://gtkaml.org/0.1\" xmlns=\"Gtk\"";
 			var foo = str.split ("=");
 			if (foo.length != 2)
 				error ("Missing value in attribute '%s'", str);
@@ -154,8 +170,6 @@ public class GtkmlToken {
 			}
 			return " "+foo[0]+"=\""+val+"\""+eos;
 		case GtkmlTokenType.CODE:
-			//else if (token != null)
-			//	xmlstr.append (token.to_xml ());
 			var pre = "";
 			if (last_type== GtkmlTokenType.END) {
 				string node = poptoken ();
@@ -188,14 +202,11 @@ public class GtkmlTranslator {
 			for (;;) {
 				token = new GtkmlToken (dis);
 				xmlstr.append (token.to_xml ());
-				// XXX: xmlstr.append (GtkmlToken (dis).token.to_xml ());
 				last_type = token.type;
 			}
 		} catch (Error e) {
 			if (e.code != 0)
 				error ("%s", e.message);
-			//else if (token != null)
-			//	xmlstr.append (token.to_xml ());
 		}
 	}
 

@@ -1,6 +1,6 @@
 /* Fuck yeah example */
 
-VBox gtkml:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
+VBox gtkon:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
 
 	gtkaml:preconstruct {
 		-{ message ("root preconstruct code"); }-
@@ -12,7 +12,7 @@ VBox gtkml:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
 			Button label=Two clicked="clicked()";
 			Label label=Tri gtkaml:public=label2;
 		}
-		Entry;
+		Entry activate="clicked()";
 	}
 
 	-{

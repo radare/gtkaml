@@ -2,8 +2,8 @@
 
 int tok_idx = 0;
 string tokens[64];
-private bool ignorelast = false;
-GtkmlTokenType last_type = GtkmlTokenType.INVALID;
+bool mustclose = false;
+GtkonTokenType last_type = GtkonTokenType.INVALID;
 
 private static void pushtoken (string token) {
 	if (tok_idx>=tokens.length)
@@ -20,7 +20,7 @@ private static string poptoken () {
 	return tokens[--tok_idx];
 }
 
-public enum GtkmlTokenType {
+public enum GtkonTokenType {
 	CODE,
 	CLASS,
 	COMMENT_LINE,
@@ -31,10 +31,15 @@ public enum GtkmlTokenType {
 	INVALID
 }
 
+// GtkonCompiler
+// DataInputStream must be here
+public char nextchar = 0;
+
 [Compact]
-public class GtkmlToken {
+public class GtkonToken {
 	public string str;
-	public GtkmlTokenType type;
+	public GtkonTokenType type;
+	public DataInputStream? dis;
 
 	private inline bool is_separator (uchar ch) {
 		switch (ch) {
@@ -49,40 +54,43 @@ public class GtkmlToken {
 		return false;
 	}
 
-	private void skip_spaces(DataInputStream dis) throws Error {
-		for (;;) {
-			var ch = dis.read_byte ();
-			if (!is_separator (ch)) {
-				update (ch);
-				break;
-			}
-		}
+	private uchar readchar() throws Error {
+		uchar ch = nextchar;
+		if (ch != 0) nextchar = 0;
+		else ch = dis.read_byte ();
+		return ch;
 	}
 
-	public GtkmlToken(DataInputStream? dis = null) throws Error {
+	private bool skip_spaces() throws Error {
+		var ch = 0;
+		do { ch = readchar ();
+		} while (is_separator (ch));
+		return update (ch);
+	}
+
+	public GtkonToken(DataInputStream dis) throws Error {
 		str = "";
-		type = GtkmlTokenType.CLASS;
-		if (dis != null) {
-			skip_spaces (dis);
-			while (update (dis.read_byte ()));
-		}
+		this.dis = dis;
+		type = GtkonTokenType.CLASS;
+		skip_spaces ();
+		while (update (readchar ()));
 	}
 
 	public bool update (uchar ch) {
 		switch (type) {
-		case GtkmlTokenType.COMMENT_LINE:
+		case GtkonTokenType.COMMENT_LINE:
 			if (ch == '\n' || ch == '\r') 
 				return false;
 			str += "%c".printf (ch);
 			return true;
-		case GtkmlTokenType.COMMENT_BLOCK:
+		case GtkonTokenType.COMMENT_BLOCK:
 			str += "%c".printf (ch);
 			if (str.has_suffix ("*/")) {
 				str = str[0:str.length-2];
 				return false;
 			}
 			return true;
-		case GtkmlTokenType.CODE:
+		case GtkonTokenType.CODE:
 			str += "%c".printf (ch);
 			if (str.has_suffix ("}-")) {
 				str = str[0:str.length-2];
@@ -95,37 +103,46 @@ public class GtkmlToken {
 		switch (ch) {
 		case ':':
 			if (str.str ("=") == null)
-				type = GtkmlTokenType.CLASS;
-			if (last_type == GtkmlTokenType.CLASS)
-				type = GtkmlTokenType.ATTRIBUTE;
+				type = GtkonTokenType.CLASS;
+			if (last_type == GtkonTokenType.CLASS)
+				type = GtkonTokenType.ATTRIBUTE;
 			break;
 		case '=':
-			type = GtkmlTokenType.ATTRIBUTE;
+			type = GtkonTokenType.ATTRIBUTE;
+			//mustclose = true;
 			break;
 		case '{':
 			if (str == "-") {
-				type = GtkmlTokenType.CODE;
+				type = GtkonTokenType.CODE;
 				str = "";
 				return true;
-			} else type = GtkmlTokenType.BEGIN;
+			}
+			if (str == "") {
+				mustclose = true;
+				type = GtkonTokenType.BEGIN;
+				return false;
+			}
+			nextchar = '{';
 			return false;
 		case ';':
-			ignorelast = (type!=GtkmlTokenType.CLASS);
-			ignorelast = true; // XXX
+			if (str == "") {
+				type = GtkonTokenType.END;
+			mustclose = true;
+				return false;
+			}
+			nextchar = ';';
 			return false;
 		case '}':
-			if (str == "{")
-				error ("Invalid syntax '{}'");
-			type = GtkmlTokenType.END;
+			type = GtkonTokenType.END;
 			return false;
 		}
 		str += "%c".printf (ch);
 		if (str == "//") {
-			type = GtkmlTokenType.COMMENT_LINE;
+			type = GtkonTokenType.COMMENT_LINE;
 			str = "";
-		}
+		} else
 		if (str == "/*") {
-			type = GtkmlTokenType.COMMENT_BLOCK;
+			type = GtkonTokenType.COMMENT_BLOCK;
 			str = "";
 		}
 		return true;
@@ -134,29 +151,30 @@ public class GtkmlToken {
 	public string to_xml() {
 		var eos = "";
 		var bos = "";
-		if (ignorelast) {
-			poptoken ();
-			eos = " />\n";
-			ignorelast = false;
+		if (mustclose) {
+			eos = ">";
+			mustclose = false;
 		}
 		int max = tok_idx;
-		if (type == GtkmlTokenType.END)
+		if (type == GtkonTokenType.END)
 			max--;
 		for (int i = 0; i<max; i++)
 			bos += "  ";
 		switch (type) {
-		case GtkmlTokenType.CLASS:
-			pushtoken (str);
-			return bos+"<"+str+eos;
-		case GtkmlTokenType.COMMENT_BLOCK:
-		case GtkmlTokenType.COMMENT_LINE:
-			return bos+"<!-- "+str+" -->\n";
-		case GtkmlTokenType.BEGIN:
+		case GtkonTokenType.CLASS:
+			if (str != "") {
+				pushtoken (str);
+				bos += "<";
+			}
+			return bos+str+eos;
+		case GtkonTokenType.COMMENT_BLOCK:
+		case GtkonTokenType.COMMENT_LINE:
+			return eos; //bos+"<!-- "+str+" -->\n";
+		case GtkonTokenType.BEGIN:
 			return ">\n";
-		case GtkmlTokenType.END:
-			string node = poptoken ();
-			return bos+"</"+node+">\n";
-		case GtkmlTokenType.ATTRIBUTE:
+		case GtkonTokenType.END:
+			return eos+bos+"</"+poptoken ()+">\n";
+		case GtkonTokenType.ATTRIBUTE:
 			if (str == "gtkon:root")
 				return " xmlns:gtkaml=\"http://gtkaml.org/0.1\" xmlns=\"Gtk\"";
 			var foo = str.split ("=");
@@ -169,17 +187,17 @@ public class GtkmlToken {
 				val = val[1:val.length-1];
 			}
 			return " "+foo[0]+"=\""+val+"\""+eos;
-		case GtkmlTokenType.CODE:
-			return bos+"<![CDATA[\n"+str+"\n"+bos+"]]>\n";
+		case GtkonTokenType.CODE:
+			return bos+"<![CDATA[\n"+str+"\n"+bos+"]]>\n"+eos;
 		}
-		return "<!-- XXX ("+str+") -->";
+		return ""+eos; //<!-- XXX ("+str+") -->";
 	}
 }
 
-public class GtkmlTranslator {
+public class GtkonTranslator {
 	StringBuilder xmlstr = null;
 
-	public GtkmlTranslator() {
+	public GtkonTranslator() {
 	}
 
 	public void parse_file(string filename) {
@@ -189,11 +207,11 @@ public class GtkmlTranslator {
 		if (!file.query_exists ())
 			error ("File '%s' doesn't exist.", filename);
 
-		GtkmlToken? token = null;
+		GtkonToken? token = null;
 		try {
 			var dis = new DataInputStream (file.read ());
 			for (;;) {
-				token = new GtkmlToken (dis);
+				token = new GtkonToken (dis);
 				xmlstr.append (token.to_xml ());
 				last_type = token.type;
 			}
@@ -223,7 +241,7 @@ public class GtkmlTranslator {
 
 void main(string[] args) {
 	if (args.length>1) {
-		var gt = new GtkmlTranslator ();
+		var gt = new GtkonTranslator ();
 		foreach (unowned string file in args[1:args.length]) {
 			if (!file.has_suffix (".gtkon"))
 				error ("Unsupported file format for "+file+"\n");

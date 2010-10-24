@@ -8,11 +8,18 @@ VBox gtkon:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
 
 	VBox homogeneous=true spacing=0 {
 		HBox homogeneous=true spacing=0 {
-			Label label=One gtkaml:public=label;
+			Label label=One gtkaml:public=label { }
+			Label label=One gtkaml:public=label2{ }
+			Label label=One gtkaml:public=label3 {}
+			Label label=One gtkaml:public=label4{}
+			Label label=One gtkaml:public=label5;
+			Label label=One gtkaml:public=label6 ;
+
 			Button label=Two clicked="clicked()";
-			Label label=Tri gtkaml:public=label2;
+			Label label=Tri gtkaml:public=label8;
 		}
-		Entry activate="clicked()";
+		Entry text=pasta activate="clicked()";
+		Entry text=jiji activate=clicked();
 	}
 
 	-{

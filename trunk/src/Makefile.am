@@ -7,6 +7,7 @@ AM_CFLAGS = -I$(top_srcdir) \
 	-Wall \
 	-g \
 	$(LIBXML2_CFLAGS) \
+	$(GIO_CFLAGS) \
 	$(GLIB_CFLAGS) \
 	$(VALA_CFLAGS) \
 	-DPACKAGE_DATADIR=\"$(pkgdatadir)\"
@@ -18,6 +19,7 @@ BUILT_SOURCES = gtkamlc.vala.stamp
 CLEANFILES = gtkamlc.vala.stamp
 
 gtkamlc_VALASOURCES = \
+	GtkonParser.vala \
 	GtkamlCompiler.vala \
 	GtkamlCodeContext.vala \
 	GtkamlSAXParser.vala \
@@ -45,12 +47,13 @@ gtkamlc_SOURCES = \
 	GtkamlSAXParser_start_parsing.c
 
 gtkamlc.vala.stamp: $(gtkamlc_VALASOURCES)
-	$(VALAC) -h gtkamlc.h -C $(VALAFLAGS) --vapidir=$(top_srcdir)/vapi --pkg config --pkg libxml-2.0 --pkg libvala-0.12 $^ 
+	$(VALAC) -h gtkamlc.h -C $(VALAFLAGS) --vapidir=$(top_srcdir)/vapi --pkg config --pkg gio-2.0 --pkg libxml-2.0 --pkg libvala-0.12 $^ 
 	touch $@
 
 gtkamlc_LDADD = \
 	$(LIBXML2_LIBS)\
 	$(GLIB_LIBS) \
+	$(GIO_LIBS) \
 	$(VALA_LIBS)
 
 EXTRA_DIST = $(gtkamlc_VALASOURCES)

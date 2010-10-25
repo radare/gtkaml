@@ -62,15 +62,15 @@ public class Gtkaml.Parser : Vala.Parser {
 	}
 
 	public void parse_gtkon_file (SourceFile gtkon_source_file) {
-		var file = gtkon_source_file.filename.replace (".gtkon", ".gtkaml");
+		var gtkaml_filename = gtkon_source_file.filename.replace (".gtkon", ".gtkaml");
 		var gp = new GtkonParser ();
 		gp.parse_file (gtkon_source_file.filename);
-		if (FileUtils.test (file, FileTest.EXISTS))
-			FileUtils.unlink (file);
-		gp.to_file (file);
-		gtkon_source_file.filename = file;
+		if (FileUtils.test (gtkaml_filename, FileTest.EXISTS))
+			FileUtils.unlink (gtkaml_filename);
+		gp.to_file (gtkaml_filename);
+		gtkon_source_file.filename = gtkaml_filename;
+		context.generated_files.add (gtkaml_filename);
 		parse_gtkaml_file (gtkon_source_file);
-		// TODO: remove .gtkaml code if not specified -C
 	}
 
 	public virtual void parse_gtkaml_file (SourceFile gtkaml_source_file) {

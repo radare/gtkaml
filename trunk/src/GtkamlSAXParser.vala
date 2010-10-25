@@ -252,15 +252,33 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return new SourceReference (source_file, line_number (),
 			column_number (), line_number (), column_number ()); 
 	}
+
+	private Symbol? lookup (string [] segments, int current, Symbol ns){
+		string current_segment = segments[current];
+		Symbol? sym = ns.scope.lookup (current_segment);
+		if (sym is Namespace) {
+			return lookup (segments,current+1, (Namespace)sym);
+		}
+		if (current + 1 == segments.length ) {
+			return sym;
+		}
+		return null;
+	}
 	
 	private Class? lookup_class (string? xmlNamespace, string name) {
-		foreach (Vala.Namespace ns in context.root.get_namespaces ()) {
-			if (xmlNamespace == ns.name) {
-				Symbol s = ns.scope.lookup (name);
-				if (s is Class)
-					return (s as Class);
-			}
+		string [] namespaces;
+		if (xmlNamespace != null) {
+			namespaces = xmlNamespace.split (".");
+			namespaces += name;
+		} else {
+			namespaces = {name};
 		}
+		
+	    Symbol sym = lookup (namespaces,0,context.root);
+		if (sym is Class) {
+			return (Class)sym;
+		}
+		
 		return null;
 	}
 

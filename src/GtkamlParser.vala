@@ -18,6 +18,8 @@
  *
  * Author:
  *        Vlad Grecescu (b100dian@gmail.com)
+ * Contributors:
+ *        pancake (pancake@nopcode.org)
  */
 
 using GLib;
@@ -52,9 +54,23 @@ public class Gtkaml.Parser : Vala.Parser {
 	public override void visit_source_file (SourceFile source_file) {
 		if (source_file.filename.has_suffix (".vala") || source_file.filename.has_suffix (".vapi")) {
 			base.visit_source_file (source_file);
+		} else if (source_file.filename.has_suffix (".gtkon")) {
+			parse_gtkon_file (source_file);
 		} else if (source_file.filename.has_suffix (".gtkaml")) {
 			parse_gtkaml_file (source_file);
 		}
+	}
+
+	public void parse_gtkon_file (SourceFile gtkon_source_file) {
+		var file = gtkon_source_file.filename.replace (".gtkon", ".gtkaml");
+		var gp = new GtkonParser ();
+		gp.parse_file (gtkon_source_file.filename);
+		if (FileUtils.test (file, FileTest.EXISTS))
+			FileUtils.unlink (file);
+		gp.to_file (file);
+		gtkon_source_file.filename = file;
+		parse_gtkaml_file (gtkon_source_file);
+		// TODO: remove .gtkaml code if not specified -C
 	}
 
 	public virtual void parse_gtkaml_file (SourceFile gtkaml_source_file) {

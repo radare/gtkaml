@@ -124,11 +124,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 				ClassDefinition attribute_parent_class_definition = state.class_definition;
 				
 				if (prefix != null) 
-					fqan = prefix_to_namespace (prefix) + "." + localname;
+					fqan = prefix + "." + localname;
 				else 
 					fqan = localname;
 				if (attrs.size > 0) { //an attribute cannot have.. attributes
-					Report.error (source_reference, "No class %s found.".printf(fqan));
+					Report.error (source_reference, "No class %s.%s found.".printf(prefix_to_namespace (prefix), localname));
 				}
 				states.push (new State (StateId.SAX_PARSER_ATTRIBUTE_STATE, attribute_parent_class_definition, null, fqan));
 			}

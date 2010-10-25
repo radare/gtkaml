@@ -115,15 +115,16 @@ public class Gtkaml.SAXParser : GLib.Object {
 			break;
 		case StateId.SAX_PARSER_CONTAINER_STATE:	
 			Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
-			string fqan;
 			
 			if (clazz != null) { //this is a member/container child object
 				ClassDefinition class_definition = get_child_for_container (clazz, state.class_definition, attrs, prefix);
 				states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, class_definition));
 			} else { //no class with this name found, assume it's an attribute
+				string fqan;
 				ClassDefinition attribute_parent_class_definition = state.class_definition;
+				
 				if (prefix != null) 
-					fqan = prefix + "." + localname;
+					fqan = prefix_to_namespace (prefix) + "." + localname;
 				else 
 					fqan = localname;
 				if (attrs.size > 0) { //an attribute cannot have.. attributes

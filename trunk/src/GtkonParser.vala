@@ -37,6 +37,7 @@ public char nextchar = 0;
 
 [Compact]
 public class GtkonToken {
+	public bool quoted;
 	public string str;
 	public GtkonTokenType type;
 	public DataInputStream? dis;
@@ -70,6 +71,7 @@ public class GtkonToken {
 
 	public GtkonToken(DataInputStream dis) throws Error {
 		str = "";
+		quoted = false;
 		this.dis = dis;
 		type = GtkonTokenType.CLASS;
 		skip_spaces ();
@@ -77,6 +79,14 @@ public class GtkonToken {
 	}
 
 	public bool update (uchar ch) {
+		if (quoted) {
+			type = GtkonTokenType.ATTRIBUTE;
+			str += "%c".printf (ch);
+			if (str.has_suffix ("\"") && !str.has_suffix ("\\\"")) {
+				return false;
+			}
+			return true;
+		}
 		switch (type) {
 		case GtkonTokenType.COMMENT_LINE:
 			if (ch == '\n' || ch == '\r') 
@@ -105,9 +115,14 @@ public class GtkonToken {
 			if (type == GtkonTokenType.ATTRIBUTE && (str.str ("=\"") != null)) {
 				if (str.has_suffix ("\"") && !str.has_suffix ("\\\""))
 					return false;
+				/* continue */
+				quoted = true;
 			} else return false;
 		}
 		switch (ch) {
+		case '"':
+			quoted = true;
+			break;
 		case '$':
 			type = GtkonTokenType.ATTRIBUTE;
 			break;

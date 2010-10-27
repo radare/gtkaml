@@ -6,6 +6,14 @@ VBox gtkon:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
 		-{ message ("root preconstruct code"); }-
 	}
 
+	/* Use '$' as short for 'gtkaml:public' */
+	HBox { Label label=Username; Entry $user; }
+	HBox { Label label=Password; Entry $pass; }
+/*
+	HBox { Label label=Username; Entry gtkaml:public=user; }
+	HBox { Label label=Password; Entry gtkaml:public=pass; }
+*/
+
 	VBox homogeneous=true spacing=0 {
 		HBox homogeneous=true spacing=0 {
 			Label label=One gtkaml:public=label { }

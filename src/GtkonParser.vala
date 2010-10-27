@@ -97,10 +97,16 @@ public class GtkonToken {
 				return false;
 			}
 			return true;
+		default:
+			/* do nothing here */
+			break;
 		}
 		if (is_separator (ch))
 			return false;
 		switch (ch) {
+		case '$':
+			type = GtkonTokenType.ATTRIBUTE;
+			break;
 		case ':':
 			if (str.str ("=") == null)
 				type = GtkonTokenType.CLASS;
@@ -175,6 +181,8 @@ public class GtkonToken {
 		case GtkonTokenType.END:
 			return eos+bos+"</"+poptoken ()+">\n";
 		case GtkonTokenType.ATTRIBUTE:
+			if (str[0] == '$')
+				return " gtkaml:public=\"%s\"".printf (str[1:str.length]);
 			if (str == "gtkon:root")
 				return " xmlns:gtkaml=\"http://gtkaml.org/0.1\" xmlns=\"Gtk\"";
 			var foo = str.split ("=");
@@ -189,6 +197,8 @@ public class GtkonToken {
 			return " "+foo[0]+"=\""+val+"\""+eos;
 		case GtkonTokenType.CODE:
 			return bos+"<![CDATA[\n"+str+"\n"+bos+"]]>\n"+eos;
+		case GtkonTokenType.INVALID:
+			error ("Invalid token!");
 		}
 		return ""+eos; //<!-- XXX ("+str+") -->";
 	}

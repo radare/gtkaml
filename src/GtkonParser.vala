@@ -101,8 +101,12 @@ public class GtkonToken {
 			/* do nothing here */
 			break;
 		}
-		if (is_separator (ch))
-			return false;
+		if (is_separator (ch)) {
+			if (type == GtkonTokenType.ATTRIBUTE && (str.str ("=\"") != null)) {
+				if (str.has_suffix ("\"") && !str.has_suffix ("\\\""))
+					return false;
+			} else return false;
+		}
 		switch (ch) {
 		case '$':
 			type = GtkonTokenType.ATTRIBUTE;
@@ -185,16 +189,16 @@ public class GtkonToken {
 				return " gtkaml:public=\"%s\"".printf (str[1:str.length]);
 			if (str == "gtkon:root")
 				return " xmlns:gtkaml=\"http://gtkaml.org/0.1\" xmlns=\"Gtk\"";
-			var foo = str.split ("=");
+			var foo = str.split ("=", 2);
 			if (foo.length != 2)
 				error ("Missing value in attribute '%s'", str);
 			var val = foo[1];
 			if (val[0] == '"') {
 				if (val[val.length-1] != '"')
 					error ("Missing '\"' in attribute '%s'", str);
-				val = val[1:val.length-1];
+				val = val[1:val.length-1].replace ("\\\"", "\"");
 			}
-			return " "+foo[0]+"=\""+val+"\""+eos;
+			return " "+foo[0]+"='"+val+"'"+eos;
 		case GtkonTokenType.CODE:
 			return bos+"<![CDATA[\n"+str+"\n"+bos+"]]>\n"+eos;
 		case GtkonTokenType.INVALID:

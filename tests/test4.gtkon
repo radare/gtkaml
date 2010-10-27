@@ -13,6 +13,7 @@ VBox gtkon:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
 	HBox { Label label=Username; Entry gtkaml:public=user; }
 	HBox { Label label=Password; Entry gtkaml:public=pass; }
 */
+	Button label="This is \"pure\" fun" clicked="clicked()";
 
 	VBox homogeneous=true spacing=0 {
 		HBox homogeneous=true spacing=0 {

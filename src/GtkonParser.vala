@@ -203,7 +203,7 @@ public class GtkonToken {
 			if (str[0] == '$')
 				return " gtkaml:public=\"%s\"".printf (str[1:str.length]);
 			if (str == "gtkon:root")
-				return " xmlns:gtkaml=\"http://gtkaml.org/0.1\" xmlns=\"Gtk\"";
+				return " xmlns:gtkaml=\"http://gtkaml.org/0.2\" xmlns=\"Gtk\"";
 			var foo = str.split ("=", 2);
 			if (foo.length != 2)
 				error ("Missing value in attribute '%s'", str);

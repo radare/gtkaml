@@ -151,7 +151,7 @@ public class Gtkaml.ImplicitsStore : Object {
 			}
 		} else {
 			//stderr.printf ("NOT found in implicits: %s|%s\n", clazz, method_name);
-			foreach (FormalParameter p in method.get_parameters ()) {
+			foreach (Vala.Parameter p in method.get_parameters ()) {
 				if (!p.ellipsis) { //hack for add_with_parameters (widget, ...)
 					var new_implicits_parameter = new ImplicitsParameter ();
 					new_implicits_parameter.name = p.name;

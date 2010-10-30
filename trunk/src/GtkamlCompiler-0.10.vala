@@ -27,6 +27,8 @@
 using GLib;
 using Vala;
 
+public extern string VERSION;
+
 class Gtkaml.Compiler {
 	static string basedir;
 	static string directory;
@@ -42,8 +44,6 @@ class Gtkaml.Compiler {
 	static string gir;
 	[CCode (array_length = false, array_null_terminated = true)]
 	static string[] packages;
-	[CCode (array_length = false, array_null_terminated = true)]
-	static string[] fast_vapis;
 	static string target_glib;
 	[CCode (array_length = false, array_null_terminated = true)]
 	static string[] implicits_directories; 
@@ -53,7 +53,6 @@ class Gtkaml.Compiler {
 	static bool use_header;
 	static string internal_header_filename;
 	static string internal_vapi_filename;
-	static string fast_vapi_filename;
 	static string symbols_filename;
 	static string includedir;
 	static bool compile_only;
@@ -82,7 +81,6 @@ class Gtkaml.Compiler {
 	static bool enable_version_header;
 	static bool disable_version_header;
 	static bool fatal_warnings;
-	static string dependencies;
 
 	static string entry_point;
 
@@ -106,9 +104,6 @@ class Gtkaml.Compiler {
 		{ "includedir", 0, 0, OptionArg.FILENAME, ref includedir, "Directory used to include the C header file", "DIRECTORY" },
 		{ "internal-header", 'h', 0, OptionArg.FILENAME, ref internal_header_filename, "Output internal C header file", "FILE" },
 		{ "internal-vapi", 0, 0, OptionArg.FILENAME, ref internal_vapi_filename, "Output vapi with internal api", "FILE" },
-		{ "fast-vapi", 0, 0, OptionArg.STRING, ref fast_vapi_filename, "Output vapi without performing symbol resolution", null },
-		{ "use-fast-vapi", 0, 0, OptionArg.STRING_ARRAY, ref fast_vapis, "Use --fast-vapi output during this compile", null },
-		{ "deps", 0, 0, OptionArg.STRING, ref dependencies, "Write make-style dependency information to this file", null },
 		{ "symbols", 0, 0, OptionArg.FILENAME, ref symbols_filename, "Output symbols file", "FILE" },
 		{ "compile", 'c', 0, OptionArg.NONE, ref compile_only, "Compile but do not link", null },
 		{ "output", 'o', 0, OptionArg.FILENAME, ref output, "Place output in file FILE", "FILE" },
@@ -158,6 +153,56 @@ class Gtkaml.Compiler {
 		}
 	}
 
+	private bool add_gir (CodeContext context, string gir) {
+		var gir_path = context.get_gir_path (gir, gir_directories);
+
+		if (gir_path == null) {
+			return false;
+		}
+
+		context.add_source_file (new SourceFile (context, gir_path, true));
+
+		return true;
+	}
+	
+	private bool add_package (CodeContext context, string pkg) {
+		if (context.has_package (pkg)) {
+			// ignore multiple occurences of the same package
+			return true;
+		}
+	
+		var package_path = context.get_package_path (pkg, vapi_directories);
+		
+		if (package_path == null) {
+			return false;
+		}
+		
+		context.add_package (pkg);
+		
+		context.add_source_file (new SourceFile (context, package_path, true));
+		
+		var deps_filename = Path.build_filename (Path.get_dirname (package_path), "%s.deps".printf (pkg));
+		if (FileUtils.test (deps_filename, FileTest.EXISTS)) {
+			try {
+				string deps_content;
+				size_t deps_len;
+				FileUtils.get_contents (deps_filename, out deps_content, out deps_len);
+				foreach (string dep in deps_content.split ("\n")) {
+					dep = dep.strip ();
+					if (dep != "") {
+						if (!add_package (context, dep)) {
+							Report.error (null, "%s, dependency of %s, not found in specified Vala API directories".printf (dep, pkg));
+						}
+					}
+				}
+			} catch (FileError e) {
+				Report.error (null, "Unable to read dependency file: %s".printf (e.message));
+			}
+		}
+		
+		return true;
+	}
+	
 	private int run () {
 		context = new CodeContext ();
 		Vala.CodeContext.push (context);
@@ -195,17 +240,15 @@ class Gtkaml.Compiler {
 		context.includedir = includedir;
 		context.output = output;
 		if (basedir == null) {
-			context.basedir = Vala.CodeContext.realpath (".");
+			context.basedir = realpath (".");
 		} else {
-			context.basedir = Vala.CodeContext.realpath (basedir);
+			context.basedir = realpath (basedir);
 		}
 		if (directory != null) {
-			context.directory = Vala.CodeContext.realpath (directory);
+			context.directory = realpath (directory);
 		} else {
 			context.directory = context.basedir;
 		}
-		context.vapi_directories = vapi_directories;
-		context.gir_directories = gir_directories;
 		context.debug = debug;
 		context.thread = thread;
 		context.mem_profiler = mem_profiler;
@@ -223,7 +266,6 @@ class Gtkaml.Compiler {
 		} else {
 			Report.error (null, "Unknown profile %s".printf (profile));
 		}
-		nostdpkg |= fast_vapi_filename != null;
 		context.nostdpkg = nostdpkg;
 
 		context.entry_point_name = entry_point;
@@ -236,14 +278,16 @@ class Gtkaml.Compiler {
 			}
 		}
 
-		for (int i = 2; i <= 12; i += 2) {
+		for (int i = 2; i <= 10; i += 2) {
 			context.add_define ("VALA_0_%d".printf (i));
 		}
 
 		if (context.profile == Profile.POSIX) {
 			if (!nostdpkg) {
 				/* default package */
-				context.add_external_package ("posix");
+				if (!add_package (context, "posix")) {
+					Report.error (null, "posix not found in specified Vala API directories");
+				}
 			}
 		} else if (context.profile == Profile.GOBJECT) {
 			int glib_major = 2;
@@ -264,32 +308,32 @@ class Gtkaml.Compiler {
 
 			if (!nostdpkg) {
 				/* default packages */
-				context.add_external_package ("glib-2.0");
-				context.add_external_package ("gobject-2.0");
+				if (!add_package (context, "glib-2.0")) {
+					Report.error (null, "glib-2.0 not found in specified Vala API directories");
+				}
+				if (!add_package (context, "gobject-2.0")) {
+					Report.error (null, "gobject-2.0 not found in specified Vala API directories");
+				}
 			}
 		} else if (context.profile == Profile.DOVA) {
 			if (!nostdpkg) {
 				/* default package */
-				context.add_external_package ("dova-core-0.1");
+				if (!add_package (context, "dova-core-0.1")) {
+					Report.error (null, "dova-core-0.1 not found in specified Vala API directories");
+				}
 			}
 		}
 
 		if (packages != null) {
 			foreach (string package in packages) {
-				context.add_external_package (package);
+				if (!add_package (context, package) && !add_gir (context, package)) {
+					Report.error (null, "%s not found in specified Vala API directories or GObject-Introspection GIR directories".printf (package));
+				}
 				if (context.profile == Profile.GOBJECT && package == "dbus-glib-1") {
 					context.add_define ("DBUS_GLIB");
 				}
 			}
 			packages = null;
-		}
-
-		if (fast_vapis != null) {
-			foreach (string vapi in fast_vapis) {
-				var rpath = Vala.CodeContext.realpath (vapi);
-				var source_file = new SourceFile (context, SourceFileType.FAST, rpath);
-				context.add_source_file (source_file);
-			}
 		}
 		
 		if (context.report.get_errors () > 0 || (fatal_warnings && context.report.get_warnings () > 0)) {
@@ -314,10 +358,44 @@ class Gtkaml.Compiler {
 		bool has_c_files = false;
 
 		foreach (string source in sources) {
-			bool is_valid = run_output || source.has_suffix(".gtkaml") || source.has_suffix(".gtkon");
-			if (context.add_source_filename (source, is_valid)) {
-				if (source.has_suffix (".c"))
+			if (FileUtils.test (source, FileTest.EXISTS)) {
+				var rpath = realpath (source);
+				if (run_output || source.has_suffix (".vala") || source.has_suffix (".gs")
+					|| source.has_suffix (".gtkaml") || source.has_suffix (".gtkon")) {
+					var source_file = new SourceFile (context, rpath);
+					source_file.relative_filename = source;
+
+					if (context.profile == Profile.POSIX) {
+						// import the Posix namespace by default (namespace of backend-specific standard library)
+						var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "Posix", null));
+						source_file.add_using_directive (ns_ref);
+						context.root.add_using_directive (ns_ref);
+					} else if (context.profile == Profile.GOBJECT) {
+						// import the GLib namespace by default (namespace of backend-specific standard library)
+						var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "GLib", null));
+						source_file.add_using_directive (ns_ref);
+						context.root.add_using_directive (ns_ref);
+					} else if (context.profile == Profile.DOVA) {
+						// import the Dova namespace by default (namespace of backend-specific standard library)
+						var ns_ref = new UsingDirective (new UnresolvedSymbol (null, "Dova", null));
+						source_file.add_using_directive (ns_ref);
+						context.root.add_using_directive (ns_ref);
+					}
+
+					context.add_source_file (source_file);
+				} else if (source.has_suffix (".vapi") || source.has_suffix (".gir")) {
+					var source_file = new SourceFile (context, rpath, true);
+					source_file.relative_filename = source;
+
+					context.add_source_file (source_file);
+				} else if (source.has_suffix (".c")) {
+					context.add_c_source_file (rpath);
 					has_c_files = true;
+				} else {
+					Report.error (null, "%s is not a supported source file type. Only .vala, .vapi, .gs, and .c files are supported.".printf (source));
+				}
+			} else {
+				Report.error (null, "%s not found".printf (source));
 			}
 		}
 		sources = null;
@@ -344,12 +422,6 @@ class Gtkaml.Compiler {
 		if (context.report.get_errors () > 0 || (fatal_warnings && context.report.get_warnings () > 0)) {
 			return quit ();
 		}
-
-		if (fast_vapi_filename != null) {
-			var interface_writer = new CodeWriter (CodeWriterType.FAST);
-			interface_writer.write_file (context, fast_vapi_filename);
-			return quit ();
-		}
 		
 		var resolver = new SymbolResolver ();
 		resolver.resolve (context);
@@ -369,7 +441,7 @@ class Gtkaml.Compiler {
 		}
 
 		if (dump_tree != null) {
-			var code_writer = new CodeWriter (CodeWriterType.DUMP);
+			var code_writer = new CodeWriter (true);
 			code_writer.write_file (context, dump_tree);
 		}
 
@@ -449,7 +521,7 @@ class Gtkaml.Compiler {
 				return quit();
 			}
 
-			var interface_writer = new CodeWriter (CodeWriterType.INTERNAL);
+			var interface_writer = new CodeWriter (false, true);
 			interface_writer.set_cheader_override(header_filename, internal_header_filename);
 			string vapi_filename = internal_vapi_filename;
 
@@ -461,10 +533,6 @@ class Gtkaml.Compiler {
 			interface_writer.write_file (context, vapi_filename);
 
 			internal_vapi_filename = null;
-		}
-
-		if (dependencies != null) {
-			context.write_dependencies (dependencies);
 		}
 
 		if (!ccode_only) {
@@ -482,18 +550,91 @@ class Gtkaml.Compiler {
 		return quit ();
 	}
 
+	private static bool ends_with_dir_separator (string s) {
+		return Path.is_dir_separator (s.offset (s.length - 1).get_char ());
+	}
+
+	/* ported from glibc */
+	private static string realpath (string name) {
+		string rpath;
+
+		// start of path component
+		weak string start;
+		// end of path component
+		weak string end;
+
+		if (!Path.is_absolute (name)) {
+			// relative path
+			rpath = Environment.get_current_dir ();
+
+			start = end = name;
+		} else {
+			// set start after root
+			start = end = Path.skip_root (name);
+
+			// extract root
+			rpath = name.substring (0, name.pointer_to_offset (start));
+		}
+
+		long root_len = rpath.pointer_to_offset (Path.skip_root (rpath));
+
+		for (; start.get_char () != 0; start = end) {
+			// skip sequence of multiple path-separators
+			while (Path.is_dir_separator (start.get_char ())) {
+				start = start.next_char ();
+			}
+
+			// find end of path component
+			long len = 0;
+			for (end = start; end.get_char () != 0 && !Path.is_dir_separator (end.get_char ()); end = end.next_char ()) {
+				len++;
+			}
+
+			if (len == 0) {
+				break;
+			} else if (len == 1 && start.get_char () == '.') {
+				// do nothing
+			} else if (len == 2 && start.has_prefix ("..")) {
+				// back up to previous component, ignore if at root already
+				if (rpath.length > root_len) {
+					do {
+						rpath = rpath.substring (0, rpath.length - 1);
+					} while (!ends_with_dir_separator (rpath));
+				}
+			} else {
+				if (!ends_with_dir_separator (rpath)) {
+					rpath += Path.DIR_SEPARATOR_S;
+				}
+
+				rpath += start.substring (0, len);
+			}
+		}
+
+		if (rpath.length > root_len && ends_with_dir_separator (rpath)) {
+			rpath = rpath.substring (0, rpath.length - 1);
+		}
+
+		if (Path.DIR_SEPARATOR != '/') {
+			// don't use backslashes internally,
+			// to avoid problems in #include directives
+			string[] components = rpath.split ("\\");
+			rpath = string.joinv ("/", components);
+		}
+
+		return rpath;
+	}
+
 	static int run_source (string[] args) {
 		int i = 1;
 		if (args[i] != null && args[i].has_prefix ("-")) {
 			try {
 				string[] compile_args;
-				Shell.parse_argv ("gtkamlc " + args[1], out compile_args);
+				Shell.parse_argv ("valac " + args[1], out compile_args);
 
-				var opt_context = new OptionContext ("- GtkAML");
+				var opt_context = new OptionContext ("- Vala");
 				opt_context.set_help_enabled (true);
 				opt_context.add_main_entries (options, null);
-				unowned string[] temp_args = compile_args;
-				opt_context.parse (ref temp_args);
+				opt_context.parse (ref compile_args);
 			} catch (ShellError e) {
 				stdout.printf ("%s\n", e.message);
 				return 1;
@@ -563,10 +704,6 @@ class Gtkaml.Compiler {
 	}
 
 	static int main (string[] args) {
-		if (Path.get_basename (args[0]) == "gtkaml") {
-			return run_source (args);
-		}
-
 		try {
 			var opt_context = new OptionContext ("- Vala Gtkaml Compiler");
 			opt_context.set_help_enabled (true);
@@ -579,11 +716,11 @@ class Gtkaml.Compiler {
 		}
 		
 		if (version) {
-			stdout.printf ("Gtkaml %s for Vala 0.12\n", Config.PACKAGE_VERSION);
+			stdout.printf ("Gtkaml %s for Vala 0.10\n", VERSION);
 			return 0;
 		}
 		
-		if (sources == null && fast_vapis == null) {
+		if (sources == null) {
 			stderr.printf ("No source file specified.\n");
 			return 1;
 		}

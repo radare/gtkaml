@@ -207,9 +207,9 @@ public class Gtkaml.MethodMatcher : Object {
 		} 
 		
 		//determine attr.target_types directly from method signature
-		Vala.Collection<Vala.Parameter> method_parameters = determined_method.get_parameters ();
+		var method_parameters = determined_method.get_parameters ();
 		i = 0;
-		foreach (Vala.Parameter formal_parameter in method_parameters) {
+		foreach (var formal_parameter in method_parameters) {
 			if (!formal_parameter.ellipsis) {
 				var attr = new_method.parameter_attributes.get (i);
 				attr.target_type = formal_parameter;

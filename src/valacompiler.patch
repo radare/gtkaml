@@ -1,5 +1,5 @@
---- valacompiler.vala	2010-10-15 01:34:42.000000000 +0300
-+++ GtkamlCompiler.vala	2010-10-15 01:42:25.000000000 +0300
+--- ../vala/compiler/valacompiler.vala	2010-10-29 14:49:36.000000000 +0300
++++ src/GtkamlCompiler.vala	2010-10-30 14:22:46.000000000 +0300
 @@ -19,11 +19,15 @@
   *
   * Author:
@@ -68,15 +68,20 @@
  				var source_file = new SourceFile (context, SourceFileType.FAST, rpath);
  				context.add_source_file (source_file);
  			}
-@@ -307,7 +314,7 @@
+@@ -307,10 +314,10 @@
  		bool has_c_files = false;
  
  		foreach (string source in sources) {
 -			if (context.add_source_filename (source, run_output)) {
-+			if (context.add_source_filename (source, run_output || source.has_suffix(".gtkaml"))) {
- 				if (source.has_suffix (".c")) {
+-				if (source.has_suffix (".c")) {
++			bool is_valid = run_output || source.has_suffix(".gtkaml") || source.has_suffix(".gtkon");
++			if (context.add_source_filename (source, is_valid)) {
++				if (source.has_suffix (".c"))
  					has_c_files = true;
- 				}
+-				}
+ 			}
+ 		}
+ 		sources = null;
 @@ -319,8 +326,8 @@
  			return quit ();
  		}
@@ -88,7 +93,7 @@
  
  		var genie_parser = new Genie.Parser ();
  		genie_parser.parse (context);
-@@ -480,9 +487,9 @@
+@@ -469,9 +476,9 @@
  		if (args[i] != null && args[i].has_prefix ("-")) {
  			try {
  				string[] compile_args;
@@ -99,11 +104,11 @@
 +				var opt_context = new OptionContext ("- GtkAML");
  				opt_context.set_help_enabled (true);
  				opt_context.add_main_entries (options, null);
- 				opt_context.parse (ref compile_args);
-@@ -555,12 +562,12 @@
- 	}
+ 				unowned string[] temp_args = compile_args;
+@@ -548,12 +555,12 @@
+ 		// initialize locale
+ 		Intl.setlocale (LocaleCategory.ALL, "");
  
- 	static int main (string[] args) {
 -		if (Path.get_basename (args[0]) == "vala" || Path.get_basename (args[0]) == "vala" + Config.PACKAGE_SUFFIX) {
 +		if (Path.get_basename (args[0]) == "gtkaml") {
  			return run_source (args);
@@ -115,12 +120,12 @@
  			opt_context.set_help_enabled (true);
  			opt_context.add_main_entries (options, null);
  			opt_context.parse (ref args);
-@@ -571,7 +578,7 @@
+@@ -564,7 +571,7 @@
  		}
  		
  		if (version) {
 -			stdout.printf ("Vala %s\n", Config.BUILD_VERSION);
-+			stdout.printf ("Gtkaml %s based on Vala 0.12\n", Config.PACKAGE_VERSION);
++			stdout.printf ("Gtkaml %s for Vala 0.12\n", Config.PACKAGE_VERSION);
  			return 0;
  		}
  		

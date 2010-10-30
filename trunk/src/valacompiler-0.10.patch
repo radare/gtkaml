@@ -1,0 +1,92 @@
+--- ../vala-0.10.1/compiler/valacompiler.vala	2010-10-19 21:59:14.000000000 +0300
++++ src/GtkamlCompiler-0.10.vala	2010-10-30 14:27:52.000000000 +0300
+@@ -19,11 +19,17 @@
+  *
+  * Author:
+  * 	Jürg Billeter <j@bitron.ch>
++ * Adapted for Gtkaml:
++ *	Vlad Grecescu <b100dian@gmail.com>
++ *	pancake <pancake@nopcode.org>
+  */
+ 
+ using GLib;
++using Vala;
+ 
+-class Vala.Compiler {
++public extern string VERSION;
++
++class Gtkaml.Compiler {
+ 	static string basedir;
+ 	static string directory;
+ 	static bool version;
+@@ -39,6 +45,8 @@
+ 	[CCode (array_length = false, array_null_terminated = true)]
+ 	static string[] packages;
+ 	static string target_glib;
++	[CCode (array_length = false, array_null_terminated = true)]
++	static string[] implicits_directories; 
+ 
+ 	static bool ccode_only;
+ 	static string header_filename;
+@@ -117,6 +125,7 @@
+ 		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, ref cc_options, "Pass OPTION to the C compiler", "OPTION..." },
+ 		{ "dump-tree", 0, 0, OptionArg.FILENAME, ref dump_tree, "Write code tree to FILE", "FILE" },
+ 		{ "save-temps", 0, 0, OptionArg.NONE, ref save_temps, "Keep temporary files", null },
++		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, ref implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
+ 		{ "profile", 0, 0, OptionArg.STRING, ref profile, "Use the given profile instead of the default", "PROFILE" },
+ 		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
+ 		{ "verbose", 'v', 0, OptionArg.NONE, ref verbose_mode, "Print additional messages to the console", null },
+@@ -196,7 +205,7 @@
+ 	
+ 	private int run () {
+ 		context = new CodeContext ();
+-		CodeContext.push (context);
++		Vala.CodeContext.push (context);
+ 
+ 		// default to build executable
+ 		if (!ccode_only && !compile_only && output == null) {
+@@ -351,7 +360,8 @@
+ 		foreach (string source in sources) {
+ 			if (FileUtils.test (source, FileTest.EXISTS)) {
+ 				var rpath = realpath (source);
+-				if (run_output || source.has_suffix (".vala") || source.has_suffix (".gs")) {
++				if (run_output || source.has_suffix (".vala") || source.has_suffix (".gs")
++					|| source.has_suffix (".gtkaml") || source.has_suffix (".gtkon")) {
+ 					var source_file = new SourceFile (context, rpath);
+ 					source_file.relative_filename = source;
+ 
+@@ -394,8 +404,8 @@
+ 			return quit ();
+ 		}
+ 		
+-		var parser = new Parser ();
+-		parser.parse (context);
++		var parser = new Gtkaml.Parser ();
++		parser.parse (context, implicits_directories);
+ 
+ 		var genie_parser = new Genie.Parser ();
+ 		genie_parser.parse (context);
+@@ -697,12 +707,12 @@
+ 		// initialize locale
+ 		Intl.setlocale (LocaleCategory.ALL, "");
+ 
+-		if (Path.get_basename (args[0]) == "vala" || Path.get_basename (args[0]) == "vala" + Config.PACKAGE_SUFFIX) {
++		if (Path.get_basename (args[0]) == "gtkaml") {
+ 			return run_source (args);
+ 		}
+ 
+ 		try {
+-			var opt_context = new OptionContext ("- Vala Compiler");
++			var opt_context = new OptionContext ("- Vala Gtkaml Compiler");
+ 			opt_context.set_help_enabled (true);
+ 			opt_context.add_main_entries (options, null);
+ 			opt_context.parse (ref args);
+@@ -713,7 +723,7 @@
+ 		}
+ 		
+ 		if (version) {
+-			stdout.printf ("Vala %s\n", Config.BUILD_VERSION);
++			stdout.printf ("Gtkaml %s for Vala 0.10\n", VERSION);
+ 			return 0;
+ 		}
+ 		

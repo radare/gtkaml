@@ -298,10 +298,15 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			type = ((Field)attr.target_type).variable_type;
 		} else if (attr.target_type is Property) {
 			type = ((Property)attr.target_type).property_type;
+		#if VALA_0_12
 		} else if (attr.target_type is Vala.Parameter) {
 			type = ((Vala.Parameter)attr.target_type).variable_type;
+		#else
+		} else if (attr.target_type is FormalParameter) {
+			type = ((FormalParameter)attr.target_type).variable_type;
+		#endif
 		} else {		
-			Report.error (null, "The attribute %s with value %s is not Field, Property or Vala.Parameter".printf (attr.name, value));
+			Report.error (null, "The attribute %s with value %s is not Field, Property or Parameter".printf (attr.name, value));
 			return "<Invalid value>";
 		}
 		
@@ -368,7 +373,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		parameters_joined = "target";
 		if (parameters.size > 0) {
 			parameter_names.resize (parameters.size+1);
-			foreach (Vala.Parameter p in parameters) {
+			foreach (var p in parameters) {
 				parameter_names[i++] = p.name;
 			}
 			parameter_names[ parameters.size ] = null;

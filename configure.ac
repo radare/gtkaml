@@ -6,6 +6,7 @@ AM_MAINTAINER_MODE
 
 AC_ISC_POSIX
 AC_PROG_CC
+AM_PROG_VALAC([0.10])
 
 EXTRA_CFLAGS=
 EXTRA_LDFLAGS=
@@ -20,16 +21,8 @@ esac
 AC_SUBST(EXTRA_CFLAGS)
 AC_SUBST(EXTRA_LDFLAGS)
 
-AC_PATH_PROG(VALAC, valac, valac)
-AC_SUBST(VALAC)
-AC_DEFINE([VALAFLAGS], VALAFLAGS, "valac flags")
-
-AC_DIAGNOSE([obsolete],[AM_PROG_CC_STDC:
-	your code should no longer depend upon `am_cv_prog_cc_stdc', but upon
-	`ac_cv_prog_cc_stdc'.  Remove this warning and the assignment when
-	you adjust the code.  You can also remove the above call to
-	AC_PROG_CC if you already called it elsewhere.])
-am_cv_prog_cc_stdc=$ac_cv_prog_cc_stdc
+dnl AC_PATH_PROG(VALAC, valac, valac)
+dnl AC_SUBST(VALAC)
 
 AC_HEADER_STDC
 
@@ -49,7 +42,10 @@ PKG_CHECK_MODULES([LIBXML2], libxml-2.0)
 AC_SUBST(LIBXML2_CFLAGS)
 AC_SUBST(LIBXML2_LIBS)
 
-PKG_CHECK_MODULES(VALA, libvala-0.12)
+PKG_CHECK_MODULES(VALA, libvala-0.12,[VALA_PKG="libvala-0.12"],[PKG_CHECK_MODULES(VALA, vala-0.10, [VALA_PKG="vala-0.10"])])
+AM_CONDITIONAL([VALA_LATEST], [test $VALA_PKG = libvala-0.12])
+
+AC_SUBST(VALA_PKG)
 AC_SUBST(VALA_CFLAGS)
 AC_SUBST(VALA_LIBS)
 

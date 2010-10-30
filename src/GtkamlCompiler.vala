@@ -142,6 +142,8 @@ class Gtkaml.Compiler {
 	};
 	
 	private int quit () {
+		context.remove_generated_files ();
+
 		if (context.report.get_errors () == 0 && context.report.get_warnings () == 0) {
 			return 0;
 		}

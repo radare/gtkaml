@@ -704,6 +704,13 @@ class Gtkaml.Compiler {
 	}
 
 	static int main (string[] args) {
+		// initialize locale
+		Intl.setlocale (LocaleCategory.ALL, "");
+
+		if (Path.get_basename (args[0]) == "gtkaml") {
+			return run_source (args);
+		}
+
 		try {
 			var opt_context = new OptionContext ("- Vala Gtkaml Compiler");
 			opt_context.set_help_enabled (true);

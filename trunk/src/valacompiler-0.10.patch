@@ -1,5 +1,5 @@
 --- ../vala-0.10.1/compiler/valacompiler.vala	2010-10-19 21:59:14.000000000 +0300
-+++ src/GtkamlCompiler-0.10.vala	2010-10-30 14:27:52.000000000 +0300
++++ src/GtkamlCompiler-0.10.vala	2010-10-30 14:39:06.000000000 +0300
 @@ -19,11 +19,17 @@
   *
   * Author:
@@ -36,7 +36,16 @@
  		{ "profile", 0, 0, OptionArg.STRING, ref profile, "Use the given profile instead of the default", "PROFILE" },
  		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
  		{ "verbose", 'v', 0, OptionArg.NONE, ref verbose_mode, "Print additional messages to the console", null },
-@@ -196,7 +205,7 @@
+@@ -128,6 +137,8 @@
+ 	};
+ 	
+ 	private int quit () {
++		context.remove_generated_files ()
++
+ 		if (context.report.get_errors () == 0 && context.report.get_warnings () == 0) {
+ 			return 0;
+ 		}
+@@ -196,7 +207,7 @@
  	
  	private int run () {
  		context = new CodeContext ();
@@ -45,7 +54,7 @@
  
  		// default to build executable
  		if (!ccode_only && !compile_only && output == null) {
-@@ -351,7 +360,8 @@
+@@ -351,7 +362,8 @@
  		foreach (string source in sources) {
  			if (FileUtils.test (source, FileTest.EXISTS)) {
  				var rpath = realpath (source);
@@ -55,7 +64,7 @@
  					var source_file = new SourceFile (context, rpath);
  					source_file.relative_filename = source;
  
-@@ -394,8 +404,8 @@
+@@ -394,8 +406,8 @@
  			return quit ();
  		}
  		
@@ -66,7 +75,7 @@
  
  		var genie_parser = new Genie.Parser ();
  		genie_parser.parse (context);
-@@ -697,12 +707,12 @@
+@@ -697,12 +709,12 @@
  		// initialize locale
  		Intl.setlocale (LocaleCategory.ALL, "");
  
@@ -81,7 +90,7 @@
  			opt_context.set_help_enabled (true);
  			opt_context.add_main_entries (options, null);
  			opt_context.parse (ref args);
-@@ -713,7 +723,7 @@
+@@ -713,7 +725,7 @@
  		}
  		
  		if (version) {

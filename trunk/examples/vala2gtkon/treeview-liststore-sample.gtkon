@@ -1,0 +1,41 @@
+Window gtkon:root gtkaml:name="TreeViewSample" title="Tree View Sample" default-width=250 default-height=100 destroy="{Gtk.main_quit}" {
+	TreeView gtkaml:private="view" gtkaml:construct="setup_treeview()" {
+		TreeViewColumn title="Account Name" {
+			CellRendererText gtkaml:private="column0" expand=false; /* gtk_cell_layout_pack_start () call */
+			CellRendererText gtkaml:existing="column0" attribute="text" column=0; /* gtk_cell_layout_add_attribute () call */
+		}
+		TreeViewColumn title="Type" {
+			CellRendererText gtkaml:private="column1" expand=false;
+			CellRendererText gtkaml:existing="column1" attribute="text" column=1;
+		}
+		TreeViewColumn title="Balance" {
+			CellRendererText gtkaml:private="column2" expand=false foreground-set=true; 
+			CellRendererText gtkaml:existing="column2" attribute="text" column=2;
+			CellRendererText gtkaml:existing="column2" attribute="foreground" column=3;
+		}
+	}
+
+	-{
+		private void setup_treeview () {
+			TreeIter iter;
+			var listmodel = new ListStore (4, typeof (string), typeof (string), typeof (string), typeof (string));
+			listmodel.append (out iter);
+			listmodel.set (iter, 0, "My Visacard", 1, "card", 2, "102,10", 3, "red", -1);
+
+			listmodel.append (out iter);
+			listmodel.set (iter, 0, "My Mastercard", 1, "card", 2, "10,20", 3, "blue", -1);
+
+			view.model = listmodel;
+		}
+
+		public static int main (string[] args) {     
+			Gtk.init (ref args);
+
+			var sample = new TreeViewSample ();
+			sample.show_all ();
+			Gtk.main ();
+
+			return 0;
+		}
+	}-
+}

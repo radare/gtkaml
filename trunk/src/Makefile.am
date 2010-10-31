@@ -64,3 +64,7 @@ gtkamlc_LDADD = \
 	$(VALA_LIBS)
 
 EXTRA_DIST = $(gtkamlc_VALASOURCES) GtkamlSAXParser_start_parsing.c
+
+install-exec-hook:
+	cd $(DESTDIR)$(bindir) && $(LN_S) -f gtkamlc$(EXEEXT) gtkaml$(EXEEXT)
+

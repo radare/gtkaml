@@ -7,9 +7,11 @@ AM_MAINTAINER_MODE
 AC_ISC_POSIX
 AC_PROG_CC
 AM_PROG_VALAC([0.10])
+AC_PROG_LN_S
 
 EXTRA_CFLAGS=
 EXTRA_LDFLAGS=
+
 case $host in
 *-*-mingw32* | *-*-windows)
 		EXTRA_CFLAGS="-mno-cygwin -mwindows -mms-bitfields -fno-strict-aliasing "	
@@ -18,11 +20,9 @@ case $host in
 		EXTRA_CFLAGS="-fno-strict-aliasing"
 		EXTRA_LDFLAGS="-export-all-symbols -mms-bitfields";;
 esac
+
 AC_SUBST(EXTRA_CFLAGS)
 AC_SUBST(EXTRA_LDFLAGS)
-
-dnl AC_PATH_PROG(VALAC, valac, valac)
-dnl AC_SUBST(VALAC)
 
 AC_HEADER_STDC
 

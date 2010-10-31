@@ -231,6 +231,9 @@ class Gtkaml.Compiler {
 		context.entry_point_name = entry_point;
 
 		context.run_output = run_output;
+		if (context.run_output) {
+			context.add_external_package ("gtk+-2.0");
+		}
 
 		if (defines != null) {
 			foreach (string define in defines) {

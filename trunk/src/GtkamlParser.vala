@@ -85,20 +85,22 @@ public class Gtkaml.Parser : Vala.Parser {
 				var sax_parser = new SAXParser (context, dummy_file); 
 				RootClassDefinition root_class_definition = sax_parser.parse();
 
-				var implicitsResolver = new ImplicitsResolver (context, implicits_store); 
-				implicitsResolver.resolve (root_class_definition);
-				
-				Gtkaml.CodeGenerator code_generator = new CodeGenerator (context);	
-				code_generator.generate (root_class_definition);
-				
-				string vala_contents =  code_generator.yield ();
-				if (vala_contents != null) { 
-					string vala_filename = gtkaml_source_file.filename.ndup (gtkaml_source_file.filename.length - ".gtkaml".length) + ".vala";
-					FileUtils.set_contents (vala_filename, vala_contents);
-					context.generated_files.add (vala_filename);
-					gtkaml_source_file.filename = vala_filename;
-					base.visit_source_file (gtkaml_source_file);
-				} 
+				if (root_class_definition != null) {
+					var implicitsResolver = new ImplicitsResolver (context, implicits_store); 
+					implicitsResolver.resolve (root_class_definition);
+					
+					Gtkaml.CodeGenerator code_generator = new CodeGenerator (context);	
+					code_generator.generate (root_class_definition);
+					
+					string vala_contents =  code_generator.yield ();
+					if (vala_contents != null) { 
+						string vala_filename = gtkaml_source_file.filename.ndup (gtkaml_source_file.filename.length - ".gtkaml".length) + ".vala";
+						FileUtils.set_contents (vala_filename, vala_contents);
+						context.generated_files.add (vala_filename);
+						gtkaml_source_file.filename = vala_filename;
+						base.visit_source_file (gtkaml_source_file);
+					}
+				}
 			} catch (FileError e) {
 				Report.error (null, e.message);
 			}

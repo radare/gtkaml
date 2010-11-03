@@ -223,7 +223,7 @@ public class GtkonToken {
 			return eos+bos+"</"+poptoken ()+">\n";
 		case GtkonTokenType.ATTRIBUTE:
 			if (str[0] == '&')
-				return " gtkaml:reference=\"%s\"".printf (str[1:str.length]);
+				return " gtkaml:existing=\"%s\"".printf (str[1:str.length]);
 			if (str[0] == '$') {
 				if (str[1] == '.')
 					return " gtkaml:private=\"%s\"".printf (str[2:str.length]);

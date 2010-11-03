@@ -17,16 +17,16 @@ EXTRA_DIST = \
 	debian/rules \
 	examples/SimpleViewer2/Makefile \
 	examples/SimpleViewer2/SimpleViewer2.gtkaml \
-	examples/vala2gtkaml/Makefile \
-	examples/vala2gtkaml/gtk-hello.gtkaml \
-	examples/vala2gtkaml/search-dialog.gtkaml \
-	examples/vala2gtkaml/sync-sample.gtkaml \
-	examples/vala2gtkaml/treeview-liststore-sample.gtkaml \
-	examples/vala2gtkon/Makefile \
-	examples/vala2gtkon/gtk-hello.gtkaml \
-	examples/vala2gtkon/search-dialog.gtkaml \
-	examples/vala2gtkon/sync-sample.gtkaml \
-	examples/vala2gtkon/treeview-liststore-sample.gtkaml
+	examples/gtkaml/Makefile \
+	examples/gtkaml/gtk-hello.gtkaml \
+	examples/gtkaml/search-dialog.gtkaml \
+	examples/gtkaml/sync-sample.gtkaml \
+	examples/gtkaml/treeview-liststore-sample.gtkaml \
+	examples/gtkon/Makefile \
+	examples/gtkon/gtk-hello.gtkon \
+	examples/gtkon/search-dialog.gtkon \
+	examples/gtkon/sync-sample.gtkon \
+	examples/gtkon/treeview-liststore-sample.gtkon
 
 
 # Copy all the spec files. Of cource, only one is actually used.

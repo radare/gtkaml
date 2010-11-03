@@ -1,17 +1,17 @@
-Window gtkon:root gtkaml:name="TreeViewSample" title="Tree View Sample" default-width=250 default-height=100 destroy="{Gtk.main_quit}" {
-	TreeView gtkaml:private="view" gtkaml:construct="setup_treeview()" {
+Window gtkon:version=0.2 using=Gtk gtkaml:name="TreeViewSample" title="Tree View Sample" default-width=250 default-height=100 destroy={Gtk.main_quit} {
+	TreeView $.view gtkaml:construct="setup_treeview()" {
 		TreeViewColumn title="Account Name" {
 			CellRendererText gtkaml:private="column0" expand=false; /* gtk_cell_layout_pack_start () call */
 			CellRendererText gtkaml:existing="column0" attribute="text" column=0; /* gtk_cell_layout_add_attribute () call */
 		}
 		TreeViewColumn title="Type" {
-			CellRendererText gtkaml:private="column1" expand=false;
-			CellRendererText gtkaml:existing="column1" attribute="text" column=1;
+			CellRendererText $.column1 expand=false; /* $. is for declaring private members, just like gtkaml:private */
+			CellRendererText &column1 attribute="text" column=1; /* & is for declaring a reference to an existing member, like gtkaml:existing */
 		}
 		TreeViewColumn title="Balance" {
-			CellRendererText gtkaml:private="column2" expand=false foreground-set=true; 
-			CellRendererText gtkaml:existing="column2" attribute="text" column=2;
-			CellRendererText gtkaml:existing="column2" attribute="foreground" column=3;
+			CellRendererText $.column2 !expand foreground-set;  /* !expand is equivalent to expand=false, while foreground-set is true */
+			CellRendererText &column2 attribute="text" column=2;
+			CellRendererText &column2 attribute="foreground" column=3;
 		}
 	}
 

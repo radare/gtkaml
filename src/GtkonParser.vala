@@ -229,8 +229,11 @@ public class GtkonToken {
 					return " gtkaml:private=\"%s\"".printf (str[2:str.length]);
 				return " gtkaml:public=\"%s\"".printf (str[1:str.length]);
 			}
-			if (str.str ("=") == null)
-				str += "=true";
+			if (str.str ("=") == null) {
+				if (str[0] == '!')
+					str = str[1:str.length] + "=false";
+				else str += "=true";
+			}
 			var foo = str.split ("=", 2);
 			if (foo[0][0] != '@') {
 				if (foo.length != 2)

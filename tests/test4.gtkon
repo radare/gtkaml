@@ -22,7 +22,7 @@ VBox gtkon:version=0.2 name=MyVBox homogeneous=false spacing=0 {
 	Button label=SHOW clicked={(x)=>{pipi.show();}};
 
 	/* attributes without value defaults to true */
-	VBox $.pipi can_focus homogeneous spacing=0 {
+	VBox $.pipi can_focus !homogeneous spacing=0 {
 		HBox homogeneous=true spacing=0 {
 			Label label=One gtkaml:public=label { }
 			Label label=One gtkaml:public=label2{ }

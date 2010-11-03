@@ -239,16 +239,15 @@ public class GtkonToken {
 				if (foo.length != 2)
 					error ("Missing value in attribute '%s'", str);
 				if (foo[0] == "gtkon:version")
-					return " xmlns=\"Gtk\" xmlns:gtkaml=\"http://gtkaml.org/"+foo[1]+"\"";
+					return " xmlns:gtkaml=\"http://gtkaml.org/"+foo[1]+"\"";
 				if (foo[0] == "name")
 					return " gtkaml:name=\""+foo[1]+"\"";
 				if (foo[0] == "using")
-					return " xmlns:"+foo[1]+"=\""+foo[1]+"\"";
+					return " xmlns=\""+foo[1]+"\"";
+				if (foo[0].has_prefix ("using:"))
+					return " xmlns:"+foo[0][6:foo[0].length]+"=\""+foo[1]+"\"";
 			} else foo[0] = foo[0][1:foo[0].length];
 			var val = foo[1];
-			if (val[0] == '{') {
-				// foo
-			} else
 			if (val[0] == '\'') {
 				if (val[val.length-1] != '\'')
 					error ("Missing '\'' in attribute '%s'", str);

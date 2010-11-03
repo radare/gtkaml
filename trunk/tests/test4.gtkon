@@ -1,8 +1,8 @@
 /* GtkON syntax example -- pancake<nopcode.org> */
 
-// VBox gtkon:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
-// VBox using=Cairo gtkon:version=0.2 class=MyVBox homogeneous=false spacing=0 {
-VBox gtkon:version=0.2 name=MyVBox homogeneous=false spacing=0 {
+VBox name=MyVBox !homogeneous spacing=0 
+	gtkon:version=0.2 using=Gtk using:cairo=Cairo 
+{
 
 	gtkaml:preconstruct {
 		-{ message ("root preconstruct code"); }-

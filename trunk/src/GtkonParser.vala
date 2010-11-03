@@ -1,9 +1,9 @@
 /* gtkon parser -- Copyleft 2010 -- author: pancake<nopcode.org> */
 
-int tok_idx = 0;
+int tok_idx;
 string tokens[64];
-bool mustclose = false;
-GtkonTokenType last_type = GtkonTokenType.INVALID;
+bool mustclose;
+GtkonTokenType last_type;
 
 private static void pushtoken (string token) {
 	if (tok_idx>=tokens.length)
@@ -37,7 +37,7 @@ public char nextchar = 0;
 
 [Compact]
 public class GtkonToken {
-	public bool quoted;
+	public uchar quoted;
 	public string str;
 	public GtkonTokenType type;
 	public DataInputStream? dis;
@@ -71,7 +71,7 @@ public class GtkonToken {
 
 	public GtkonToken(DataInputStream dis) throws Error {
 		str = "";
-		quoted = false;
+		quoted = 0;
 		this.dis = dis;
 		type = GtkonTokenType.CLASS;
 		skip_spaces ();
@@ -79,11 +79,21 @@ public class GtkonToken {
 	}
 
 	public bool update (uchar ch) {
-		if (quoted) {
+		if (quoted != 0) {
 			type = GtkonTokenType.ATTRIBUTE;
 			str += "%c".printf (ch);
-			if (str.has_suffix ("\"") && !str.has_suffix ("\\\"")) {
-				return false;
+			if (quoted == '{') {
+				if (ch == '}') {
+					str += "'";
+					return false;
+				}
+			} else
+			if (quoted == '\'') {
+				if (ch == '\'')
+					return false;
+			} else {
+				if (str.has_suffix ("\"") && !str.has_suffix ("\\\""))
+					return false;
 			}
 			return true;
 		}
@@ -112,16 +122,15 @@ public class GtkonToken {
 			break;
 		}
 		if (is_separator (ch)) {
-			if (type == GtkonTokenType.ATTRIBUTE && (str.str ("=\"") != null)) {
-				if (str.has_suffix ("\"") && !str.has_suffix ("\\\""))
+			if (type == GtkonTokenType.ATTRIBUTE && (str.str ("=%c".printf (ch)) != null)) {
+				if (str.has_suffix ("%c".printf (ch)) && !str.has_suffix ("\\\""))
 					return false;
-				/* continue */
-				quoted = true;
 			} else return false;
 		}
 		switch (ch) {
 		case '"':
-			quoted = true;
+		case '\'':
+			quoted = ch;
 			break;
 		case '$':
 			type = GtkonTokenType.ATTRIBUTE;
@@ -137,6 +146,11 @@ public class GtkonToken {
 			//mustclose = true;
 			break;
 		case '{':
+			if (str.has_suffix ("=") ) {
+				str += "'{";
+				quoted = ch;
+				return true;
+			}
 			if (str == "-") {
 				type = GtkonTokenType.CODE;
 				str = "";
@@ -152,7 +166,7 @@ public class GtkonToken {
 		case ';':
 			if (str == "") {
 				type = GtkonTokenType.END;
-			mustclose = true;
+				mustclose = true;
 				return false;
 			}
 			nextchar = ';';
@@ -200,14 +214,33 @@ public class GtkonToken {
 		case GtkonTokenType.END:
 			return eos+bos+"</"+poptoken ()+">\n";
 		case GtkonTokenType.ATTRIBUTE:
-			if (str[0] == '$')
+			if (str[0] == '&')
+				return " gtkaml:reference=\"%s\"".printf (str[1:str.length]);
+			if (str[0] == '$') {
+				if (str[1] == '.')
+					return " gtkaml:private=\"%s\"".printf (str[2:str.length]);
 				return " gtkaml:public=\"%s\"".printf (str[1:str.length]);
-			if (str == "gtkon:root")
-				return " xmlns:gtkaml=\"http://gtkaml.org/0.2\" xmlns=\"Gtk\"";
+			}
 			var foo = str.split ("=", 2);
-			if (foo.length != 2)
-				error ("Missing value in attribute '%s'", str);
+			if (foo[0][0] != '@') {
+				if (foo.length != 2)
+					error ("Missing value in attribute '%s'", str);
+				if (foo[0] == "gtkon:version")
+					return " xmlns=\"Gtk\" xmlns:gtkaml=\"http://gtkaml.org/"+foo[1]+"\"";
+				if (foo[0] == "name")
+					return " gtkaml:name=\""+foo[1]+"\"";
+				if (foo[0] == "using")
+					return " xmlns:"+foo[1]+"=\""+foo[1]+"\"";
+			} else foo[0] = foo[0][1:foo[0].length];
 			var val = foo[1];
+			if (val[0] == '{') {
+				// foo
+			} else
+			if (val[0] == '\'') {
+				if (val[val.length-1] != '\'')
+					error ("Missing '\'' in attribute '%s'", str);
+				val = val[1:val.length-1];
+			} else
 			if (val[0] == '"') {
 				if (val[val.length-1] != '"')
 					error ("Missing '\"' in attribute '%s'", str);
@@ -227,6 +260,10 @@ public class GtkonParser {
 	StringBuilder xmlstr = null;
 
 	public GtkonParser() {
+		/* reset global vars -- hacky */
+		tok_idx = 0;
+		mustclose = false;
+		last_type = GtkonTokenType.INVALID;
 	}
 
 	public void parse_file(string filename) {

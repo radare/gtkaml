@@ -72,18 +72,22 @@ public class GtkonToken {
 	public GtkonToken(DataInputStream dis) throws Error {
 		str = "";
 		quoted = 0;
+		bracket = 0;
 		this.dis = dis;
 		type = GtkonTokenType.CLASS;
 		skip_spaces ();
 		while (update (readchar ()));
 	}
 
+	public int bracket = 0;
 	public bool update (uchar ch) {
 		if (quoted != 0) {
 			type = GtkonTokenType.ATTRIBUTE;
 			str += "%c".printf (ch);
 			if (quoted == '{') {
-				if (ch == '}') {
+				if (ch=='{') bracket++;
+				if (ch=='}') bracket--;
+				if (bracket <0 && ch == '}') {
 					str += "'";
 					return false;
 				}
@@ -190,6 +194,10 @@ public class GtkonToken {
 	public string to_xml() {
 		var eos = "";
 		var bos = "";
+		/* workaround to get attributes without value */
+		if (type == GtkonTokenType.CLASS)
+			if (last_type == GtkonTokenType.CLASS || last_type == GtkonTokenType.ATTRIBUTE)
+				type = GtkonTokenType.ATTRIBUTE;
 		if (mustclose) {
 			eos = ">";
 			mustclose = false;
@@ -221,6 +229,8 @@ public class GtkonToken {
 					return " gtkaml:private=\"%s\"".printf (str[2:str.length]);
 				return " gtkaml:public=\"%s\"".printf (str[1:str.length]);
 			}
+			if (str.str ("=") == null)
+				str += "=true";
 			var foo = str.split ("=", 2);
 			if (foo[0][0] != '@') {
 				if (foo.length != 2)

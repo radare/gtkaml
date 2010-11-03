@@ -1,8 +1,7 @@
-/* Fuck yeah example */
+/* GtkON syntax example -- pancake<nopcode.org> */
 
 // VBox gtkon:root gtkaml:name=MyVBox homogeneous=false spacing=0 {
-// using Gtk
-//VBox using=Gtk gtkon:version=0.2 class=MyVBox homogeneous=false spacing=0 {
+// VBox using=Cairo gtkon:version=0.2 class=MyVBox homogeneous=false spacing=0 {
 VBox gtkon:version=0.2 name=MyVBox homogeneous=false spacing=0 {
 
 	gtkaml:preconstruct {
@@ -20,8 +19,10 @@ VBox gtkon:version=0.2 name=MyVBox homogeneous=false spacing=0 {
 	Button label="This is \"pure\" fun" clicked="clicked()";
 	Button label="{\"%d\".printf(WindowType.TOPLEVEL)}" clicked="clicked()";
 	Button label={"%d".printf(WindowType.TOPLEVEL)} clicked="clicked()";
+	Button label=SHOW clicked={(x)=>{pipi.show();}};
 
-	VBox homogeneous=true spacing=0 {
+	/* attributes without value defaults to true */
+	VBox $.pipi can_focus homogeneous spacing=0 {
 		HBox homogeneous=true spacing=0 {
 			Label label=One gtkaml:public=label { }
 			Label label=One gtkaml:public=label2{ }
@@ -31,6 +32,7 @@ VBox gtkon:version=0.2 name=MyVBox homogeneous=false spacing=0 {
 			Label label=One gtkaml:public=label6 ;
 
 			Button label=Two clicked="clicked()";
+			Button label=HIDE clicked={(x)=>{message("jiji");pipi.hide();}};
 			Label label=Tri gtkaml:public=label8;
 		}
 		Entry text=pasta activate="clicked()";
@@ -45,10 +47,12 @@ VBox gtkon:version=0.2 name=MyVBox homogeneous=false spacing=0 {
 		static void main (string[] args) {
 			Gtk.init (ref args);
 			var w = new Gtk.Window (WindowType.TOPLEVEL);
-			w.add (new MyVBox ());
+			var vb = new MyVBox ();
+			w.add (vb);
 			w.destroy.connect (Gtk.main_quit);
 			w.show_all (); 
 			Gtk.main (); 
+			print ("Username: "+ vb.user.text+"\n");
 		}
 	}-
 }

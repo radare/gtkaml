@@ -1,13 +1,13 @@
-Dialog gtkon:root gtkaml:name="SearchDialog" title="Find" has-separator=false border-width=5 default-width=350 default-height=100
-  response="{on_response}" destroy="{Gtk.main_quit}" {
+Dialog gtkon:version=0.2 using=Gtk gtkaml:name="SearchDialog" title="Find" has-separator=false border-width=5 default-width=350 default-height=100
+  response={on_response} destroy={Gtk.main_quit} {
 	/*Dialog already has a VBox named vbox (existing) and is already added to the Dialog (standalone) */
 	VBox spacing=10 gtkaml:existing=vbox gtkaml:standalone=true {
-		HBox homogeneous=false spacing=20 expand=false {
-			Label with-mnemonic=true label="_Search for:" mnemonic-widget="{search_entry}" expand=false;
-			Entry gtkaml:private="search_entry";
+		HBox !homogeneous spacing=20 !expand {
+			Label with-mnemonic label="_Search for:" mnemonic-widget={search_entry} !expand;
+			Entry $.search_entry;
 		}
-		CheckButton gtkaml:private="match_case" with-mnemonic=true label="_Match case" expand=false;
-		CheckButton gtkaml:private="find_backwards" with-mnemonic=true label="Find _backwards" expand=false;
+		CheckButton $.match_case with-mnemonic label="_Match case" !expand;
+		CheckButton $.find_backwards with-mnemonic label="Find _backwards" !expand;
 	}
 
 	-{

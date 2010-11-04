@@ -565,7 +565,7 @@ class Gtkaml.Compiler {
 		}
 
 		try {
-			var opt_context = new OptionContext ("- Vala Gtkaml Compiler");
+			var opt_context = new OptionContext ("- Vala Gtkaml/GtkON Compiler");
 			opt_context.set_help_enabled (true);
 			opt_context.add_main_entries (options, null);
 			opt_context.parse (ref args);

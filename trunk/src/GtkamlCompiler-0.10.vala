@@ -273,9 +273,8 @@ class Gtkaml.Compiler {
 		context.entry_point_name = entry_point;
 
 		context.run_output = run_output;
-		if (context.run_output) {
-			context.add_external_package ("gtk+-2.0");
-		}
+		if (context.run_output)
+			context.add_package ("gtk+-2.0");
 
 
 		if (defines != null) {
@@ -718,7 +717,7 @@ class Gtkaml.Compiler {
 		}
 
 		try {
-			var opt_context = new OptionContext ("- Vala Gtkaml Compiler");
+			var opt_context = new OptionContext ("- Vala Gtkaml/GtkON Compiler");
 			opt_context.set_help_enabled (true);
 			opt_context.add_main_entries (options, null);
 			opt_context.parse (ref args);

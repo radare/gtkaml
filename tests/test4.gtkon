@@ -1,8 +1,6 @@
 /* GtkON syntax example -- pancake<nopcode.org> */
 
-VBox name=MyVBox !homogeneous spacing=0 
-	gtkon:version=0.2 using=Gtk using:cairo=Cairo 
-{
+VBox name=MyVBox !homogeneous spacing=0 gtkon:version=0.2 using=Gtk {
 
 	gtkaml:preconstruct {
 		-{ message ("root preconstruct code"); }-

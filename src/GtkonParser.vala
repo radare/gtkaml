@@ -242,7 +242,7 @@ public class GtkonToken {
 				if (foo[0] == "gtkon:version")
 					return " xmlns:gtkaml=\"http://gtkaml.org/"+arg+"\"";
 				if (foo[0] == "name")
-					return " class:name=\""+arg+"\"";
+					return " gtkaml:name=\""+arg+"\"";
 				if (foo[0] == "using")
 					return " xmlns=\""+arg+"\"";
 				if (foo[0].has_prefix ("using:"))

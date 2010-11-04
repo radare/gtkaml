@@ -272,7 +272,7 @@ class Gtkaml.Compiler {
 
 		context.run_output = run_output;
 		if (context.run_output)
-			context.add_package ("gtk+-2.0");
+			add_package (context, "gtk+-2.0");
 
 
 		if (defines != null) {

@@ -236,16 +236,17 @@ public class GtkonToken {
 			}
 			var foo = str.split ("=", 2);
 			if (foo[0][0] != '@') {
+				var arg = foo[1].replace ("\"", "").replace ("'", "");
 				if (foo.length != 2)
 					error ("Missing value in attribute '%s'", str);
 				if (foo[0] == "gtkon:version")
-					return " xmlns:gtkaml=\"http://gtkaml.org/"+foo[1]+"\"";
+					return " xmlns:gtkaml=\"http://gtkaml.org/"+arg+"\"";
 				if (foo[0] == "name")
-					return " gtkaml:name=\""+foo[1]+"\"";
+					return " class:name=\""+arg+"\"";
 				if (foo[0] == "using")
-					return " xmlns=\""+foo[1]+"\"";
+					return " xmlns=\""+arg+"\"";
 				if (foo[0].has_prefix ("using:"))
-					return " xmlns:"+foo[0][6:foo[0].length]+"=\""+foo[1]+"\"";
+					return " xmlns:"+foo[0][6:foo[0].length]+"=\""+arg+"\"";
 			} else foo[0] = foo[0][1:foo[0].length];
 			var val = foo[1];
 			if (val[0] == '\'') {

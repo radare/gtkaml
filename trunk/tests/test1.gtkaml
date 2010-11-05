@@ -1,5 +1,5 @@
 <Window xmlns="Gtk" xmlns:GLib="GLib" xmlns:gtkaml="http://gtkaml.org/0.1" 
-	gtkaml:name="MyWindow" title="gtktest" destroy="{Gtk.main_quit}">
+	gtkaml:name="MyWindow" title="gtktest" destroy="Gtk.main_quit">
 	<VBox spacing="4">
         <Label expand="false" use_markup="true" 
 		label="&lt;b&gt;Dialog Box Title Here&lt;/b&gt;"/>
@@ -17,13 +17,13 @@ please move along</label>
                 </HBox>
         </Notebook>
         <HButtonBox expand="false" fill="true" padding="0">
-                <Button with_mnemonic="true" label="_abort" clicked="on_click ()"/>
+                <Button with_mnemonic="true" label="_abort" clicked="{on_click ()}"/>
                 <Button label="gtk-redo" use_stock="true">
-                	<clicked> { 
+                	<clicked> 
                 		target => {
                 			target.sensitive = false;
                 		}	
-                	} </clicked>
+                	</clicked>
                 </Button>
                 <Button label="fail"/>
         </HButtonBox>

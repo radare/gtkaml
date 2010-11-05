@@ -1,5 +1,5 @@
 Dialog gtkon:version=0.2 using=Gtk gtkaml:name="SearchDialog" title="Find" has-separator=false border-width=5 default-width=350 default-height=100
-  response={on_response} destroy={Gtk.main_quit} {
+  response=on_response destroy=Gtk.main_quit {
 	/*Dialog already has a VBox named vbox (existing) and is already added to the Dialog (standalone) */
 	VBox spacing=10 gtkaml:existing=vbox gtkaml:standalone=true {
 		HBox !homogeneous spacing=20 !expand {

@@ -1,7 +1,7 @@
 <Dialog xmlns:g="http://gtkaml.org/0.2" xmlns="Gtk"
   g:name="SearchDialog" title="Find" has-separator="false"
   border-width="5" default-width="350" default-height="100"
-  response="{on_response}" destroy="{Gtk.main_quit}">
+  response="on_response" destroy="Gtk.main_quit">
 
   <VBox spacing="10" g:existing="vbox" g:standalone="true"> <!-- Dialog already has a vbox (existing) and is already added to the Dialog (standalone) -->
     <HBox homogeneous="false" spacing="20" expand="false">

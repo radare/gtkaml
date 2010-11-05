@@ -1,4 +1,4 @@
-<Window xmlns:g="http://gtkaml.org/0.2" xmlns="Gtk"
+<Window xmlns:g="http://gtkaml.org/0.4" xmlns="Gtk"
   title="Enter your age" position="{WindowPosition.CENTER}"
   destroy="Gtk.main_quit" default-width="300" default-height="20"
   g:name="SyncSample">

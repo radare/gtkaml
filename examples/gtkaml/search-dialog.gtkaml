@@ -1,4 +1,4 @@
-<Dialog xmlns:g="http://gtkaml.org/0.2" xmlns="Gtk"
+<Dialog xmlns:g="http://gtkaml.org/0.4" xmlns="Gtk"
   g:name="SearchDialog" title="Find" has-separator="false"
   border-width="5" default-width="350" default-height="100"
   response="on_response" destroy="Gtk.main_quit">

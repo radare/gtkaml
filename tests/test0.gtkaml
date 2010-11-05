@@ -1,6 +1,6 @@
 <Gtk:VBox gtkaml:name="MyVBox"
 	xmlns='GLib' xmlns:Gtk='Gtk' 
-	xmlns:gtkaml="http://gtkaml.org/0.1"
+	xmlns:gtkaml="http://gtkaml.org/0.4"
 	homogeneous="false" spacing="0">
 	<gtkaml:preconstruct>
 	<![CDATA[

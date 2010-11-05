@@ -3,7 +3,7 @@ This example tests a segmentation fault produced in gtkaml
 It is already fixed in svn head
 Maybe it would be good to have a test suite to avoid regressions
 -->
-<Window xmlns:class="http://gtkaml.org/0.2"
+<Window xmlns:class="http://gtkaml.org/0.4"
 	xmlns="Gtk"
 	xmlns:Gtk="Gtk"
 	xmlns:GLib="GLib"

@@ -1,4 +1,4 @@
-<Window xmlns:g="http://gtkaml.org/0.2" xmlns="Gtk"
+<Window xmlns:g="http://gtkaml.org/0.4" xmlns="Gtk"
   g:name="TreeViewSample" title="Tree View Sample"
   default-width="250" default-height="100"
   destroy="Gtk.main_quit">

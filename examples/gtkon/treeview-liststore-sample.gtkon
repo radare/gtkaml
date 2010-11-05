@@ -1,4 +1,4 @@
-Window gtkon:version=0.2 using=Gtk gtkaml:name="TreeViewSample" title="Tree View Sample" default-width=250 default-height=100 destroy={Gtk.main_quit} {
+Window gtkon:version=0.2 using=Gtk gtkaml:name="TreeViewSample" title="Tree View Sample" default-width=250 default-height=100 destroy=Gtk.main_quit {
 	TreeView $.view gtkaml:construct="setup_treeview()" {
 		TreeViewColumn title="Account Name" {
 			CellRendererText gtkaml:private="column0" expand=false; /* gtk_cell_layout_pack_start () call */

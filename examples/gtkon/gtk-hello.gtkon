@@ -1,7 +1,7 @@
 Window gtkon:version=0.2 using=Gtk gtkaml:name=GtkHello type={WindowType.TOPLEVEL} title="First GTK+ Program" 
-  position={WindowPosition.CENTER} default-width=300 default-height=50 destroy={Gtk.main_quit}
+  position={WindowPosition.CENTER} default-width=300 default-height=50 destroy=Gtk.main_quit
 {
-	Button label="Click me!" clicked='target.label="Thank you"';
+	Button label="Click me!" clicked={target.label="Thank you"};
 
 	-{
 		static int main (string[] args) {

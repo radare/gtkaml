@@ -44,7 +44,8 @@ class Gtkaml.Compiler {
 	static string[] packages;
 	static string target_glib;
 	[CCode (array_length = false, array_null_terminated = true)]
-	static string[] implicits_directories; 
+	static string[] implicits_directories;
+	static bool write_vala;
 
 	static bool ccode_only;
 	static string header_filename;
@@ -124,6 +125,7 @@ class Gtkaml.Compiler {
 		{ "dump-tree", 0, 0, OptionArg.FILENAME, ref dump_tree, "Write code tree to FILE", "FILE" },
 		{ "save-temps", 0, 0, OptionArg.NONE, ref save_temps, "Keep temporary files", null },
 		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, ref implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
+		{ "write-vala", 'V', 0, OptionArg.NONE, ref write_vala, "Parses gtkaml and gtkon files and stops after writing the vala source", null },
 		{ "profile", 0, 0, OptionArg.STRING, ref profile, "Use the given profile instead of the default", "PROFILE" },
 		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
 		{ "verbose", 'v', 0, OptionArg.NONE, ref verbose_mode, "Print additional messages to the console", null },
@@ -410,6 +412,10 @@ class Gtkaml.Compiler {
 		var parser = new Gtkaml.Parser ();
 		parser.parse (context, implicits_directories);
 
+		if (write_vala) {
+			context.save_temps = true;
+			return quit ();
+		}
 		var genie_parser = new Genie.Parser ();
 		genie_parser.parse (context);
 

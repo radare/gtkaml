@@ -354,18 +354,21 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		string parameters_joined = "";
 		string body = simple_attribute.value.strip ();
 		
-		if (body.has_prefix ("{")) {
-			if ( body.has_suffix ("}") ) {
-				parameters_joined = body.substring (1, body.length - 2);
-				construct_body += "\t\t%s.%s.connect (%s);\n".printf (class_definition.identifier,
-					signal_attr.name, parameters_joined);
-			} else {
-				Report.error (class_definition.source_reference,
-					"Signal %s not properly ended".printf (signal_attr.name));
-			}
+		if (!body.has_prefix ("{")) {
+			//verbatim value copy
+			construct_body += "\t\t%s.%s.connect (%s);\n".printf (class_definition.identifier,
+					signal_attr.name, simple_attribute.value);
 			return;
-		} 
-		
+		}
+
+		if (!body.has_suffix ("}")) {
+			Report.error (class_definition.source_reference,
+				"Signal %s not properly ended".printf (signal_attr.name));
+			return;
+		}
+
+		body = body.substring (1, body.length - 2);
+
 		var parameters = the_signal.get_parameters ();
 		string[] parameter_names = new string[0];
 		int i = 0;
@@ -380,10 +383,11 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			parameters_joined += ", " + string.joinv (",", parameter_names);
 			construct_body += "\t\t%s.%s.connect( (%s) => { %s; } );\n".printf (
 				class_definition.identifier, signal_attr.name, parameters_joined,
-				simple_attribute.value);
+				body);
 		} else {
-			construct_body += "\t\t%s.%s.connect ( %s => { %s; } );\n".printf (class_definition.identifier,
-				signal_attr.name, parameters_joined, simple_attribute.value);
+			construct_body += "\t\t%s.%s.connect ( %s => { %s; } );\n".printf (
+				class_definition.identifier, signal_attr.name, parameters_joined,
+				body);
 		}
 	}
 

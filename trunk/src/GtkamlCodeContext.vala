@@ -29,6 +29,8 @@ using Vala;
 public class Gtkaml.CodeContext : Vala.CodeContext {
 	public Vala.List<string> generated_files = new Vala.ArrayList<string> ();
 
+	public bool write_vala;
+
 	public void remove_generated_files () {
 		if (!save_temps)
 			foreach (string filename in generated_files) {

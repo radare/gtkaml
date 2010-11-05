@@ -1,4 +1,4 @@
-<Window xmlns="Gtk" xmlns:GLib="GLib" xmlns:gtkaml="http://gtkaml.org/0.1" 
+<Window xmlns="Gtk" xmlns:GLib="GLib" xmlns:gtkaml="http://gtkaml.org/0.4" 
 	gtkaml:name="MyWindow" title="gtktest" destroy="Gtk.main_quit">
 	<VBox spacing="4">
         <Label expand="false" use_markup="true" 

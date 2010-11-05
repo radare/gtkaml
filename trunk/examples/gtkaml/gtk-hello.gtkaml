@@ -1,4 +1,4 @@
-<Window xmlns:g="http://gtkaml.org/0.2" xmlns="Gtk" g:name="GtkHello"
+<Window xmlns:g="http://gtkaml.org/0.4" xmlns="Gtk" g:name="GtkHello"
   type="{WindowType.TOPLEVEL}" title="First GTK+ Program" 
   position="{WindowPosition.CENTER}" default-width="300" default-height="50"
   destroy="Gtk.main_quit">

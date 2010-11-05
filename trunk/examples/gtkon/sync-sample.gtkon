@@ -1,4 +1,4 @@
-Window gtkon:version=0.2 using=Gtk title="Enter your age" position={WindowPosition.CENTER} destroy=Gtk.main_quit
+Window gtkon:version=0.4 using=Gtk title="Enter your age" position={WindowPosition.CENTER} destroy=Gtk.main_quit
 	default-width=300 default-height=20 gtkaml:name=SyncSample {
 	HBox spacing=5 {
 		SpinButton $.spin with-range min=0 max=130 step=1 value=35

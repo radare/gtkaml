@@ -491,6 +491,11 @@ public class Gtkaml.SAXParser : GLib.Object {
 					Report.warning (create_source_reference (),
 						"Source file version (%s) newer than gtkaml compiler version (%s)".printf (version, Config.PACKAGE_VERSION));
 				}
+				if (version < "0.4") {
+					Report.warning (create_source_reference (),
+						"Source file version %s is old. The signal attributes are now interpreted differently,".printf (version)
+						+ " you may have to remove enclosing braces or add them. If you already did this then change the xmlns:%s version too.".printf (gtkaml_prefix));
+				}
 			}
 			namespace_list.add (ns);
 			walker += 2;

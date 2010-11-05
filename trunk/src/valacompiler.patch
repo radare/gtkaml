@@ -1,5 +1,5 @@
---- ../vala/compiler/valacompiler.vala	2010-10-29 14:49:36.000000000 +0300
-+++ src/GtkamlCompiler.vala	2010-10-30 14:38:44.000000000 +0300
+--- ../vala/compiler/valacompiler.vala	2010-11-04 00:27:03.000000000 +0200
++++ src/GtkamlCompiler.vala	2010-11-05 10:36:43.000000000 +0200
 @@ -19,11 +19,15 @@
   *
   * Author:
@@ -17,24 +17,26 @@
  	static string basedir;
  	static string directory;
  	static bool version;
-@@ -41,6 +45,8 @@
+@@ -41,6 +45,9 @@
  	[CCode (array_length = false, array_null_terminated = true)]
  	static string[] fast_vapis;
  	static string target_glib;
 +	[CCode (array_length = false, array_null_terminated = true)]
-+	static string[] implicits_directories; 
++	static string[] implicits_directories;
++	static bool write_vala;
  
  	static bool ccode_only;
  	static string header_filename;
-@@ -124,6 +130,7 @@
+@@ -124,6 +131,8 @@
  		{ "Xcc", 'X', 0, OptionArg.STRING_ARRAY, ref cc_options, "Pass OPTION to the C compiler", "OPTION..." },
  		{ "dump-tree", 0, 0, OptionArg.FILENAME, ref dump_tree, "Write code tree to FILE", "FILE" },
  		{ "save-temps", 0, 0, OptionArg.NONE, ref save_temps, "Keep temporary files", null },
 +		{ "implicitsdir", 0, 0, OptionArg.FILENAME_ARRAY, ref implicits_directories, "Look for implicit add and creation methods and their parameters in DIRECTORY", "DIRECTORY..." },
++		{ "write-vala", 'V', 0, OptionArg.NONE, ref write_vala, "Parses gtkaml and gtkon files and stops after writing the vala source", null },
  		{ "profile", 0, 0, OptionArg.STRING, ref profile, "Use the given profile instead of the default", "PROFILE" },
  		{ "quiet", 'q', 0, OptionArg.NONE, ref quiet_mode, "Do not print messages to the console", null },
  		{ "verbose", 'v', 0, OptionArg.NONE, ref verbose_mode, "Print additional messages to the console", null },
-@@ -135,6 +142,8 @@
+@@ -135,6 +144,8 @@
  	};
  	
  	private int quit () {
@@ -43,7 +45,7 @@
  		if (context.report.get_errors () == 0 && context.report.get_warnings () == 0) {
  			return 0;
  		}
-@@ -153,7 +162,7 @@
+@@ -153,7 +164,7 @@
  
  	private int run () {
  		context = new CodeContext ();
@@ -52,7 +54,7 @@
  
  		// default to build executable
  		if (!ccode_only && !compile_only && output == null) {
-@@ -188,12 +197,12 @@
+@@ -188,12 +199,12 @@
  		context.includedir = includedir;
  		context.output = output;
  		if (basedir == null) {
@@ -68,7 +70,17 @@
  		} else {
  			context.directory = context.basedir;
  		}
-@@ -279,7 +288,7 @@
+@@ -222,6 +233,9 @@
+ 		context.entry_point_name = entry_point;
+ 
+ 		context.run_output = run_output;
++		if (context.run_output) {
++			context.add_external_package ("gtk+-2.0");
++		}
+ 
+ 		if (defines != null) {
+ 			foreach (string define in defines) {
+@@ -279,7 +293,7 @@
  
  		if (fast_vapis != null) {
  			foreach (string vapi in fast_vapis) {
@@ -77,7 +89,7 @@
  				var source_file = new SourceFile (context, SourceFileType.FAST, rpath);
  				context.add_source_file (source_file);
  			}
-@@ -307,10 +316,10 @@
+@@ -307,10 +321,10 @@
  		bool has_c_files = false;
  
  		foreach (string source in sources) {
@@ -91,7 +103,7 @@
  			}
  		}
  		sources = null;
-@@ -319,8 +328,8 @@
+@@ -319,8 +333,13 @@
  			return quit ();
  		}
  		
@@ -99,10 +111,15 @@
 -		parser.parse (context);
 +		var parser = new Gtkaml.Parser ();
 +		parser.parse (context, implicits_directories);
++
++		if (write_vala) {
++			context.save_temps = true;
++			return quit ();
++		}
  
  		var genie_parser = new Genie.Parser ();
  		genie_parser.parse (context);
-@@ -469,9 +478,9 @@
+@@ -469,9 +488,9 @@
  		if (args[i] != null && args[i].has_prefix ("-")) {
  			try {
  				string[] compile_args;
@@ -114,7 +131,7 @@
  				opt_context.set_help_enabled (true);
  				opt_context.add_main_entries (options, null);
  				unowned string[] temp_args = compile_args;
-@@ -548,12 +557,12 @@
+@@ -548,12 +567,12 @@
  		// initialize locale
  		Intl.setlocale (LocaleCategory.ALL, "");
  
@@ -125,11 +142,11 @@
  
  		try {
 -			var opt_context = new OptionContext ("- Vala Compiler");
-+			var opt_context = new OptionContext ("- Vala Gtkaml Compiler");
++			var opt_context = new OptionContext ("- Vala Gtkaml/GtkON Compiler");
  			opt_context.set_help_enabled (true);
  			opt_context.add_main_entries (options, null);
  			opt_context.parse (ref args);
-@@ -564,7 +573,7 @@
+@@ -564,7 +583,7 @@
  		}
  		
  		if (version) {

@@ -1,4 +1,6 @@
-* Add support for vala-0.10 and vala-0.12
 * Add some test cases for gtkon syntax
-* Implement 'gtkaml' as 'vala' for 'valac' (compile+run)
-* Add support for fast vapis
+* Add support for fast vapis (must test)
+* Add -V to output vala
+* Generate gtkon from gtkaml files
+* Detect unclosed brackets in gtkon file
+* Add support for #.. preprocessing directives at gtkon level

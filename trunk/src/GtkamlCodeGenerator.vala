@@ -86,6 +86,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			generate_children (class_definition);
 			write_construct (class_definition);
 		} else if (class_definition is ReferenceClassDefinition) {
+			write_complex_attributes (class_definition);
 			generate_children (class_definition);
 			write_setters (class_definition);
 			write_add (class_definition);			
@@ -153,7 +154,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		else this.construct_body += to_append;
 	}
 
-	protected void write_complex_attributes (ClassDefinition class_definition) {	
+	protected void write_complex_attributes (ClassDefinition class_definition) {
 		foreach (Attribute attr in class_definition.attrs) {
 			if (attr is ComplexAttribute)
 				generate ( (attr as ComplexAttribute).complex_type );

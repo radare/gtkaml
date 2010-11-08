@@ -102,7 +102,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 				}
 			}
 			
-			Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
+			TypeSymbol clazz = lookup_class (prefix_to_namespace (prefix), localname);
 			if (clazz == null) {
 				Report.error ( source_reference, "%s not a class".printf (localname));
 				stop_parsing (); 
@@ -114,7 +114,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 			states.push (new State (StateId.SAX_PARSER_CONTAINER_STATE, root_class_definition));
 			break;
 		case StateId.SAX_PARSER_CONTAINER_STATE:	
-			Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
+			TypeSymbol clazz = lookup_class (prefix_to_namespace (prefix), localname);
 			
 			if (clazz != null) { //this is a member/container child object
 				ClassDefinition class_definition = get_child_for_container (clazz, state.class_definition, attrs, prefix);
@@ -141,7 +141,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 				return;
 			}
 
-			Class clazz = lookup_class (prefix_to_namespace (prefix), localname);
+			TypeSymbol clazz = lookup_class (prefix_to_namespace (prefix), localname);
 			
 			ClassDefinition attribute_value_definition;
 			if (clazz != null) { //this is a member/container child object
@@ -265,7 +265,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return null;
 	}
 	
-	private Class? lookup_class (string? xmlNamespace, string name) {
+	private TypeSymbol? lookup_class (string? xmlNamespace, string name) {
 		string [] namespaces;
 		if (xmlNamespace != null) {
 			namespaces = xmlNamespace.split (".");
@@ -275,8 +275,8 @@ public class Gtkaml.SAXParser : GLib.Object {
 		}
 		
 	    Symbol sym = lookup (namespaces,0,context.root);
-		if (sym is Class) {
-			return (Class)sym;
+		if (sym is TypeSymbol) {
+			return (TypeSymbol)sym;
 		}
 		
 		return null;
@@ -288,7 +288,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return string.joinv ("_", tokens);
 	}
 
-	public RootClassDefinition get_root_definition (Class clazz, Vala.List<XmlAttribute> attrs, string? prefix) {
+	public RootClassDefinition get_root_definition (TypeSymbol clazz, Vala.List<XmlAttribute> attrs, string? prefix) {
 		RootClassDefinition root_class_definition = new Gtkaml.RootClassDefinition (create_source_reference (), "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
 		root_class_definition.prefixes_namespaces = prefixes_namespaces;
 		foreach (XmlAttribute attr in attrs) {
@@ -356,7 +356,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 		return root_class_definition;
 	}
 	
-	public ClassDefinition get_child_for_container (Class clazz,
+	public ClassDefinition get_child_for_container (TypeSymbol clazz,
 		ClassDefinition? container_definition, Vala.List<XmlAttribute> attrs,
 		string? prefix)
 	{

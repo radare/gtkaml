@@ -308,18 +308,23 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		foreach (Vala.Method m in ((Class)clazz).get_methods ()) {
 			if (m is CreationMethod) {
 				constructors.add (m);
-				stderr.printf ("Found direct creation method '%s.%s' for %s, we now have %d\n", clazz.name, m.name, clazz.name, constructors.size);
 			}
 		}
 
-		if (clazz is Struct)
-		foreach (Vala.Method m in ((Struct)clazz).get_methods ()) {
-			constructors.add (((Struct)clazz).default_construction_method);
-			stderr.printf ("Found direct creation method '%s.%s' for %s, we now have %d\n", clazz.name, ((Struct)clazz).default_construction_method.name, clazz.name, constructors.size);
+		if (clazz is Struct) {
+			bool no_default_constructor = true;
+			foreach (Vala.Method m in ((Struct)clazz).get_methods ()) {
+				if (m is CreationMethod) {
+					constructors.add (m);
+					if (m.name == ".new")
+						no_default_constructor = false;
+				}
+			}
 
-			if (m is CreationMethod) {
+			if (no_default_constructor) {
+				Vala.Method m = new Vala.CreationMethod (clazz.name, ".new");
+				m.owner = clazz.scope;
 				constructors.add (m);
-				stderr.printf ("Found direct creation method '%s.%s' for %s, we now have %d\n", clazz.name, m.name, clazz.name, constructors.size);
 			}
 		}
 		return constructors;

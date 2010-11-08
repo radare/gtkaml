@@ -181,8 +181,8 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 	}
 
 	private void lookup_container_add_methods_for_class (string ns,
-		Class container_class_implicits_entry, string? ns2,
-		ObjectTypeSymbol? container_class_holding_methods,
+		TypeSymbol container_class_implicits_entry, string? ns2,
+		TypeSymbol? container_class_holding_methods,
 		Vala.List<Vala.Method> methods)
 	{
 		if (ns2 == null)
@@ -201,7 +201,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 				string utns = get_unresolved_type_ns (dt as UnresolvedType);
 				if (utns == null)
 					continue;
-				ObjectTypeSymbol c = lookup_class (utns,
+				TypeSymbol c = lookup_class (utns,
 					(dt as UnresolvedType).unresolved_symbol.name);
 				if (c != null)
 					lookup_container_add_methods_for_class (ns,
@@ -212,7 +212,12 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		var add_methods = implicits_store.get_adds (ns, container_class_implicits_entry.name);
 		if (add_methods.size != 0) {
 			foreach (string add_method in add_methods) {
-				foreach (Vala.Method method in container_class_holding_methods.get_methods ())
+				Vala.List<Vala.Method> class_methods = new ArrayList<Vala.Method> ();
+				if (container_class_holding_methods is Struct)
+					class_methods = ((Struct)container_class_holding_methods).get_methods ();
+				if (container_class_holding_methods is ObjectTypeSymbol)
+					class_methods = ((ObjectTypeSymbol)container_class_holding_methods).get_methods ();
+				foreach (Vala.Method method in class_methods)
 					if (method.name == add_method) {
 						methods.add (method);
 						//stderr.printf ("Found direct add method '%s.%s' for %s, we now have %d\n", container_class_holding_methods.name, method.name, container_class_implicits_entry.name, methods.size);
@@ -222,7 +227,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		}
 	}
 	
-	public void lookup_container_add_methods (string? ns, Class? container_class, Vala.List<Vala.Method> methods) {
+	public void lookup_container_add_methods (string? ns, TypeSymbol? container_class, Vala.List<Vala.Method> methods) {
 		//FIXME workaround to stop recursion at TypeInstance and Object
 		if (null == ns) 
 			return;
@@ -230,12 +235,13 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		//first recurse over class hierarchy
 		lookup_container_add_methods_for_class (ns, container_class, ns, container_class, methods);
 
-		//then recurse over implicits definitions		
-		foreach (DataType dt in container_class.get_base_types ()) {
+		//then recurse over implicits definitions
+		if (container_class is Class)
+		foreach (DataType dt in ((Class)container_class).get_base_types ()) {
 			if (dt is UnresolvedType) {
 				string utns = get_unresolved_type_ns (dt as UnresolvedType);
 				if (utns == null) continue;
-				Class c = lookup_class (utns, (dt as UnresolvedType).unresolved_symbol.name) as Class;
+				TypeSymbol c = lookup_class (utns, (dt as UnresolvedType).unresolved_symbol.name) as Class;
 				if (c != null) {
 					//over inherited implicits definitions
 					lookup_container_add_methods (utns, c, methods);
@@ -261,12 +267,14 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		}
 	}
 	
-	private Symbol? member_lookup_inherited (Class clazz, string member) {
+	private Symbol? member_lookup_inherited (TypeSymbol clazz, string member) {
 		Symbol result = clazz.scope.lookup (member) as Symbol;
 		if (result != null)
 			return result;
-		
-		foreach (DataType dt in clazz.get_base_types ()) {
+
+		/* recurse over base types */
+		if (clazz is Class)
+		foreach (DataType dt in ((Class)clazz).get_base_types ()) {
 			if (dt is UnresolvedType) {
 				var name = (dt as UnresolvedType).unresolved_symbol.name;
 				string ns;
@@ -293,12 +301,27 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		return null;
 	}
 
-	private Vala.List<Vala.Method> lookup_constructors (Class clazz) {
+	private Vala.List<Vala.Method> lookup_constructors (TypeSymbol clazz) {
 		var constructors = new Vala.ArrayList<Vala.Method> ();
-		foreach (Vala.Method m in clazz.get_methods ()) {
-			if (m is CreationMethod)
+
+		if (clazz is Class)
+		foreach (Vala.Method m in ((Class)clazz).get_methods ()) {
+			if (m is CreationMethod) {
 				constructors.add (m);
-		}	
+				stderr.printf ("Found direct creation method '%s.%s' for %s, we now have %d\n", clazz.name, m.name, clazz.name, constructors.size);
+			}
+		}
+
+		if (clazz is Struct)
+		foreach (Vala.Method m in ((Struct)clazz).get_methods ()) {
+			constructors.add (((Struct)clazz).default_construction_method);
+			stderr.printf ("Found direct creation method '%s.%s' for %s, we now have %d\n", clazz.name, ((Struct)clazz).default_construction_method.name, clazz.name, constructors.size);
+
+			if (m is CreationMethod) {
+				constructors.add (m);
+				stderr.printf ("Found direct creation method '%s.%s' for %s, we now have %d\n", clazz.name, m.name, clazz.name, constructors.size);
+			}
+		}
 		return constructors;
 	}
 }

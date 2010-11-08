@@ -26,7 +26,7 @@ using Vala;
 /** represents a tag with gtkaml:existing */
 public class Gtkaml.ReferenceClassDefinition : Gtkaml.ClassDefinition {
 	public ReferenceClassDefinition (SourceReference source_reference,
-		string reference, string base_ns, Vala.Class base_type, 
+		string reference, string base_ns, TypeSymbol base_type, 
 		ClassDefinition? parent_container = null)
 	{
 		base (source_reference, reference, base_ns, base_type,

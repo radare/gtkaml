@@ -33,7 +33,7 @@ public class Gtkaml.RootClassDefinition : Gtkaml.ClassDefinition {
 	public string implements {get;set;}
 	
 	public RootClassDefinition (SourceReference source_reference, string identifier,
-		string base_ns, Vala.Class base_type, DefinitionScope definition_scope,
+		string base_ns, TypeSymbol base_type, DefinitionScope definition_scope,
 		Gtkaml.ClassDefinition? parent_container = null)
 	{
 		base (source_reference, identifier, base_ns, base_type, definition_scope,

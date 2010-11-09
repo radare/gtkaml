@@ -144,7 +144,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 			if (real_construct_code.has_suffix ("}"))
 				real_construct_code = real_construct_code.substring (1, real_construct_code.length - 2);
 			else Report.error (null, "%s for %s not properly ended".printf (construct_type, identifier));
-		} else real_construct_code = " (thiz, target) => { %s; }".printf (construct_code);
+		} else real_construct_code = " (self, target) => { %s; }".printf (construct_code);
 
 		this.construct_signals += "\tprivate signal void %s (%s target);\n".printf (construct_signal, identifier_type);
 		string to_append = "\t\t%s.connect (%s);\n".printf (construct_signal, real_construct_code)

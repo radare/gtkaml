@@ -1,0 +1,4 @@
+## see Gtk.implicits for more implicit choices
+
+[Stage]
+adds = add_actor

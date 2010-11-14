@@ -1,0 +1,20 @@
+/* GtkON with Stk */
+
+View gtkon:version=0.4 using=Stk name=TestView {
+	VBox $.vb {
+		Label $label with_text="Welcome guy!";
+		Entry $text clicked=clear;
+		Button $button label="set name" clicked=setname;
+	}
+-{
+	public void *setname () {
+		label.set_text ("Welcome "+text.get_text ()+"!");
+		return null;
+	}
+
+	public void *clear () {
+		text.set_text ("");
+		return null;
+	}
+}-
+}

@@ -1,0 +1,11 @@
+## This file describes the container methods for different classes of Stk (blitzen.org)
+
+[View]
+adds = set_child
+
+[VBox]
+adds = add_child
+
+[Label]
+## rename the parameter 'str' to 'label'
+new.with_text = with_text

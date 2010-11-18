@@ -4,6 +4,8 @@ int tok_idx;
 string tokens[64];
 bool mustclose;
 GtkonTokenType last_type;
+bool first_class = true;
+bool has_version = false;
 
 private static void pushtoken (string token) {
 	if (tok_idx>=tokens.length)
@@ -73,6 +75,7 @@ public class GtkonToken {
 		str = "";
 		quoted = 0;
 		bracket = 0;
+		first_class = true;
 		this.dis = dis;
 		type = GtkonTokenType.CLASS;
 		skip_spaces ();
@@ -201,6 +204,12 @@ public class GtkonToken {
 		if (mustclose) {
 			eos = ">";
 			mustclose = false;
+/*
+			if (first_class) {
+				//eos = " xmlns:gtkaml=\"http://gtkaml.org/0.4\""+eos;
+				first_class = false;
+			}
+*/
 		}
 		int max = tok_idx;
 		if (type == GtkonTokenType.END)
@@ -218,6 +227,10 @@ public class GtkonToken {
 		case GtkonTokenType.COMMENT_LINE:
 			return eos; //bos+"<!-- "+str+" -->\n";
 		case GtkonTokenType.BEGIN:
+			if (first_class && !has_version) {
+				first_class = false;
+				return " xmlns:gtkaml=\"http://gtkaml.org/0.4\">\n";
+			}
 			return ">\n";
 		case GtkonTokenType.END:
 			return eos+bos+"</"+poptoken ()+">\n";
@@ -239,8 +252,14 @@ public class GtkonToken {
 				var arg = foo[1].replace ("\"", "").replace ("'", "");
 				if (foo.length != 2)
 					error ("Missing value in attribute '%s'", str);
-				if (foo[0] == "gtkon:version")
+				if (foo[0] == "gtkon:version") {
+					has_version = true;
 					return " xmlns:gtkaml=\"http://gtkaml.org/"+arg+"\"";
+				}
+				if (foo[0] == "construct")
+					return " gtkaml:construct=\""+arg+"\"";
+				if (foo[0] == "property")
+					return " gtkaml:property=\""+arg+"\"";
 				if (foo[0] == "name")
 					return " gtkaml:name=\""+arg+"\"";
 				if (foo[0] == "using")

@@ -249,6 +249,8 @@ public class GtkonToken {
 					has_version = true;
 					return " xmlns:gtkaml=\"http://gtkaml.org/"+arg+"\"";
 				}
+				if (foo[0] == "standalone")
+					return " gtkaml:standalone=\""+arg+"\"";
 				if (foo[0] == "construct")
 					return " gtkaml:construct=\""+arg+"\"";
 				if (foo[0] == "property")

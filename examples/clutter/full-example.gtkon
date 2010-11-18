@@ -1,6 +1,7 @@
 /* from http://www.openismus.com/documents/clutter_tutorial/0.8/docs/tutorial/html/sec-full-example.html */
-Window gtkon:version=0.4 using=Gtk using:gtkclutter=GtkClutter using:clutter=Clutter
-	gtkaml:name=ClutterExamples.MainWindow destroy=Gtk.main_quit
+
+Window using=Gtk using:gtkclutter=GtkClutter using:clutter=Clutter
+	name=ClutterExamples.MainWindow destroy=Gtk.main_quit
 {
 	VBox {
 		gtkclutter:Embed $.embed width_request=800 height_request=600;
@@ -10,23 +11,23 @@ Window gtkon:version=0.4 using=Gtk using:gtkclutter=GtkClutter using:clutter=Clu
 	}
 
 	/* configuring the existing stage */
-	clutter:Stage gtkaml:existing="embed.get_stage ()" gtkaml:standalone {
+	clutter:Stage gtkaml:existing="embed.get_stage()" standalone {
 		color { clutter:Color red=0xB0 green=0xB0 blue=0xB0 alpha=0xff; }
 		clutter:Text x=10 y=10 opacity=0 color={label_color} font-name="Sans 24";
 		clutter:Rectangle $.rect color={rectangle_color}
-			height={ ELLIPSE_HEIGHT + 20 }
-			width={ stage.width + 100 }
-			x={ -(rect.width - stage.width)/2 }
-			y={ ELLIPSE_Y + IMAGE_HEIGHT - rect.height/2 }
-			/* no setters for rotation */
-			gtkaml:construct="target.set_rotation (RotateAxis.X_AXIS, -90, 0, target.height/2, 0)";
+		height={ ELLIPSE_HEIGHT + 20 }
+		width={ stage.width + 100 }
+		x={ -(rect.width - stage.width)/2 }
+		y={ ELLIPSE_Y + IMAGE_HEIGHT - rect.height/2 }
+		/* no setters for rotation */
+		construct="target.set_rotation (RotateAxis.X_AXIS, -90, 0, target.height/2, 0)";
 	}
 
 	-{
-		//Vala code
-		public MainWindow () {
-		}
-	
+		const int ELLIPSE_Y = 390;
+		const int ELLIPSE_HEIGHT = 450;
+		const int IMAGE_HEIGHT = 100;
+
 		private Color label_color = Color () { red=0x60, green=0x60, blue=0x90, alpha=0xff };
 		private Color rectangle_color = Color () { red=0xff, green=0xff, blue=0xff, alpha=0xff };
 		private Stage stage {
@@ -35,19 +36,9 @@ Window gtkon:version=0.4 using=Gtk using:gtkclutter=GtkClutter using:clutter=Clu
 			}
 		}
 
-		
-		const int ELLIPSE_Y = 390;
-		const int ELLIPSE_HEIGHT = 450; /* The distance from front to back when it's rotated 90 degrees. */
-		const int IMAGE_HEIGHT = 100;
-
-		public void load_images (string directory_path) {
-			
-		}
-
 		public static int main (string[] args) {
 			GtkClutter.init (ref args);
 			var window = new MainWindow ();
-			window.load_images ("./");
 			window.show_all ();
 			Gtk.main ();
 			return 0;

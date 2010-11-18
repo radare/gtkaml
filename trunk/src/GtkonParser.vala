@@ -75,7 +75,6 @@ public class GtkonToken {
 		str = "";
 		quoted = 0;
 		bracket = 0;
-		first_class = true;
 		this.dis = dis;
 		type = GtkonTokenType.CLASS;
 		skip_spaces ();
@@ -204,12 +203,6 @@ public class GtkonToken {
 		if (mustclose) {
 			eos = ">";
 			mustclose = false;
-/*
-			if (first_class) {
-				//eos = " xmlns:gtkaml=\"http://gtkaml.org/0.4\""+eos;
-				first_class = false;
-			}
-*/
 		}
 		int max = tok_idx;
 		if (type == GtkonTokenType.END)
@@ -229,7 +222,7 @@ public class GtkonToken {
 		case GtkonTokenType.BEGIN:
 			if (first_class && !has_version) {
 				first_class = false;
-				return " xmlns:gtkaml=\"http://gtkaml.org/0.4\">\n";
+				return " xmlns:gtkaml=\"http://gtkaml.org/"+Config.PACKAGE_VERSION+"\">\n";
 			}
 			return ">\n";
 		case GtkonTokenType.END:
@@ -295,6 +288,8 @@ public class GtkonParser {
 		/* reset global vars -- hacky */
 		tok_idx = 0;
 		mustclose = false;
+		first_class = true;
+		has_version = false;
 		last_type = GtkonTokenType.INVALID;
 	}
 

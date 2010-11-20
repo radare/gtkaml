@@ -211,6 +211,7 @@ public class GtkonToken {
 			bos += "  ";
 		switch (type) {
 		case GtkonTokenType.CLASS:
+			str = str.replace (".", ":");
 			if (str != "") {
 				pushtoken (str);
 				bos += "<";
@@ -255,8 +256,10 @@ public class GtkonToken {
 					return " gtkaml:construct=\""+arg+"\"";
 				if (foo[0] == "property")
 					return " gtkaml:property=\""+arg+"\"";
-				if (foo[0] == "name")
+				if (foo[0] == "name") {
+					warning ("name= attribute is deprecated. use '$' prefix");
 					return " gtkaml:name=\""+arg+"\"";
+				}
 				if (foo[0] == "using")
 					return " xmlns=\""+arg+"\"";
 				if (foo[0].has_prefix ("using:"))

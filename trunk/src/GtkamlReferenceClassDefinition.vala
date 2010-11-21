@@ -30,6 +30,6 @@ public class Gtkaml.ReferenceClassDefinition : Gtkaml.ClassDefinition {
 		ClassDefinition? parent_container = null)
 	{
 		base (source_reference, reference, base_ns, base_type,
-			DefinitionScope.MAIN_CLASS, parent_container);
+			DefinitionScope.PUBLIC, parent_container);
 	}
 }

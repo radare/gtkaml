@@ -24,8 +24,9 @@ using GLib;
 using Vala;
 
 public enum DefinitionScope {
-	MAIN_CLASS = 0,
 	PUBLIC,
+	INTERNAL,
+	PROTECTED,
 	PRIVATE,
 	CONSTRUCTOR
 }
@@ -34,6 +35,7 @@ public enum DefinitionScope {
 public class Gtkaml.ClassDefinition : GLib.Object {
 	public Vala.SourceReference source_reference { get; set; }
 	public string identifier { get; set; }
+	public string property_desc { get; set; }
 	public string base_full_name {
 		owned get { 
 			//BUG return (ns == null)? base_type.name : ns + "." + base_type.name;

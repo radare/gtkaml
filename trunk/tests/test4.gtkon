@@ -7,7 +7,7 @@ VBox name=MyVBox !homogeneous spacing=0 using=Gtk {
 	}
 
 	/* Use '$' as short for 'gtkaml:public' */
-	HBox { Label label=Username; Entry $user; }
+	HBox { Label label=Username; Entry $user property="get; private set"; }
 	HBox { Label label=Password; Entry $pass; }
 /*
 	HBox { Label label=Username; Entry gtkaml:public=user; }

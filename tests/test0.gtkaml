@@ -1,4 +1,4 @@
-<Gtk:VBox gtkaml:name="MyVBox"
+<Gtk:VBox gtkaml:internal="MyVBox"
 	xmlns='GLib' xmlns:Gtk='Gtk' 
 	xmlns:gtkaml="http://gtkaml.org/0.4"
 	homogeneous="false" spacing="0">
@@ -9,9 +9,9 @@
 	</gtkaml:preconstruct>
 	<Gtk:VBox homogeneous="true" spacing="0">
 		<Gtk:HBox homogeneous="true" spacing="0">
-			<Gtk:Label label='_Gogu' with-mnemonic="true" angle="0.2" gtkaml:public="l1" />
+			<Gtk:Label label='_Gogu' with-mnemonic="true" angle="0.2" gtkaml:protected="l1" />
 			<Gtk:Button label='gigel' clicked="{clicked()}" gtkaml:private="b1"/>
-			<Gtk:Label label='gigel' gtkaml:public="l2"/>
+			<Gtk:Label label='gigel' gtkaml:public="l2" gtkaml:property="get; private set"/>
 		</Gtk:HBox>
 		<Gtk:Entry/>
 		<Gtk:Table n-rows="2" n_columns="2" homogeneous="true">

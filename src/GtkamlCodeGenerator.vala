@@ -180,8 +180,19 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		string name = root_class_definition.target_name;
 		string base_ns = root_class_definition.base_ns;
 		string base_name = root_class_definition.base_type.name;
+
+		switch (root_class_definition.definition_scope) {
+			case DefinitionScope.PUBLIC:
+				class_start += "public class ";
+				break;
+			case DefinitionScope.INTERNAL:
+				class_start += "internal class ";
+				break;
+			default:
+				Report.error(null, "Invalid class visibility");
+				break;
+		}
 		
-		class_start += "public class ";
 		if (ns!=null) class_start += ns + ".";
 		class_start += name + " : ";
 		if (base_ns!=null) class_start += base_ns + ".";
@@ -200,21 +211,33 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 
 	protected void write_declaration (ClassDefinition class_definition) {
 		switch (class_definition.definition_scope) {
-		case DefinitionScope.MAIN_CLASS:
-			/* do something here? */
-			break;
 		case DefinitionScope.PUBLIC:
 			members_declarations += "\tpublic " + class_definition.base_full_name +
-				" " + class_definition.identifier + ";\n";
+				" " + class_definition.identifier;
+			break;
+		case DefinitionScope.INTERNAL:
+			members_declarations += "\tinternal " + class_definition.base_full_name +
+				" " + class_definition.identifier;
+			break;
+		case DefinitionScope.PROTECTED:
+			members_declarations += "\tprotected " + class_definition.base_full_name +
+				" " + class_definition.identifier;
 			break;
 		case DefinitionScope.PRIVATE:
 			members_declarations += "\tprivate " + class_definition.base_full_name +
-				" " + class_definition.identifier + ";\n";
+				" " + class_definition.identifier;
 			break;
-		case DefinitionScope.CONSTRUCTOR:
+		}
+
+		if (class_definition.definition_scope == DefinitionScope.CONSTRUCTOR) {
 			construct_body_locals += "\t\t" + class_definition.base_full_name +
 				" " + class_definition.identifier + ";\n";
-			break;
+		} else {
+			if (class_definition.property_desc != null) {
+				members_declarations +=  " { " + class_definition.property_desc + " }\n";
+			} else {
+				members_declarations += ";\n";
+			}
 		}
 	}	
 		

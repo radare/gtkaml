@@ -289,7 +289,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	}
 
 	public RootClassDefinition get_root_definition (TypeSymbol clazz, Vala.List<XmlAttribute> attrs, string? prefix) {
-		RootClassDefinition root_class_definition = new Gtkaml.RootClassDefinition (create_source_reference (), "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.MAIN_CLASS);
+		RootClassDefinition root_class_definition = new Gtkaml.RootClassDefinition (create_source_reference (), "this", prefix_to_namespace (prefix),  clazz, DefinitionScope.PUBLIC);
 		root_class_definition.prefixes_namespaces = prefixes_namespaces;
 		foreach (XmlAttribute attr in attrs) {
 			if (attr.prefix == null) {
@@ -304,6 +304,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 			} else
 			switch (attr.localname) {
 			case "public":
+			case "internal":
 			case "name":
 				if (root_class_definition.target_name != null) {
 					Report.error (create_source_reference (),
@@ -312,6 +313,8 @@ public class Gtkaml.SAXParser : GLib.Object {
 					stop_parsing ();
 				}
 				root_class_definition.target_name = attr.value;
+				if (attr.localname == "internal")
+					root_class_definition.definition_scope = DefinitionScope.INTERNAL;
 				break;
 			case "namespace":
 				root_class_definition.target_namespace = attr.value;
@@ -364,12 +367,13 @@ public class Gtkaml.SAXParser : GLib.Object {
 		string identifier = null;
 		string construct_code = null;
 		string preconstruct_code = null;
+		string property_desc = null;
 		ClassDefinition parent_container = container_definition;
 		DefinitionScope identifier_scope = DefinitionScope.CONSTRUCTOR;
 
 		foreach (XmlAttribute attr in attrs) {
 			if (attr.prefix!=null && attr.prefix==gtkaml_prefix) {
-				if ((attr.localname=="public" || attr.localname=="private")) {
+				if ((attr.localname=="public" || attr.localname=="private") || attr.localname=="internal" || attr.localname=="protected") {
 					if (identifier!=null) {
 						Report.error (create_source_reference (), "Cannot have multiple identifier names:%s".printf(attr.localname));
 						stop_parsing (); 
@@ -378,11 +382,20 @@ public class Gtkaml.SAXParser : GLib.Object {
 					identifier = attr.value;
 					if (attr.localname == "public")
 						identifier_scope = DefinitionScope.PUBLIC;
+					else if (attr.localname == "internal")
+						identifier_scope = DefinitionScope.INTERNAL;
+					else if (attr.localname == "protected")
+						identifier_scope = DefinitionScope.PROTECTED;
 					else identifier_scope = DefinitionScope.PRIVATE;
+				} else if (attr.localname=="property") {
+					if (attr.value.strip ().has_suffix(";"))
+						property_desc = attr.value;
+					else
+						property_desc = attr.value + ";";
 				} else if (attr.localname=="existing") {
 					reference = attr.value;
 				} else if (attr.localname=="construct") {
-					construct_code = attr.value;
+						construct_code = attr.value;
 				} else if (attr.localname=="preconstruct") {
 					preconstruct_code = attr.value;
 				} else if (attr.localname=="standalone") {
@@ -441,6 +454,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 				else Report.error (create_source_reference (), "'existing' attribute not properly ended");
 			} else class_definition.identifier = "(%s as %s)".printf (reference, class_definition.base_full_name);
 		}
+		class_definition.property_desc = property_desc;
 		
 		if (container_definition != null)
 			container_definition.add_child (class_definition);

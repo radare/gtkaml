@@ -311,6 +311,10 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		using_directives += "using %s;\n".printf(ns);
 	}
 
+	private inline string escape (string str) {
+		return str.replace ("\"", "\\\"");
+	}
+
 	protected string generate_literal (Attribute attr) {
 		string literal;
 		DataType type;
@@ -348,7 +352,7 @@ public class Gtkaml.CodeGenerator : GLib.Object {
 		} else if (type is UnresolvedType) {
 			UnresolvedType utype = type as UnresolvedType;
 			if (utype.unresolved_symbol.name == "string") {
-				literal = "\"" + value.escape ("") + "\"";
+				literal = "\"" + escape (stripped_value) + "\"";
 			} else if (utype.unresolved_symbol.name == "bool") {
 				if (stripped_value != "true" && stripped_value != "false") {
 					Report.error (null, "'%s' is not a boolean literal".printf (value));

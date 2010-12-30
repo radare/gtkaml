@@ -1,6 +1,6 @@
 /* GtkON syntax example -- pancake<nopcode.org> */
 
-VBox name=MyVBox !homogeneous spacing=0 using=Gtk {
+VBox $MyVBox !homogeneous spacing=0 using=Gtk {
 
 	gtkaml:preconstruct {
 		-{ message ("root preconstruct code"); }-
@@ -13,7 +13,7 @@ VBox name=MyVBox !homogeneous spacing=0 using=Gtk {
 	HBox { Label label=Username; Entry gtkaml:public=user; }
 	HBox { Label label=Password; Entry gtkaml:public=pass; }
 */
-  	Button label='This is "pure" fun' clicked={clicked()};
+  	Button label='This ís "pure" fun' clicked={clicked()};
 	Button label="This is \"pure\" fun" clicked={clicked()};
 	Button label="{\"%d\".printf(WindowType.TOPLEVEL)}" clicked={clicked()};
 	Button label={"%d".printf(WindowType.TOPLEVEL)} clicked={clicked()};

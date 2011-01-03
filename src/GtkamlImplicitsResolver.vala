@@ -46,17 +46,6 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 		if (class_definition.parent_container != null)
 			determine_add_method (class_definition);
 
-		//References should have no other attributes than the 'attached' ones (woa.. i learned xaml)
-		if (class_definition is ReferenceClassDefinition &&
-			class_definition.attrs.size != 0 &&
-			class_definition.parent_container != null)
-		{
-			Report.error (class_definition.source_reference,
-				"No attributes other than the container "+
-				"add parameters are allowed on existing "+
-				"widgets which are not standalone");
-		}
-		
 		//resolve the rest of the attr types
 		resolve_complex_attributes (class_definition);
 		determine_attribute_types (class_definition);

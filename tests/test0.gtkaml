@@ -13,7 +13,7 @@
 			<Gtk:Button label='gigel' clicked="{clicked()}" gtkaml:private="b1"/>
 			<Gtk:Label label='gigel' gtkaml:public="l2" gtkaml:property="get; private set"/>
 		</Gtk:HBox>
-		<Gtk:Entry/>
+		<Gtk:Entry changed='{message ("changed")}'/>
 		<Gtk:Table n-rows="2" n_columns="2" homogeneous="true">
 			<Gtk:Button attach_defaults="true" left_attach="0" right_attach="1" top_attach="1" bottom_attach="2" label="in the table" />
 			<Gtk:Button left_attach="1" right_attach="2" top-attach="0" bottom_attach="1" label="where noone has gone before" />

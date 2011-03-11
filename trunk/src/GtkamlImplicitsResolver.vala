@@ -271,7 +271,7 @@ public class Gtkaml.ImplicitsResolver : GLib.Object {
 					ns = (dt as UnresolvedType).unresolved_symbol.inner.name;
 				else
 					ns = null;
-				var otherclazz = lookup_class (ns, name) as Class;
+				var otherclazz = lookup_class (ns, name);
 				if (otherclazz != null && ( null != (result = member_lookup_inherited (otherclazz, member) as Symbol)))
 					return result;
 			}

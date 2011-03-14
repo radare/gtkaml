@@ -28,7 +28,10 @@ EXTRA_DIST = \
 	examples/gtkon/sync-sample.gtkon \
 	examples/gtkon/treeview-liststore-sample.gtkon \
 	examples/clutter/Makefile \
-	examples/clutter/full-example.gtkon
+	examples/clutter/full-example.gtkon \
+	examples/blitzen/Makefile \
+	examples/blitzen/main.vala \
+	examples/blitzen/test.gtkon
 
 
 # Copy all the spec files. Of cource, only one is actually used.

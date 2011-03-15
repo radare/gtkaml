@@ -1,4 +1,8 @@
-SUBDIRS = src data vapi tests 
+if ENABLE_TESTS
+TESTS_DIR = tests
+endif
+
+SUBDIRS = src data vapi $(TESTS_DIR)
 
 gtkamldocdir = ${prefix}/doc/gtkaml
 

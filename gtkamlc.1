@@ -1,0 +1,159 @@
+.TH GTKAMLC 1 "Mar 14, 2011"
+.SH NAME
+gtkamlc \- Gtkaml/GtkON compiler
+.SH SYNOPSIS
+.B gtkamlc
+.RI [ options ] " files" ...
+.br
+.B gtkaml
+.RI [ options ] " files" ...
+.SH DESCRIPTION
+This manual page documents briefly the
+.B gtkamlc
+command.
+.PP
+\fBgtkamlc\fP is a compiler for the Gtkaml and the GtkON languages. These
+languages let you create GTK UIs to be used in Vala programs with a
+compact syntax. Please see the \fBSEE ALSO\fR section for more information.
+.SH OPTIONS
+.TP
+.B \-?, \-\-help
+Show summary of options.
+.TP
+.B \-\-version
+Show version of program.
+.TP
+\fB\-\-girdir=\fIDIRECTORY\fR
+Look for .gir files in \fIDIRECTORY\fR
+.TP
+\fB\-\-vapidir=\fIDIRECTORY\fR
+Look for package bindings in \fIDIRECTORY\fR
+.TP
+\fB\-\-pkg=\fIPACKAGE\fR
+Include binding for \fIPACKAGE\fR
+.TP
+\fB\-\-vapi=\fIFILE\fR
+Output vapi to \fIFILE\fR
+.TP
+\fB\-\-library=\fINAME\fR
+Library name
+.TP
+\fB\-\-gir=\fINAME\fR-\fIVERSION\fR.gir
+GObject-Introspection repository file name
+.TP
+\fB\-b\fR, \fB\-\-basedir=\fIDIRECTORY\fR
+Base source directory
+.TP
+\fB\-d\fR, \fB\-\-directory=\fIDIRECTORY\fR
+Output directory
+.TP
+.B \-C, \-\-ccode
+Output C code
+.TP
+\fB\-H\fR, \fB\-\-header=\fIFILE\fR
+Output C header file
+.TP
+.B \-\-use\-header
+Use C header file
+.TP
+\fB\-\-includedir=\fIDIRECTORY\fR
+Directory used to include the C header file
+.TP
+\fB\-h\fR, \fB--internal-header=\fIFILE\fR
+Output internal C header file
+.TP
+\fB\-\-internal\-vapi=\fIFILE\fR
+Output vapi with internal api
+.TP
+\fB\-\-symbols=\fIFILE\fR
+Output symbols file
+.TP
+.B \-c, \-\-compile
+Compile but do not link
+.TP
+\fB\-o\fR, \fB\-\-output=\fIFILE\fR
+Place output in file \fIFILE\fR
+.TP
+.B \-g, \-\-debug
+Produce debug information
+.TP
+.B \-\-thread
+Enable multithreading support
+.TP
+.B \-\-enable\-mem\-profiler
+Enable GLib memory profiler
+.TP
+\fB\-D\fR, \fB\-\-define=\fISYMBOL\fR
+Define \fISYMBOL\fR
+.TP
+\fB\-\-main=\fISYMBOL\fR
+Use \fISYMBOL\fR as entry point
+.TP
+.B \-\-nostdpkg
+Do not include standard packages
+.TP
+.B \-\-disable\-assert
+Disable assertions
+.TP
+.B \-\-enable\-checking
+Enable additional run-time checks
+.TP
+.B \-\-enable\-deprecated
+Enable deprecated features
+.TP
+.B \-\-enable\-experimental
+Enable experimental features
+.TP
+.B \-\-disable\-warnings
+Disable warnings
+.TP
+.B \-\-fatal\-warnings
+Treat warnings as fatal
+.TP
+.B \-\-enable\-experimental\-non\-null
+Enable experimental enhancements for non-null types
+.TP
+.B \-\-disable\-dbus\-transformation
+Disable transformation of D-Bus member names
+.TP
+\fB\-\-cc=\fICOMMAND\fR
+Use \fICOMMAND\fR as C compiler command
+.TP
+\fB\-X\fR, \fB\-\-Xcc=\fIOPTION\fR
+Pass \fIOPTION\fR to the C compiler
+.TP
+\fB\-\-dump\-tree=\fIFILE\fR
+Write code tree to \fIFILE\fR
+.TP
+.B \-\-save\-temps
+Keep temporary files
+.TP
+\fB\-\-implicitsdir=\fIDIRECTORY\fR
+Look for implicit add and creation methods and their parameters in
+\fIDIRECTORY\fR
+.TP
+.B \-V, \-\-write\-vala
+Parses gtkaml and gtkon files and stops after writing the vala source
+.TP
+\fB\-\-profile=\fIPROFILE\fR
+Use the given profile instead of the default
+.TP
+.B \-q, \-\-quiet
+Do not print messages to the console
+.TP
+.B \-v, \-\-verbose
+Print additional messages to the console
+.TP
+\fB\-\-target\-glib=\fIMAJOR.MINOR\fR
+Target version of glib for code generation
+.TP
+.B \-\-enable\-version\-header, \-\-disable\-version\-header
+Write/do not write vala build version in generated files
+.SH SEE ALSO
+For more information on the Gtkaml and the GtkON languages, please see the
+documentation available at the project website: \fIhttp://code.google.com/p/gtkaml/\fR.
+.SH AUTHOR
+\fBgtkaml\fR was written by Vlad Grecescu <b100dian@gmail.com>.
+.PP
+This manual page was written by David Paleino <dapal@debian.org>,
+for the Debian project (and may be used by others).

@@ -2,6 +2,8 @@ SUBDIRS = src data vapi tests
 
 gtkamldocdir = ${prefix}/doc/gtkaml
 
+dist_man_MANS = gtkamlc.1
+
 EXTRA_DIST = \
 	README\
 	COPYING\

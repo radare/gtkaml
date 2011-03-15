@@ -182,7 +182,7 @@ public class GtkonToken {
 			return false;
 		}
 		str += "%c".printf (ch);
-		if (str == "//") {
+		if (str == "//" || str == "#") {
 			type = GtkonTokenType.COMMENT_LINE;
 			str = "";
 		} else

@@ -7,14 +7,6 @@ EXTRA_DIST = \
 	COPYING\
 	AUTHORS\
 	INSTALL\
-	debian/changelog \
-	debian/compat \
-	debian/control \
-	debian/dirs \
-	debian/docs \
-	debian/files \
-	debian/gtkaml.substvars \
-	debian/rules \
 	examples/SimpleViewer2/Makefile \
 	examples/SimpleViewer2/SimpleViewer2.gtkaml \
 	examples/gtkaml/Makefile \
@@ -31,7 +23,8 @@ EXTRA_DIST = \
 	examples/clutter/full-example.gtkon \
 	examples/blitzen/Makefile \
 	examples/blitzen/main.vala \
-	examples/blitzen/test.gtkon
+	examples/blitzen/test.gtkon \
+	data/Stk.implicits
 
 
 # Copy all the spec files. Of cource, only one is actually used.

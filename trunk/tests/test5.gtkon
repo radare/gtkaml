@@ -1,9 +1,13 @@
 #!/usr/bin/env gtkaml
 # This is a simple test of GtkON application
-Window $Food using=Gtk {
+Window $Test using=Gtk {
 	VBox {
-		Label label="Do it for fun";
-		Button !expand label="CLICK ME";
+		Label $msg label="Do it for fun";
+		Button !expand label="CLICK ME" clicked={
+			if (msg.label == "byebye!")
+				Gtk.main_quit();
+			msg.label = "byebye!";
+		};
 	}
 	gtkaml:preconstruct { -{
 		print ("Hello World!\n");

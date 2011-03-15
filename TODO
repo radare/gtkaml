@@ -1,6 +1,5 @@
-* Add some test cases for gtkon syntax
+* Add support for Genie syntax
 * Add support for fast vapis (must test)
 * Add -V to output vala
 * Generate gtkon from gtkaml files
 * Detect unclosed brackets in gtkon file
-* Add support for #.. preprocessing directives at gtkon level

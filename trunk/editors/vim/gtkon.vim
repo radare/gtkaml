@@ -6,6 +6,7 @@
 syn keyword gtkonTodo		contained TODO FIXME XXX NOTE
 syn region  gtkonComment	start="/\*"  end="\*/" contains=gtkonTodo
 syn match   gtkonComment	"//.*$" contains=gtkonTodo
+syn match   gtkonComment	"#.*$" contains=gtkonTodo
 
 "Strings
 syn region  gtkonString		start="\""	end="\"" skip="\\\""

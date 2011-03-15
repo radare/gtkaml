@@ -406,7 +406,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 						stop_parsing ();
 					}
 				} else {
-					Report.error (create_source_reference (), "Unkown gtkaml attribute '%s'".printf (attr.localname));
+					Report.error (create_source_reference (), "Unknown gtkaml attribute '%s'".printf (attr.localname));
 					stop_parsing ();
 				}
 			} else if (attr.prefix != null) {

@@ -1,6 +1,6 @@
 /* GtkamlSAXParser.vala
  * 
- * Copyright (C) 2008 Vlad Grecescu
+ * Copyright (C) 2008-2011 Vlad Grecescu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -167,7 +167,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 	
 	public void characters (string data, int len) {
 		State state = states.peek ();
-		string @value = data.ndup (len);
+		string @value = data.substring (0, len);
 		string stripped_value = @value.strip ();
 		
 		if (stripped_value != "")
@@ -197,9 +197,9 @@ public class Gtkaml.SAXParser : GLib.Object {
 				if (root_class.original_first_code_line < 0) {
 					root_class.original_first_code_line = line_number ();
 				}
-				root_class.code.add (cdata.ndup (len));
+				root_class.code.add (cdata.substring (0, len));
 			} else {
-				parse_attribute_content_as_text (state, cdata.ndup (len));
+				parse_attribute_content_as_text (state, cdata.substring (0, len));
 			}
 		} 
 	}
@@ -480,7 +480,7 @@ public class Gtkaml.SAXParser : GLib.Object {
 			attr.URI = attributes[walker+2];
 			attr.value = attributes[walker+3];
 			end = attributes[walker+4];
-			attr.value = attr.value.ndup (attr.value.length - end.length);
+			attr.value = attr.value.substring (0, attr.value.length - end.length);
 			attribute_list.add (attr);
 			walker += 5;
 		}

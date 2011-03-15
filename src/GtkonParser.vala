@@ -1,4 +1,4 @@
-/* gtkon parser -- Copyleft 2010 -- author: pancake<nopcode.org> */
+/* gtkon parser -- Copyleft 2010-2011 -- author: pancake<nopcode.org> */
 
 int tok_idx;
 string tokens[64];
@@ -6,6 +6,7 @@ bool mustclose;
 GtkonTokenType last_type;
 bool first_class = true;
 bool has_version = false;
+string? rootclass = null;
 
 private static void pushtoken (string token) {
 	if (tok_idx>=tokens.length)
@@ -232,6 +233,8 @@ public class GtkonToken {
 			if (str[0] == '&')
 				return " gtkaml:existing=\"%s\"".printf (str[1:str.length]);
 			if (str[0] == '$') {
+				if (tok_idx==1)
+					rootclass = str[1:str.length];
 				if (str[1] == '.')
 					return " gtkaml:private=\"%s\"".printf (str[2:str.length]);
 				return " gtkaml:public=\"%s\"".printf (str[1:str.length]);
@@ -278,6 +281,16 @@ public class GtkonToken {
 			}
 			return " "+foo[0]+"='"+val+"'"+eos;
 		case GtkonTokenType.CODE:
+			if (rootclass != null)
+			switch (str) {
+			case "gtkaml::gtk::main":
+				str = "\tpublic static void main(string[] args) {\n"+
+					"\t\tGtk.init (ref args);\n"+
+					"\t\t(new %s ()).show_all ();\n".printf (rootclass)+
+					"\t\tGtk.main ();\n"+
+					"\t}\n";
+				break;
+			}
 			return bos+"<![CDATA[\n"+str+"\n"+bos+"]]>\n"+eos;
 		case GtkonTokenType.INVALID:
 			error ("Invalid token!");

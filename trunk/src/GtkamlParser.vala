@@ -41,7 +41,7 @@ public class Gtkaml.Parser : Vala.Parser {
 		if (implicits_directories != null)
 			foreach (string? implicits_dirs in implicits_directories)
 				implicits_store.add_implicits_dir (implicits_dirs);
-		foreach (string datadir in Environment.get_system_data_dirs ()) {
+		foreach (var datadir in Environment.get_system_data_dirs ()) {
 			var filename = Path.build_filename (datadir, "gtkaml", "implicits");
 			if (FileUtils.test (filename, FileTest.EXISTS)) {  
 				implicits_store.add_implicits_dir (filename);
@@ -94,7 +94,8 @@ public class Gtkaml.Parser : Vala.Parser {
 					
 					string vala_contents =  code_generator.yield ();
 					if (vala_contents != null) { 
-						string vala_filename = gtkaml_source_file.filename.ndup (gtkaml_source_file.filename.length - ".gtkaml".length) + ".vala";
+						string vala_filename = gtkaml_source_file.filename.substring (0, 
+							gtkaml_source_file.filename.length - ".gtkaml".length) + ".vala";
 						FileUtils.set_contents (vala_filename, vala_contents);
 						context.generated_files.add (vala_filename);
 						gtkaml_source_file.filename = vala_filename;

@@ -1,28 +1,5 @@
 /* gtkon parser -- Copyleft 2010-2011 -- author: pancake<nopcode.org> */
 
-int tok_idx;
-string tokens[64];
-bool mustclose;
-GtkonTokenType last_type;
-bool first_class = true;
-bool has_version = false;
-string? rootclass = null;
-
-private static void pushtoken (string token) {
-	if (tok_idx>=tokens.length)
-		error ("Cannot push more tokens");
-	//print (">> [%d]=%s\n", tok_idx, token);
-	tokens[tok_idx++] = token;
-}
-
-private static string poptoken () {
-	if (tok_idx == 0)
-		return "";
-	//	error ("Cannot pop more tokens");
-	//print ("<< [%d]=%s\n", tok_idx-1, tokens[tok_idx-1]);
-	return tokens[--tok_idx];
-}
-
 public enum GtkonTokenType {
 	CODE,
 	CLASS,
@@ -34,9 +11,29 @@ public enum GtkonTokenType {
 	INVALID
 }
 
-// GtkonCompiler
-// DataInputStream must be here
-public char nextchar = 0;
+// TODO: those vars must be private. but vala does not support outside class private vars
+int tok_idx;
+string tokens[64];
+bool mustclose;
+GtkonTokenType last_type;
+bool first_class = true;
+bool has_version = false;
+string? rootclass = null;
+char nextchar = 0;
+
+private static void pushtoken (string token) {
+	if (tok_idx>=tokens.length)
+		error ("Cannot push more tokens");
+	//print (">> [%d]=%s\n", tok_idx, token);
+	tokens[tok_idx++] = token;
+}
+
+private static string poptoken () {
+	if (tok_idx == 0)
+		return "";
+	//print ("<< [%d]=%s\n", tok_idx-1, tokens[tok_idx-1]);
+	return tokens[--tok_idx];
+}
 
 [Compact]
 public class GtkonToken {
@@ -129,7 +126,7 @@ public class GtkonToken {
 			break;
 		}
 		if (is_separator (ch)) {
-			if (type == GtkonTokenType.ATTRIBUTE && (str.str ("=%c".printf (ch)) != null)) {
+			if (type == GtkonTokenType.ATTRIBUTE && (str.index_of ("=%c".printf (ch)) != -1)) {
 				if (str.has_suffix ("%c".printf (ch)) && !str.has_suffix ("\\\""))
 					return false;
 			} else return false;
@@ -143,7 +140,7 @@ public class GtkonToken {
 			type = GtkonTokenType.ATTRIBUTE;
 			break;
 		case ':':
-			if (str.str ("=") == null)
+			if (str.index_of ("=") == -1)
 				type = GtkonTokenType.CLASS;
 			if (last_type == GtkonTokenType.CLASS)
 				type = GtkonTokenType.ATTRIBUTE;
@@ -239,7 +236,7 @@ public class GtkonToken {
 					return " gtkaml:private=\"%s\"".printf (str[2:str.length]);
 				return " gtkaml:public=\"%s\"".printf (str[1:str.length]);
 			}
-			if (str.str ("=") == null) {
+			if (str.index_of ("=") == -1) {
 				if (str[0] == '!')
 					str = str[1:str.length] + "=false";
 				else str += "=true";

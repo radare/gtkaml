@@ -4,7 +4,7 @@ Syntax highlights to use Vala/GtkAML/GtkON with the VIM editor
 Installation
 
   mkdir -p $HOME/.vim/syntax
-  cp gtkon.vim vala.vim $HOME/.vim/syntax/vala.vim
+  cp gtkaml.vim gtkon.vim vala.vim $HOME/.vim/syntax/vala.vim
 
 Configuration
 
@@ -14,7 +14,7 @@ Add the following to your ~/.vimrc:
   autocmd BufRead *.vapi set efm=%f:%l.%c-%[%^:]%#:\ %t%[%^:]%#:\ %m
   au BufRead,BufNewFile *.vala   setfiletype vala
   au BufRead,BufNewFile *.vapi   setfiletype vala
-  au BufRead,BufNewFile *.gtkaml setfiletype xml
+  au BufRead,BufNewFile *.gtkaml setfiletype gtkaml
   au BufRead,BufNewFile *.gtkon  setfiletype gtkon
 
 The syntax file additionally supports following options in ~/.vimrc

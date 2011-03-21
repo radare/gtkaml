@@ -3,3 +3,5 @@
 * Add support for fast vapis (must test)
 * Generate gtkon from gtkaml files (reverse mode)
 * Use temporary name for the generated .gtkaml file from .gtkon when not needed?
+
+* dist-hook for adjusting examples Makefiles

@@ -1,5 +1,6 @@
 " Vim syntax file
-" Language:	Gtkon
+" Maintainers:  pancake <pancake@nopcode.org>
+" Language:	GtkON
 " Filenames:	*.gtkon
 
 "Comments

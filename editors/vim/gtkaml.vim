@@ -1,4 +1,5 @@
 " Vim syntax file
+" Maintainers:  pancake <pancake@nopcode.org>
 " Language:	GtkAML
 " Filenames:	*.gtkaml
 

@@ -5,7 +5,7 @@ Window $Test using=Gtk {
 		Label $msg label="Do it for fun";
 		Button !expand label="CLICK ME" clicked={
 			if (msg.label == "byebye!")
-				Gtk.main_quit();
+				Gtk.main_quit ();
 			msg.label = "byebye!";
 		};
 	}

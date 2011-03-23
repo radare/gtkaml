@@ -1,4 +1,6 @@
 * Add support for Genie syntax
+  - add support for --genie to 'gtkaml' too
+  - Autodetect genie syntax
 * Detect unclosed brackets in gtkon file
 * Add support for fast vapis (must test)
 * Generate gtkon from gtkaml files (reverse mode)

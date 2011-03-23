@@ -1,6 +1,6 @@
 /* GtkamlParser.vala
  * 
- * Copyright (C) 2008 Vlad Grecescu
+ * Copyright (C) 2008-2011 Vlad Grecescu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -61,9 +61,11 @@ public class Gtkaml.Parser : Vala.Parser {
 		}
 	}
 
+public bool use_genie;
 	public void parse_gtkon_file (SourceFile gtkon_source_file) {
 		var gtkaml_filename = gtkon_source_file.filename.replace (".gtkon", ".gtkaml");
 		var gp = new GtkonParser ();
+		gp.use_genie (use_genie);
 		gp.parse_file (gtkon_source_file.filename);
 		if (FileUtils.test (gtkaml_filename, FileTest.EXISTS))
 			FileUtils.unlink (gtkaml_filename);

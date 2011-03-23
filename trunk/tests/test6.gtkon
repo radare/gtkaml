@@ -1,0 +1,22 @@
+# Test example using the Genie syntax
+# gtkamlc -V --genie --pkg gtk+-2.0 test6.gtkon
+# 19 vs 23  (-4 LOC)
+[indent=1]
+Window $WindowName using=Gtk
+	VBox $vbox
+		HBox !expand
+			Button label=funny $b
+			Button $b
+		HBox
+			Label label=one
+			Label label=two !expand
+			Entry $entry
+	HBox $hbox
+		Label label="Hello World"
+		Button label="fuck yeah"
+[code]
+init
+	Gtk.init (ref args)
+	var w = new WindowName ()
+	w.show_all ()
+	Gtk.main ()

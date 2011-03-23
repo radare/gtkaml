@@ -1,6 +1,7 @@
 /* GtkamlSAXParser_start_parsing.c
  * 
  * Copyright (C) 2008 Vlad Grecescu
+ * Copyright (C) 2011 Vlad Grecescu, pancake
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,16 +19,18 @@
  *
  * Author:
  *        Vlad Grecescu (b100dian@gmail.com)
+ * Contributions:
+ *        pancake (pancake@nopcode.org)
  */
 
 #include <glib.h>
+#include <glib/gprintf.h>
 #include <glib-object.h>
 #include "gtkamlc.h"
 #include <libxml/parser.h>
 
 
-void gtkaml_sax_parser_error (GtkamlSAXParser * self, char * message, ...)
-{
+void gtkaml_sax_parser_error (GtkamlSAXParser * self, char * message, ...) {
 	va_list args;
 	gchar * output;
 	
@@ -46,40 +49,43 @@ void gtkaml_sax_parser_error (GtkamlSAXParser * self, char * message, ...)
 }
 
 
-void gtkaml_sax_parser_start_parsing (GtkamlSAXParser * self, const char* contents, gulong length)
-{
+void gtkaml_sax_parser_start_parsing (GtkamlSAXParser * self, const char* contents, gulong length) {
 	xmlSAXHandler *saxHandler;
+	int ret;
 		
 	saxHandler = g_new0 (xmlSAXHandler, 1);
 	saxHandler->startElementNs = (startElementNsSAX2Func)gtkaml_sax_parser_start_element;
 	saxHandler->endElementNs = (endElementNsSAX2Func)gtkaml_sax_parser_end_element;
 	saxHandler->cdataBlock = (cdataBlockSAXFunc)gtkaml_sax_parser_cdata_block;
 	saxHandler->error = (errorSAXFunc)gtkaml_sax_parser_error;
+	saxHandler->fatalError = (errorSAXFunc)gtkaml_sax_parser_error;
 	saxHandler->initialized = XML_SAX2_MAGIC;
 	saxHandler->characters = (charactersSAXFunc)gtkaml_sax_parser_characters;
 	
 	self->xmlCtxt = xmlCreatePushParserCtxt (saxHandler, self, contents, 0, NULL);
-	xmlParseChunk ((xmlParserCtxtPtr)self->xmlCtxt, contents, length, -1);
+	ret = xmlParseChunk ((xmlParserCtxtPtr)self->xmlCtxt, contents, length, -1);
+	if (ret != 0 && ret != XML_ERR_DOCUMENT_END) {
+		printf ("gtkaml error: xmlParseChunk: Oops. XML parse error %d\n", ret);
+		return;
+	}
 	//xmlSAXParseDoc ( saxHandler, contents, 0 );
-	
 	xmlSubstituteEntitiesDefault (1);
+
+	/* ignore return value? */
 	xmlParseDocument ((xmlParserCtxtPtr)self->xmlCtxt);
 
 	//xmlFreeParserCtxt ((xmlParserCtxtPtr)self->xmlCtxt);
 	g_free (saxHandler);
 }
 
-void gtkaml_sax_parser_stop_parsing (GtkamlSAXParser * self)
-{
+void gtkaml_sax_parser_stop_parsing (GtkamlSAXParser * self) {
 	xmlStopParser(self->xmlCtxt);
 }
 
-int gtkaml_sax_parser_column_number (GtkamlSAXParser * self)
-{
+int gtkaml_sax_parser_column_number (GtkamlSAXParser * self) {
 	return xmlSAX2GetColumnNumber (self->xmlCtxt);
 }
 
-int gtkaml_sax_parser_line_number (GtkamlSAXParser * self)
-{
+int gtkaml_sax_parser_line_number (GtkamlSAXParser * self) {
 	return xmlSAX2GetLineNumber (self->xmlCtxt);
 }

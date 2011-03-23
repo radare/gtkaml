@@ -35,6 +35,17 @@ private static string poptoken () {
 	return tokens[--tok_idx];
 }
 
+public bool genie_mode = true; //false;
+public int genie_indent = 1;
+private bool genie_closetag = false;
+public bool nextiscode = false;
+
+public int spaces = 0;
+public bool newkeyword = true;
+public int ospaces = 0;
+public bool checkforindent = false;
+GtkonToken? next_token;
+
 [Compact]
 public class GtkonToken {
 	public uchar quoted;
@@ -42,17 +53,53 @@ public class GtkonToken {
 	public GtkonTokenType type;
 	public DataInputStream? dis;
 
-	private inline bool is_separator (uchar ch) {
-		switch (ch) {
-		case ' ':
-		case '\t':
-		case ',':
-		case '\n':
-		case '\r':
-		case '\0':
-			return true;
+	private bool is_separator (uchar ch) {
+		if (genie_mode) {
+			if (nextiscode) {
+				type= GtkonTokenType.CODE;
+				return false;
+			}
+			switch (ch) {
+			case ' ':
+			case '\t':
+				print ("is_space\n");
+				if (newkeyword)
+					spaces++;
+				return true;
+			case '\r':
+			case '\n':
+				print ("-------> is_newline and new keyword\n");
+				newkeyword = true;
+				ospaces = spaces;
+				spaces = 0;
+				return true;
+			case ',':
+			case '\0':
+				return true;
+			}
+			if (newkeyword) {
+				if (ospaces >= spaces) {
+	//				genie_closetag = true;
+newkeyword=true;
+ospaces=spaces; // this fixes the H\nb\no\nx issue
+					print ("==== CLOSE TAG\n");
+				}
+			}
+			print ("  %d %d is_char (%c)\n", (int)newkeyword, spaces, ch);
+			newkeyword = false;
+			return false;
+		} else {
+			switch (ch) {
+			case ' ':
+			case '\t':
+			case '\r':
+			case '\n':
+			case ',':
+			case '\0':
+				return true;
+			}
+			return false;
 		}
-		return false;
 	}
 
 	private uchar readchar() throws Error {
@@ -69,14 +116,48 @@ public class GtkonToken {
 		return update (ch);
 	}
 
+	public GtkonToken.copy(GtkonToken src) {
+		str = src.str;
+		type = src.type;
+		quoted = src.quoted;
+		dis = src.dis;
+	}
+
 	public GtkonToken(DataInputStream dis) throws Error {
-		str = "";
-		quoted = 0;
-		bracket = 0;
-		this.dis = dis;
-		type = GtkonTokenType.CLASS;
-		skip_spaces ();
-		while (update (readchar ()));
+		if (next_token != null) {
+			str = next_token.str;
+			type = next_token.type;
+			quoted = next_token.quoted;
+			next_token = null;
+		} else {
+			str = "";
+			quoted = 0;
+			bracket = 0;
+			this.dis = dis;
+			type = GtkonTokenType.CLASS;
+			skip_spaces ();
+			if (genie_mode) {
+				print ("TOKEN IS (%s)\n", str);
+				if (type == GtkonTokenType.CLASS) {
+					if (checkforindent) {
+						print ("============ SPACES ==== %d %d\n", spaces, ospaces);
+						if (ospaces>spaces) {
+							next_token=new GtkonToken.copy (this);
+							type = GtkonTokenType.END;
+							return;
+						}
+						checkforindent = false;
+					}
+				}
+			}
+			if (genie_mode) {
+				try {
+					while (update (readchar ()));
+				} catch (Error err) {
+					/* do nothing.. just ignore */
+				}
+			} else while (update (readchar ()));
+		}
 	}
 
 	public int bracket = 0;
@@ -126,6 +207,29 @@ public class GtkonToken {
 			break;
 		}
 		if (is_separator (ch)) {
+			if (genie_mode) {
+print ("typs=NEW %s %d \n", str, type);
+				if (!nextiscode && str[0]>'A' && type == GtkonTokenType.CLASS) {
+					checkforindent = true;
+					mustclose = true;
+					print ("NEWKEYWORLD (%s) (%d %d)\n", str, ospaces, spaces);
+					next_token = new GtkonToken.copy (this);
+					if (ospaces>=spaces) {
+						type = GtkonTokenType.END;
+print ("NEW -- END\n");
+					} else type = GtkonTokenType.BEGIN;
+					str = "";
+					return false;
+				}
+/*
+				if (genie_closetag) {
+					type = GtkonTokenType.END;
+					mustclose = true;
+genie_closetag = false;
+					return false;
+				}
+*/
+			}
 			if (type == GtkonTokenType.ATTRIBUTE && (str.index_of ("=%c".printf (ch)) != -1)) {
 				if (str.has_suffix ("%c".printf (ch)) && !str.has_suffix ("\\\""))
 					return false;
@@ -225,7 +329,9 @@ public class GtkonToken {
 			}
 			return ">\n";
 		case GtkonTokenType.END:
-			return eos+bos+"</"+poptoken ()+">\n";
+			if (tok_idx>0)
+				return eos+bos+"</"+poptoken ()+">\n";
+			return "";
 		case GtkonTokenType.ATTRIBUTE:
 			if (str[0] == '&')
 				return " gtkaml:existing=\"%s\"".printf (str[1:str.length]);
@@ -308,6 +414,14 @@ public class GtkonParser {
 		last_type = GtkonTokenType.INVALID;
 	}
 
+	public void parse_format(string format) {
+		genie_mode = (format == "genie");
+	}
+
+	public void use_genie (bool use) {
+		genie_mode = use;
+	}
+
 	public void parse_file(string filename) {
 		xmlstr = new StringBuilder ();
 		var file = File.new_for_path (filename);
@@ -320,12 +434,44 @@ public class GtkonParser {
 			var dis = new DataInputStream (file.read ());
 			for (;;) {
 				token = new GtkonToken (dis);
+				if (genie_mode) {
+					if (nextiscode) {
+						print ("-----------code---***********************************************\n");
+				xmlstr.append ("</"+poptoken ()+">\n");
+						last_type = token.type = GtkonTokenType.CODE;
+					//	nextiscode = false;
+					} else
+					if (token.str[0] == '[') {
+						/* parse preprocessing token */
+						if (token.str[1:8] == "indent=") {
+							genie_indent = int.parse (token.str[8:token.str.length]);
+							print ("INDENT=%d\n", genie_indent);
+							continue;
+						} else
+						if (token.str == "[code]") {
+							nextiscode=true;
+							continue;
+						} else print ("WARNING: Unkwnown preprocessing token (%s)\n", token.str);
+					}
+				}
 				xmlstr.append (token.to_xml ());
 				last_type = token.type;
 			}
 		} catch (Error e) {
 			if (e.code != 0)
 				error ("%s", e.message);
+		}
+
+		// close remaining tags...
+		if (genie_mode) {
+			print ("last type: %d\n", last_type);
+			//print ("OUTSTR (%s)\n", token.str);
+			while (tok_idx>0) {
+				print ("TOKID-----\n");
+				string s = "</"+poptoken ()+">\n";
+				xmlstr.append (s); 
+				tok_idx--;
+			}
 		}
 	}
 
@@ -354,9 +500,12 @@ void main(string[] args) {
 		foreach (unowned string file in args[1:args.length]) {
 			if (!file.has_suffix (".gtkon"))
 				error ("Unsupported file format for "+file+"\n");
+			var g = Environment.get_variable ("GENIE");
+			if (g != null && g == "1")
+				gt.use_genie (true);
 			gt.parse_file (file);
 			gt.to_file (file.replace (".gtkon", ".gtkaml"));
 		}
-	} else print ("gtkon [file.gtkon ...]\n");
+	} else print ("gtkon [file.gtkon ...]   # export GENIE=1 to use GENIE syntax\n");
 }
 #endif

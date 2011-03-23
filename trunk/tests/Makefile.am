@@ -141,3 +141,6 @@ EXTRA_DIST = \
 	$(test3_VALASOURCES) \
 	$(test4_GTKONSOURCES)
 
+test6:
+	-../src/gtkamlc -V --genie --pkg gtk+-2.0 test6.gtkon
+	cat test6.gtkaml

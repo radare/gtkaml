@@ -52,6 +52,7 @@ class Gtkaml.Compiler {
 	static bool ccode_only;
 	static string header_filename;
 	static bool use_header;
+	static bool use_genie;
 	static string internal_header_filename;
 	static string internal_vapi_filename;
 	static string fast_vapi_filename;
@@ -97,6 +98,7 @@ class Gtkaml.Compiler {
 		{ "pkg", 0, 0, OptionArg.STRING_ARRAY, ref packages, "Include binding for PACKAGE", "PACKAGE..." },
 		{ "vapi", 0, 0, OptionArg.FILENAME, ref vapi_filename, "Output VAPI file name", "FILE" },
 		{ "library", 0, 0, OptionArg.STRING, ref library, "Library name", "NAME" },
+		{ "genie", 0, 0, OptionArg.NONE, ref use_genie, "Enable the Genie syntax mode", null },
 		{ "gir", 0, 0, OptionArg.STRING, ref gir, "GObject-Introspection repository file name", "NAME-VERSION.gir" },
 		{ "basedir", 'b', 0, OptionArg.FILENAME, ref basedir, "Base source directory", "DIRECTORY" },
 		{ "directory", 'd', 0, OptionArg.FILENAME, ref directory, "Output directory", "DIRECTORY" },
@@ -334,6 +336,7 @@ class Gtkaml.Compiler {
 		}
 		
 		var parser = new Gtkaml.Parser ();
+		parser.use_genie = use_genie;
 		parser.parse (context, implicits_directories);
 
 		if (write_vala) {

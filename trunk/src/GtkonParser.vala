@@ -81,7 +81,7 @@ public class GtkonToken {
 				if (ospaces >= spaces) {
 	//				genie_closetag = true;
 newkeyword=true;
-ospaces=spaces; // this fixes the H\nb\no\nx issue
+ospaces=spaces; // this hack fixes the H\nb\no\nx issue
 					print ("==== CLOSE TAG\n");
 				}
 			}
@@ -149,8 +149,6 @@ ospaces=spaces; // this fixes the H\nb\no\nx issue
 						checkforindent = false;
 					}
 				}
-			}
-			if (genie_mode) {
 				try {
 					while (update (readchar ()));
 				} catch (Error err) {
@@ -209,14 +207,14 @@ ospaces=spaces; // this fixes the H\nb\no\nx issue
 		if (is_separator (ch)) {
 			if (genie_mode) {
 print ("typs=NEW %s %d \n", str, type);
-				if (!nextiscode && str[0]>'A' && type == GtkonTokenType.CLASS) {
+				if (!nextiscode && str[0]>'A' && type==GtkonTokenType.CLASS) {
 					checkforindent = true;
 					mustclose = true;
 					print ("NEWKEYWORLD (%s) (%d %d)\n", str, ospaces, spaces);
 					next_token = new GtkonToken.copy (this);
 					if (ospaces>=spaces) {
 						type = GtkonTokenType.END;
-print ("NEW -- END\n");
+print ("NEW -- END ((%s))\n", str);
 					} else type = GtkonTokenType.BEGIN;
 					str = "";
 					return false;
@@ -384,6 +382,12 @@ genie_closetag = false;
 			}
 			return " "+foo[0]+"='"+val+"'"+eos;
 		case GtkonTokenType.CODE:
+			var prestr = "";
+			if (genie_mode) {
+				print ("MUST FREE ALL THAT SHIT\n");
+				while (tok_idx>1)
+					prestr += "</"+poptoken ()+">\n";
+			}
 			if (rootclass != null)
 			switch (str) {
 			case "gtkaml::gtk::main":
@@ -394,7 +398,7 @@ genie_closetag = false;
 					"\t}\n";
 				break;
 			}
-			return bos+"<![CDATA[\n"+str+"\n"+bos+"]]>\n"+eos;
+			return prestr+bos+"<![CDATA[\n"+str+"\n"+bos+"]]>\n"+eos;
 		case GtkonTokenType.INVALID:
 			error ("Invalid token!");
 		}

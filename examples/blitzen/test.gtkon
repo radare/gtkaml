@@ -1,6 +1,6 @@
 /* GtkON with Stk */
 
-View gtkon:version=0.4 using=Stk name=TestView {
+View using=Stk $TestView {
 	VBox $.vb {
 		Label $label with_text="Welcome guy!";
 		Entry $text clicked=clear;

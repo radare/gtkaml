@@ -1,4 +1,4 @@
 implicitsdir = $(pkgdatadir)/implicits
 
-dist_implicits_DATA = Gtk.implicits Clutter.implicits
+dist_implicits_DATA = Gtk.implicits Clutter.implicits Stk.implicits
 

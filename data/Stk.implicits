@@ -6,6 +6,39 @@ adds = set_child
 [VBox]
 adds = add_child
 
+[HBox]
+adds = add_child
+
+[Container]
+adds = add_child
+
+[Table]
+adds = add_child
+
 [Label]
 ## rename the parameter 'str' to 'label'
 new.with_text = with_text
+
+[Entry]
+new.with_text = with_text
+
+[Button]
+new.with_label = with_label
+
+[CheckBox]
+new.with_label = with_label
+
+[Image]
+new.with_url = with_url
+
+[Link]
+new.full = full
+
+[RadioButton]
+new.with_label = with_label
+
+[RadioButtonGroup]
+adds = add
+
+[ComboBox]
+new.with_model = with_model

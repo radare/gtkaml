@@ -23,6 +23,11 @@ deploy: ${APPNAME}-app.so
 	if test ! -d "$(DEPLOYDIR)"; then mkdir "$(DEPLOYDIR)"; fi; 
 	cp -f $< $(DEPLOYDIR) 
 	ln -sf $(JSHELPER) $(DEPLOYDIR)
+	@echo
+	@echo To complete installation of the blitzen webapp append
+	@echo this to the config file: /etc/blitzen/blitzen.conf
+	@echo
+	@cat blitzen.conf
 
 install: deploy
 

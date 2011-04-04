@@ -159,10 +159,27 @@ ospaces=spaces; // this hack fixes the H\nb\no\nx issue
 	}
 
 	public int bracket = 0;
+
+	/* MORE ON : http://www.utexas.edu/learn/html/spchar.html */
+	private string xmlfilteredchar (uchar ch) {
+		// TODO: Use Html.
+		switch (ch) {
+/*
+		case '\'': return "&apos;";
+		case '"': return "&quot;";
+*/
+		//case '·': return "&middot;";
+		case '<': return "&lt;";
+		case '>': return "&gt;";
+		case '&': return "&amp;";
+		}
+		return "%c".printf (ch);
+	}
+
 	public bool update (uchar ch) {
 		if (quoted != 0) {
 			type = GtkonTokenType.ATTRIBUTE;
-			str += "%c".printf (ch);
+			str += xmlfilteredchar (ch);
 			if (quoted == '{') {
 				if (ch=='{') bracket++;
 				if (ch=='}') bracket--;

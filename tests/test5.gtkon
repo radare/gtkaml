@@ -6,7 +6,7 @@ Window $Test using=Gtk {
 		Button !expand label="CLICK ME" clicked={
 			if (msg.label == "byebye!")
 				Gtk.main_quit ();
-			msg.label = "byebye!";
+			msg.label = "<>&byebye!";
 		};
 	}
 	gtkaml:preconstruct { -{

@@ -12,10 +12,10 @@ AM_CFLAGS = -I$(top_srcdir) \
 	$(VALA_CFLAGS) \
 	-DPACKAGE_DATADIR=\"$(pkgdatadir)\"
 
-if VALA_LATEST
-        GTKAML_COMPILER = GtkamlCompiler.vala
-else
+if VALA_10
         GTKAML_COMPILER = GtkamlCompiler-0.10.vala
+else
+        GTKAML_COMPILER = GtkamlCompiler.vala
 endif
 
 

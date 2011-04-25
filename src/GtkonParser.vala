@@ -13,6 +13,7 @@ public enum GtkonTokenType {
 
 // TODO: those vars must be private. but vala does not support outside class private vars
 int tok_idx;
+int usingcount;
 string tokens[64];
 bool mustclose;
 GtkonTokenType last_type;
@@ -223,7 +224,7 @@ ospaces=spaces; // this hack fixes the H\nb\no\nx issue
 		}
 		if (is_separator (ch)) {
 			if (genie_mode) {
-print ("typs=NEW %s %d \n", str, type);
+print ("type=NEW %s %d \n", str, type);
 				if (!nextiscode && str[0]>'A' && type==GtkonTokenType.CLASS) {
 					checkforindent = true;
 					mustclose = true;
@@ -385,8 +386,9 @@ genie_closetag = false;
 					var ns = arg.split (":");
 					var s = "";
 					for (int i=0; i<ns.length; i++) {
-						if (i==0) s += " xmlns=\""+ns[i]+"\"";
+						if (usingcount==0) s += " xmlns=\""+ns[i]+"\"";
 						else s += " xmlns:"+ns[i]+"=\""+ns[i]+"\"";
+						usingcount++;
 					}
 					return s;
 		//			return " xmlns=\""+arg+"\"";
@@ -437,6 +439,7 @@ public class GtkonParser {
 	public GtkonParser() {
 		/* reset global vars -- hacky */
 		tok_idx = 0;
+		usingcount = 0;
 		mustclose = false;
 		first_class = true;
 		has_version = false;

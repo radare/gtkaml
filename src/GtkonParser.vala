@@ -381,8 +381,16 @@ genie_closetag = false;
 					warning ("name= attribute is deprecated. use '$' prefix");
 					return " gtkaml:name=\""+arg+"\"";
 				}
-				if (foo[0] == "using")
-					return " xmlns=\""+arg+"\"";
+				if (foo[0] == "using") {
+					var ns = arg.split (":");
+					var s = "";
+					for (int i=0; i<ns.length; i++) {
+						if (i==0) s += " xmlns=\""+ns[i]+"\"";
+						else s += " xmlns:"+ns[i]+"=\""+ns[i]+"\"";
+					}
+					return s;
+		//			return " xmlns=\""+arg+"\"";
+				}
 				if (foo[0].has_prefix ("using:"))
 					return " xmlns:"+foo[0][6:foo[0].length]+"=\""+arg+"\"";
 			} else foo[0] = foo[0][1:foo[0].length];

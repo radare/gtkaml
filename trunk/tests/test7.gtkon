@@ -1,8 +1,10 @@
 #!/usr/bin/env gtkaml
 # This is a simple test of GtkON application
-Window $Test using=Gtk:Posix {
+Window $Test using=Gtk {
 	VBox {
-		Label $msg label="Do it for fun";
+		Label
+			$msg
+			label="Do it for fun";
 		Button !expand label="CLICK ME" clicked={
 			if (msg.label == "byebye!")
 				Gtk.main_quit ();
@@ -10,7 +12,6 @@ Window $Test using=Gtk:Posix {
 		};
 	}
 	gtkaml:preconstruct { -{
-	       Posix.system ("ls");
 		print ("Hello World!\n");
 		resize (400, 300);
 		position = WindowPosition.CENTER;

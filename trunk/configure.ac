@@ -42,9 +42,11 @@ PKG_CHECK_MODULES([LIBXML2], libxml-2.0)
 AC_SUBST(LIBXML2_CFLAGS)
 AC_SUBST(LIBXML2_LIBS)
 
-PKG_CHECK_MODULES(VALA, libvala-0.14, [VALA_PKG="libvala-0.14"],
-	[PKG_CHECK_MODULES(VALA, libvala-0.12, [VALA_PKG="libvala-0.12"],
-		[PKG_CHECK_MODULES(VALA, vala-0.10, [VALA_PKG="vala-0.10"])
+PKG_CHECK_MODULES(VALA, libvala-0.16, [VALA_PKG="libvala-0.16"],
+	[PKG_CHECK_MODULES(VALA, libvala-0.14, [VALA_PKG="libvala-0.14"],
+		[PKG_CHECK_MODULES(VALA, libvala-0.12, [VALA_PKG="libvala-0.12"],
+			[PKG_CHECK_MODULES(VALA, vala-0.10, [VALA_PKG="vala-0.10"])
+		])
 	])
 ])
 AM_CONDITIONAL([VALA_10], [test $VALA_PKG = libvala-0.10])

@@ -9,8 +9,8 @@ AM_CFLAGS = \
 	 $(EXTRA_CFLAGS) \
 	 $(GTK_CFLAGS)
 
-BUILT_SOURCES = test0.stamp test1.stamp test3.stamp test4.stamp test5.stamp
-noinst_PROGRAMS = test0 test1 test3 test4 test5
+BUILT_SOURCES = test0.stamp test1.stamp test3.stamp test4.stamp test5.stamp test7.stamp
+noinst_PROGRAMS = test0 test1 test3 test4 test5 test7
 
 
 CLEANFILES = test0.h test0.c test0.stamp test0.vala \
@@ -18,6 +18,7 @@ CLEANFILES = test0.h test0.c test0.stamp test0.vala \
 	test2.h test2.c test2.stamp test2.vala \
 	test3.h test3.c test3.stamp test3.vala \
 	test4.h test4.c test4.stamp test4.vala \
+	test7.h test7.c test7.stamp test7.vala \
 	test5.h test5.c test5.stamp test5.vala
 
 
@@ -130,6 +131,24 @@ test5_LDADD = \
 	$(EXTRA_LDFLAGS)
 
 test5.stamp : $(test5_GTKONSOURCES)
+	../src/gtkamlc -C $(VALAFLAGS) --save-temps --implicitsdir $(top_srcdir)/data --pkg gtk+-2.0 --pkg posix $^
+	touch $@
+
+## Example 7 gtkon
+
+test7_GTKONSOURCES = \
+	test7.gtkon
+
+nodist_test7_SOURCES = \
+	$(test7_GTKONSOURCES:.gtkon=.c) \
+	$(test7_GTKONSOURCES:.gtkon=.h) \
+	test7.stamp
+
+test7_LDADD = \
+	$(GTK_LIBS) \
+	$(EXTRA_LDFLAGS)
+
+test7.stamp : $(test7_GTKONSOURCES)
 	../src/gtkamlc -C $(VALAFLAGS) --save-temps --implicitsdir $(top_srcdir)/data --pkg gtk+-2.0 $^
 	touch $@
 
@@ -139,7 +158,9 @@ EXTRA_DIST = \
 	$(test2_GTKAMLSOURCES) \
 	$(test3_GTKAMLSOURCES) \
 	$(test3_VALASOURCES) \
-	$(test4_GTKONSOURCES)
+	$(test4_GTKONSOURCES) \
+	$(test5_GTKONSOURCES) \
+	$(test7_GTKONSOURCES)
 
 test6:
 	-../src/gtkamlc -V --genie --pkg gtk+-2.0 test6.gtkon

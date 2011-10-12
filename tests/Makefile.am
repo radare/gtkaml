@@ -57,24 +57,6 @@ test1.stamp : $(test1_GTKAMLSOURCES)
 	../src/gtkamlc -C $(VALAFLAGS) --implicitsdir $(top_srcdir)/data --pkg gtk+-2.0 $^
 	touch $@
 
-## Segmentation fault test 3
-
-test2_GTKAMLSOURCES = \
-	test2.gtkaml
-
-nodist_test2_SOURCES = \
-	$(test1_GTKAMLSOURCES:.gtkaml=.c) \
-	$(test1_GTKAMLSOURCES:.gtkaml=.h) \
-	test2.stamp	
-
-test2_LDADD = \
-	$(GTK_LIBS) \
-	$(EXTRA_LDFLAGS)
-
-test2.stamp : $(test2_GTKAMLSOURCES)
-	../src/gtkamlc -C $(VALAFLAGS) --implicitsdir $(top_srcdir)/data --pkg gtk+-2.0 $^
-	touch $@
-
 ## Example 3
 
 test3_GTKAMLSOURCES = \

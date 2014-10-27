@@ -222,19 +222,8 @@ class Gtkaml.Compiler {
 		context.thread = thread;
 		context.mem_profiler = mem_profiler;
 		context.save_temps = save_temps;
-		if (profile == "posix") {
-			context.profile = Profile.POSIX;
-			context.add_define ("POSIX");
-		} else if (profile == "gobject-2.0" || profile == "gobject" || profile == null) {
-			// default profile
-			context.profile = Profile.GOBJECT;
-			context.add_define ("GOBJECT");
-		} else if (profile == "dova") {
-			context.profile = Profile.DOVA;
-			context.add_define ("DOVA");
-		} else {
-			Report.error (null, "Unknown profile %s".printf (profile));
-		}
+		context.profile = Profile.GOBJECT;
+		context.add_define ("GOBJECT");
 		nostdpkg |= fast_vapi_filename != null;
 		context.nostdpkg = nostdpkg;
 
@@ -255,12 +244,7 @@ class Gtkaml.Compiler {
 			context.add_define ("VALA_0_%d".printf (i));
 		}
 
-		if (context.profile == Profile.POSIX) {
-			if (!nostdpkg) {
-				/* default package */
-				context.add_external_package ("posix");
-			}
-		} else if (context.profile == Profile.GOBJECT) {
+		//if (context.profile == Profile.GOBJECT) {
 			int glib_major = 2;
 			int glib_minor = 16;
 			if (target_glib != null && target_glib.scanf ("%d.%d", out glib_major, out glib_minor) != 2) {
@@ -282,12 +266,7 @@ class Gtkaml.Compiler {
 				context.add_external_package ("glib-2.0");
 				context.add_external_package ("gobject-2.0");
 			}
-		} else if (context.profile == Profile.DOVA) {
-			if (!nostdpkg) {
-				/* default package */
-				context.add_external_package ("dova-core-0.1");
-			}
-		}
+		//}
 
 		if (packages != null) {
 			foreach (string package in packages) {
@@ -311,24 +290,7 @@ class Gtkaml.Compiler {
 			return quit ();
 		}
 
-		if (context.profile == Profile.GOBJECT) {
-#if !VALA_0_14
-			if (context.has_package ("dbus-glib-1")) {
-				if (!context.deprecated) {
-					Report.warning (null, "D-Bus GLib is deprecated, use GDBus");
-				}
-				context.codegen = new DBusServerModule ();
-			} else {
-				context.codegen = new GDBusServerModule ();
-			}
-#else
-			context.codegen = new GDBusServerModule ();
-#endif
-		} else if (context.profile == Profile.DOVA) {
-			context.codegen = new DovaErrorModule ();
-		} else {
-			context.codegen = new CCodeDelegateModule ();
-		}
+		context.codegen = new GDBusServerModule ();
 
 		bool has_c_files = false;
 
@@ -405,29 +367,31 @@ class Gtkaml.Compiler {
 
 		if (library != null) {
 			if (gir != null) {
-				if (context.profile == Profile.GOBJECT) {
-					long gir_len = gir.length;
-					int last_hyphen = gir.last_index_of_char ('-');
+				long gir_len = gir.length;
+				int last_hyphen = gir.last_index_of_char ('-');
 
-					if (last_hyphen == -1 || !gir.has_suffix (".gir")) {
+				if (last_hyphen == -1 || !gir.has_suffix (".gir")) {
+					Report.error (null, "GIR file name `%s' is not well-formed, expected NAME-VERSION.gir".printf (gir));
+				} else {
+					string gir_namespace = gir.substring (0, last_hyphen);
+					string gir_version = gir.substring (last_hyphen + 1, gir_len - last_hyphen - 5);
+					gir_version.canon ("0123456789.", '?');
+					if (gir_namespace == "" || gir_version == "" || !gir_version[0].isdigit () || gir_version.contains ("?")) {
 						Report.error (null, "GIR file name `%s' is not well-formed, expected NAME-VERSION.gir".printf (gir));
 					} else {
-						string gir_namespace = gir.substring (0, last_hyphen);
-						string gir_version = gir.substring (last_hyphen + 1, gir_len - last_hyphen - 5);
-						gir_version.canon ("0123456789.", '?');
-						if (gir_namespace == "" || gir_version == "" || !gir_version[0].isdigit () || gir_version.contains ("?")) {
-							Report.error (null, "GIR file name `%s' is not well-formed, expected NAME-VERSION.gir".printf (gir));
-						} else {
-							var gir_writer = new GIRWriter ();
+						var gir_writer = new GIRWriter ();
 
-							// put .gir file in current directory unless -d has been explicitly specified
-							string gir_directory = ".";
-							if (directory != null) {
-								gir_directory = context.directory;
-							}
-
-							gir_writer.write_file (context, gir_directory, gir_namespace, gir_version, library);
+						// put .gir file in current directory unless -d has been explicitly specified
+						string gir_directory = ".";
+						if (directory != null) {
+							gir_directory = context.directory;
 						}
+
+#if VALA_0_26
+						gir_writer.write_file (context, gir_directory, gir, gir_namespace, gir_version, library);
+#else
+						gir_writer.write_file (context, gir_directory, gir_namespace, gir_version, library);
+#endif
 					}
 				}
 

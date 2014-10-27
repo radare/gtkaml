@@ -249,8 +249,17 @@ public class Gtkaml.SAXParser : GLib.Object {
 	}
 	
 	public SourceReference create_source_reference () {
+#if OLD_VALA
 		return new SourceReference (source_file, line_number (),
 			column_number (), line_number (), column_number ()); 
+#else
+	// XXX this is wrong
+		return new SourceReference (source_file,
+				SourceLocation (source_file,0,0),
+				SourceLocation (source_file,0,0));
+				//SourceLocation (current, line, column + offset),
+				//SourceLocation (current+length, line, column + offset+length));
+#endif
 	}
 
 	private Symbol? lookup (string [] segments, int current, Symbol ns){

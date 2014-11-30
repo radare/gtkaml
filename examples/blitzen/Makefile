@@ -10,7 +10,7 @@ OBJS := $(patsubst %.vala, %.vala.o, $(SOURCES))
 all: gtkaml ${APPNAME}-app.so
 
 gtkaml:
-	gtkamlc -V --pkg=stk test.gtkon 
+	gtkamlc --pkg=stk test.gtkon 
 	rm -f test.vala.o ${APPNAME}-app.so
 
 ${APPNAME}-app.so: $(OBJS)

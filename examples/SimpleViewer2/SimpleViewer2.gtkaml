@@ -1,6 +1,6 @@
 <!-- this is a port of http://www.michaelwerle.name/Programming/CSharp/SimpleViewer2.glade -->
 <Window xmlns='Gtk' xmlns:GLib='GLib' xmlns:class="http://gtkaml.org/0.4"
-	class:name="SimpleViewer2" title="SimpleViewer2" delete-event="{OnWindow1DeleteEvent()}">
+	class:name="SimpleViewer2" title="SimpleViewer2">
 	<VBox>
 		<MenuBar expand="false">
 			<MenuItem label="_File" with-mnemonic="true">
@@ -50,7 +50,7 @@
 		program-name="SimpleViewer2" version="1.0" copyright="Copyright (c) 2007 MIchael Werle"
 		comments="Simple .Net demonstration program, displays a text file in a scrolling text box and allows the user to toggle word-wrap on and off"
 		website="http://www.michaelwerle.com/SimpleViewer2/" 
-		authors='{new string[] {"Michael Werle (micha@michaelwerle.com)", "ported to gtkaml by Vlad Grecescu (b100dian@gmail.com)", null}}'>
+		authors='{{"Michael Werle (micha@michaelwerle.com)", "ported to gtkaml by Vlad Grecescu (b100dian@gmail.com)", null}}'>
 	</AboutDialog>			
 
 <![CDATA[

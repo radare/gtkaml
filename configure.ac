@@ -42,8 +42,8 @@ PKG_CHECK_MODULES([LIBXML2], libxml-2.0)
 AC_SUBST(LIBXML2_CFLAGS)
 AC_SUBST(LIBXML2_LIBS)
 
-PKG_CHECK_MODULES(VALA, libvala-0.26, [VALA_PKG="libvala-0.26"],
-	[PKG_CHECK_MODULES(VALA, libvala-0.28, [VALA_PKG="libvala-0.28"],
+PKG_CHECK_MODULES(VALA, libvala-0.28, [VALA_PKG="libvala-0.28"],
+	[PKG_CHECK_MODULES(VALA, libvala-0.26, [VALA_PKG="libvala-0.26"],
 		[PKG_CHECK_MODULES(VALA, libvala-0.16, [VALA_PKG="libvala-0.16"],
 			[PKG_CHECK_MODULES(VALA, libvala-0.14, [VALA_PKG="libvala-0.14"],
 				[PKG_CHECK_MODULES(VALA, libvala-0.12, [VALA_PKG="libvala-0.12"],

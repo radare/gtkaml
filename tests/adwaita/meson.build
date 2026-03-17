@@ -10,6 +10,8 @@ custom_target(
     'libadwaita-1',
     '--vapidir',
     meson.project_source_root() / 'markuphints',
+    '--implicitsdir',
+    meson.project_source_root() / 'data',
     '--dump-tree',
     '@OUTPUT1@',
     '-o',

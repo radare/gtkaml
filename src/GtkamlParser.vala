@@ -99,7 +99,8 @@ public bool use_genie;
 							gtkaml_source_file.filename.length - ".gtkaml".length) + ".vala";
 						FileUtils.set_contents (vala_filename, vala_contents);
 						context.generated_files.add (vala_filename);
-						base.visit_source_file (new SourceFile (context, SourceFileType.FAST, vala_filename));
+						var generated_source_file = new SourceFile (context, SourceFileType.FAST, vala_filename);
+						context.add_source_file (generated_source_file);
 					}
 				}
 			} catch (FileError e) {

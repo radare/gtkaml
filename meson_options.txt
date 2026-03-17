@@ -6,6 +6,21 @@ option(
 )
 
 option(
+  'examples',
+  type: 'boolean',
+  value: false,
+  description: 'Build example programs',
+)
+
+option(
+  'gtk_api',
+  type: 'combo',
+  choices: ['auto', 'gtk3', 'gtk4', 'adwaita'],
+  value: 'auto',
+  description: 'Select which GTK stack to target for optional examples/tests',
+)
+
+option(
   'docs',
   type: 'boolean',
   value: false,

@@ -1,25 +1,22 @@
 if build_gtk3_targets
   foreach test_data : [
-    ['test0.gtkaml', 'test0.vala'],
-    ['test4.gtkon', 'test4.vala'],
-    ['test5.gtkon', 'test5.vala'],
-    ['test7.gtkon', 'test7.vala'],
+    ['test0.gtkaml', 'test0'],
+    ['test4.gtkon', 'test4'],
+    ['test5.gtkon', 'test5'],
+    ['test7.gtkon', 'test7'],
   ]
     custom_target(
-      'gtk3-smoke-' + test_data[0],
+      'gtk3-smoke-' + test_data[1],
       input: test_data[0],
       output: test_data[1],
       command: [
-        gtkaml_to_vala,
         gtkamlc,
-        '@INPUT@',
-        '@OUTPUT@',
         '--pkg',
         'gtk+-3.0',
-        '--vapidir',
-        meson.project_source_root() / 'markuphints',
-        '--implicitsdir',
-        meson.project_source_root() / 'data',
+      ] + gtkamlc_markup_args + [
+        '-o',
+        '@OUTPUT@',
+        '@INPUT@',
       ],
       build_by_default: true,
     )

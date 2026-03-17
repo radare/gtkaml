@@ -1,19 +1,14 @@
 custom_target(
   'gtk4-smoke',
   input: 'smoke.gtkaml',
-  output: ['smoke', 'smoke.vala'],
+  output: 'smoke',
   command: [
     gtkamlc,
     '--pkg',
     'gtk4',
-    '--vapidir',
-    meson.project_source_root() / 'markuphints',
-    '--implicitsdir',
-    meson.project_source_root() / 'data',
-    '--dump-tree',
-    '@OUTPUT1@',
+  ] + gtkamlc_markup_args + [
     '-o',
-    '@OUTPUT0@',
+    '@OUTPUT@',
     '@INPUT@',
   ],
   build_by_default: true,

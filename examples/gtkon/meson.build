@@ -7,18 +7,15 @@ foreach example_name : [
   custom_target(
     'example-gtkon-' + example_name,
     input: example_name + '.gtkon',
-    output: example_name + '.vala',
+    output: example_name,
     command: [
-      gtkaml_to_vala,
       gtkamlc,
-      '@INPUT@',
-      '@OUTPUT@',
       '--pkg',
       'gtk+-3.0',
-      '--vapidir',
-      meson.project_source_root() / 'markuphints',
-      '--implicitsdir',
-      meson.project_source_root() / 'data',
+    ] + gtkamlc_markup_args + [
+      '-o',
+      '@OUTPUT@',
+      '@INPUT@',
     ],
     build_by_default: true,
   )

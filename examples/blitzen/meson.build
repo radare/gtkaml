@@ -1,18 +1,14 @@
-blitzen_markup = custom_target(
+custom_target(
   'example-blitzen-markup',
   input: 'test.gtkon',
   output: 'test.vala',
   command: [
-    gtkaml_to_vala,
     gtkamlc,
-    '@INPUT@',
-    '@OUTPUT@',
     '--pkg',
     'stk-1.0',
-    '--vapidir',
-    meson.project_source_root() / 'markuphints',
-    '--implicitsdir',
-    meson.project_source_root() / 'data',
+  ] + gtkamlc_markup_args + [
+    '-V',
+    '@INPUT@',
   ],
   build_by_default: true,
 )

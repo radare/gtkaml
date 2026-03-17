@@ -1,18 +1,15 @@
 custom_target(
   'example-simpleviewer2',
   input: 'SimpleViewer2.gtkaml',
-  output: 'SimpleViewer2.vala',
+  output: 'SimpleViewer2',
   command: [
-    gtkaml_to_vala,
     gtkamlc,
-    '@INPUT@',
-    '@OUTPUT@',
     '--pkg',
     'gtk+-3.0',
-    '--vapidir',
-    meson.project_source_root() / 'markuphints',
-    '--implicitsdir',
-    meson.project_source_root() / 'data',
+  ] + gtkamlc_markup_args + [
+    '-o',
+    '@OUTPUT@',
+    '@INPUT@',
   ],
   build_by_default: true,
 )

@@ -70,9 +70,8 @@ public bool use_genie;
 		if (FileUtils.test (gtkaml_filename, FileTest.EXISTS))
 			FileUtils.unlink (gtkaml_filename);
 		gp.to_file (gtkaml_filename);
-		gtkon_source_file.filename = gtkaml_filename;
 		context.generated_files.add (gtkaml_filename);
-		parse_gtkaml_file (gtkon_source_file);
+		parse_gtkaml_file (new SourceFile (context, SourceFileType.FAST, gtkaml_filename));
 	}
 
 	public virtual void parse_gtkaml_file (SourceFile gtkaml_source_file) {
@@ -100,8 +99,7 @@ public bool use_genie;
 							gtkaml_source_file.filename.length - ".gtkaml".length) + ".vala";
 						FileUtils.set_contents (vala_filename, vala_contents);
 						context.generated_files.add (vala_filename);
-						gtkaml_source_file.filename = vala_filename;
-						base.visit_source_file (gtkaml_source_file);
+						base.visit_source_file (new SourceFile (context, SourceFileType.FAST, vala_filename));
 					}
 				}
 			} catch (FileError e) {

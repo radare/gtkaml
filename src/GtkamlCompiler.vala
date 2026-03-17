@@ -201,7 +201,6 @@ class Gtkaml.Compiler {
 		if (header_filename == null && use_header) {
 			Report.error (null, "--use-header may only be used in combination with --header");
 		}
-		context.use_header = use_header;
 		context.internal_header_filename = internal_header_filename;
 		context.symbols_filename = symbols_filename;
 		context.includedir = includedir;
@@ -219,13 +218,11 @@ class Gtkaml.Compiler {
 		context.vapi_directories = vapi_directories;
 		context.gir_directories = gir_directories;
 		context.debug = debug;
-		context.thread = thread;
 		context.mem_profiler = mem_profiler;
 		context.save_temps = save_temps;
-		context.profile = Profile.GOBJECT;
-		context.add_define ("GOBJECT");
 		nostdpkg |= fast_vapi_filename != null;
-		context.nostdpkg = nostdpkg;
+		context.set_target_profile (Profile.GOBJECT, !nostdpkg);
+		context.add_define ("GOBJECT");
 
 		context.entry_point_name = entry_point;
 
@@ -251,9 +248,8 @@ class Gtkaml.Compiler {
 				Report.error (null, "Invalid format for --target-glib");
 			}
 
-			context.target_glib_major = glib_major;
-			context.target_glib_minor = glib_minor;
-			if (context.target_glib_major != 2) {
+			context.set_target_glib_version ("%d.%d".printf (glib_major, glib_minor));
+			if (glib_major != 2) {
 				Report.error (null, "This version of valac only supports GLib 2");
 			}
 

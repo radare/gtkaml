@@ -1,0 +1,13 @@
+option(
+  'tests',
+  type: 'boolean',
+  value: false,
+  description: 'Build markup smoke tests',
+)
+
+option(
+  'docs',
+  type: 'boolean',
+  value: false,
+  description: 'Enable the valadoc generation target',
+)

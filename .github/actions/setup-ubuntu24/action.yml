@@ -25,4 +25,4 @@ runs:
           meson \
           ninja-build \
           pkg-config \
-          vala
+          valac

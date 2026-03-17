@@ -1,56 +1,24 @@
 <!-- this is a port of http://www.michaelwerle.name/Programming/CSharp/SimpleViewer2.glade -->
 <Window xmlns='Gtk' xmlns:GLib='GLib' xmlns:class="http://gtkaml.org/0.4"
-	class:name="SimpleViewer2" title="SimpleViewer2">
-	<VBox>
-		<MenuBar expand="false">
-			<MenuItem label="_File" with-mnemonic="true">
-				<submenu>
-					<Menu>
-						<ImageMenuItem from-stock="true" stock-id="gtk-new" />
-						<ImageMenuItem stock-id="gtk-open" activate="OnFileOpenEvent"/>
-						<ImageMenuItem stock-id="gtk-save" />
-						<ImageMenuItem stock-id="gtk-save-as" />
-						<SeparatorMenuItem />
-						<ImageMenuItem stock-id="gtk-quit" activate="OnQuitEvent"/>
-					</Menu>
-				</submenu>
-			</MenuItem>
-			<MenuItem label="_Edit" with-mnemonic="true">
-				<submenu>
-					<Menu>
-						<ImageMenuItem stock-id="gtk-cut" />
-						<ImageMenuItem stock-id="gtk-copy" />
-						<ImageMenuItem stock-id="gtk-paste" />
-						<ImageMenuItem stock-id="gtk-delete" />
-					</Menu>
-				</submenu>
-			</MenuItem>
-			<MenuItem label="_View" with-mnemonic="true">
-				<submenu>
-					<Menu>
-						<CheckMenuItem label="_Word Wrap" with-mnemonic="true" class:private="menuWordWrap" activate="OnWordWrapActivatedEvent" />
-					</Menu>
-				</submenu>
-			</MenuItem>
-			<MenuItem label="_Help" with-mnemonic="true">
-				<submenu>
-					<Menu>
-						<ImageMenuItem stock-id="gtk-about" activate="OnMenuHelpAboutActivatedEvent"/>
-					</Menu>
-				</submenu>
-			</MenuItem>
-		</MenuBar>
-		<ScrolledWindow can-focus="true" hscrollbar-policy="{PolicyType.AUTOMATIC}" vscrollbar-policy="{PolicyType.AUTOMATIC}" >
+	class:name="SimpleViewer2" title="SimpleViewer2" destroy="Gtk.main_quit"
+	default-width="720" default-height="480">
+	<Box orientation="{Orientation.VERTICAL}" spacing="6" border-width="6">
+		<Box orientation="{Orientation.HORIZONTAL}" spacing="6" expand="false">
+			<Button label="Open" clicked="OnFileOpenEvent" />
+			<CheckButton label="Word Wrap" class:private="wordWrapToggle" toggled="OnWordWrapActivatedEvent" />
+			<Button label="About" clicked="OnMenuHelpAboutActivatedEvent" />
+			<Button label="Quit" clicked="OnQuitEvent" />
+		</Box>
+		<ScrolledWindow can-focus="true" hscrollbar-policy="{PolicyType.AUTOMATIC}" vscrollbar-policy="{PolicyType.AUTOMATIC}" hexpand="true" vexpand="true">
 			<TextView can-focus="true" editable="false" class:private="textview1" />
 		</ScrolledWindow>
-	</VBox>	
+	</Box>
 	<AboutDialog class:standalone="true" class:private="aboutdialog1" delete-event="aboutdialog1.hide_on_delete"
 		border-width="5" title="About SimpleViewer2" resizable="false" modal="true"
-		window-position="{WindowPosition.CENTER_ON_PARENT}" has-separator="false"
+		window-position="{WindowPosition.CENTER_ON_PARENT}"
 		program-name="SimpleViewer2" version="1.0" copyright="Copyright (c) 2007 MIchael Werle"
 		comments="Simple .Net demonstration program, displays a text file in a scrolling text box and allows the user to toggle word-wrap on and off"
-		website="http://www.michaelwerle.com/SimpleViewer2/" 
-		authors='{{"Michael Werle (micha@michaelwerle.com)", "ported to gtkaml by Vlad Grecescu (b100dian@gmail.com)", null}}'>
+		website="http://www.michaelwerle.com/SimpleViewer2/">
 	</AboutDialog>			
 
 <![CDATA[
@@ -109,7 +77,7 @@
 	}
 
 	private void OnWordWrapActivatedEvent () {
-		textview1.wrap_mode = menuWordWrap.active ? WrapMode.WORD_CHAR: WrapMode.NONE;
+		textview1.wrap_mode = wordWrapToggle.active ? WrapMode.WORD_CHAR : WrapMode.NONE;
 	}
 	
 	private void OnMenuHelpAboutActivatedEvent () {

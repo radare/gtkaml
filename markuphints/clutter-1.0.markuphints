@@ -1,0 +1,4 @@
+## see gtk+-2.0.markuphints for a thorough example of adapting an API
+
+[Clutter.Stage]
+adds = add_actor

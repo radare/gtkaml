@@ -1,6 +1,44 @@
-gtkaml is an XML parser that extends the Vala.Parser (literally) 
-and transforms all your tags into a valid Gtk+ UI described in the Vala language.
+gtkaml is a Vala markup compiler that turns `.gtkaml` and `.gtkon` files into
+regular Vala/C sources.
 
-It requires glib-2.0, vala-1.0, libxml-2.0, and gtk+-2.0
+This tree has been rebased around the newer `gtkaml3` architecture:
 
-See http://code.google.com/p/gtkaml for the latest version details
+- `libgtkaml/` contains the parser, AST, resolver and Vala integration.
+- `src/gtkamlcompiler.vala` is the frontend compiler driver.
+- `markuphints/` replaces the old `data/*.implicits` files.
+
+Current focus
+
+- Modern Vala toolchains through `libvala-<api>` detection in `configure`.
+- GTK 3 support via `gtk+-3.0.markuphints`.
+- GTK 4 support via `gtk4.markuphints`.
+- libadwaita support via `libadwaita-1.markuphints`.
+
+Build requirements
+
+- `valac`
+- development files for a matching `libvala-<api>` package
+- `glib-2.0`
+- `gio-2.0`
+- `libxml-2.0`
+- `libtool`, `autoconf`, `automake` for bootstrap builds
+
+Typical bootstrap:
+
+```sh
+autoreconf -fi
+./configure
+make
+```
+
+Examples:
+
+```sh
+./src/gtkamlc --vapidir ./markuphints --pkg gtk+-3.0 examples/gtkaml/gtk-hello.gtkaml
+./src/gtkamlc --vapidir ./markuphints --pkg gtk4 tests/gtk4/smoke.gtkaml
+./src/gtkamlc --vapidir ./markuphints --pkg gtk4 --pkg libadwaita-1 tests/adwaita/smoke.gtkaml
+```
+
+The compiler relies on markuphints to resolve container child APIs. For
+uninstalled builds, keep passing `--vapidir ./markuphints`; after install the
+hints are loaded from `$(pkgdatadir)/markuphints`.

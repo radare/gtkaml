@@ -1,0 +1,44 @@
+## This file describes the container methods for different classes of Stk (blitzen.org)
+
+[Stk.View]
+adds = set_child
+
+[Stk.VBox]
+adds = add_child
+
+[Stk.HBox]
+adds = add_child
+
+[Stk.Container]
+adds = add_child
+
+[Stk.Table]
+adds = add_child
+
+[Stk.Label]
+## rename the parameter 'str' to 'label'
+new.with_text = with_text
+
+[Stk.Entry]
+new.with_text = with_text
+
+[Stk.Button]
+new.with_label = with_label
+
+[Stk.CheckBox]
+new.with_label = with_label
+
+[Stk.Image]
+new.with_url = with_url
+
+[Stk.Link]
+new.full = full
+
+[Stk.RadioButton]
+new.with_label = with_label
+
+[Stk.RadioButtonGroup]
+adds = add
+
+[Stk.ComboBox]
+new.with_model = with_model

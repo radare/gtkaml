@@ -1,0 +1,27 @@
+## libadwaita markuphints for Gtkaml.
+## These extend the Gtk 4 hints with Adwaita-specific container/content APIs.
+
+[Adw.ApplicationWindow]
+new = application
+adds = set_content
+
+[Adw.Window]
+adds = set_content
+
+[Adw.Bin]
+adds = set_child
+
+[Adw.Clamp]
+adds = set_child
+
+[Adw.ToolbarView]
+adds = set_content;add_top_bar;add_bottom_bar
+
+[Adw.PreferencesWindow]
+adds = add
+
+[Adw.PreferencesPage]
+adds = add
+
+[Adw.PreferencesGroup]
+adds = add

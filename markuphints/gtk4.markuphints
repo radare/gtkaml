@@ -1,0 +1,83 @@
+## GTK 4 markuphints for Gtkaml.
+## These entries describe common child-composition APIs that no longer use
+## GtkContainer-style add() methods.
+
+[Gtk.Label]
+new = label
+new.with_mnemonic = label
+
+[Gtk.Button]
+new.with_label = label
+new.with_mnemonic = label
+adds = set_child
+
+[Gtk.Window]
+adds = set_child
+
+[Gtk.ApplicationWindow]
+new = application
+adds = set_child
+
+[Gtk.ScrolledWindow]
+adds = set_child
+new = hadjustment={null};vadjustment={null}
+
+[Gtk.Box]
+new = orientation={Orientation.VERTICAL};spacing=0
+adds = append;prepend;insert_child_after
+add.insert_child_after = child;sibling={null}
+
+[Gtk.CenterBox]
+adds = set_start_widget;set_center_widget;set_end_widget
+
+[Gtk.Paned]
+adds = set_start_child;set_end_child
+
+[Gtk.Frame]
+adds = set_child
+
+[Gtk.AspectFrame]
+adds = set_child
+
+[Gtk.Expander]
+adds = set_child
+
+[Gtk.Revealer]
+adds = set_child
+
+[Gtk.Overlay]
+adds = set_child;add_overlay
+
+[Gtk.MenuButton]
+adds = set_child
+
+[Gtk.Popover]
+adds = set_child
+
+[Gtk.Viewport]
+adds = set_child
+
+[Gtk.WindowHandle]
+adds = set_child
+
+[Gtk.ListBox]
+adds = append;prepend;insert
+add.insert = child;position
+
+[Gtk.FlowBox]
+adds = append;insert
+add.insert = widget;position
+
+[Gtk.Grid]
+adds = attach
+
+[Gtk.Stack]
+adds = add_child;add_named;add_titled
+add.add_named = child;name
+add.add_titled = child;name;title
+
+[Gtk.Notebook]
+adds = append_page;prepend_page;insert_page
+
+[Gtk.HeaderBar]
+adds = set_title_widget;pack_start;pack_end

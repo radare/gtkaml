@@ -1,0 +1,24 @@
+<ApplicationWindow
+  gtkaml:public="Gtk4SmokeWindow"
+  title="GTK4 Gtkaml Smoke"
+  default-width="480"
+  default-height="240"
+  xmlns="Gtk"
+  xmlns:gtkaml="http://gtkaml.org/0.6.0">
+  <Box orientation="{Orientation.VERTICAL}" spacing="12"
+       margin-top="24" margin-bottom="24" margin-start="24" margin-end="24">
+    <Label label="Gtkaml on GTK4"/>
+    <Button label="Push"/>
+  </Box>
+  <![CDATA[
+    static int main (string[] args) {
+      var app = new Gtk.Application ("org.gtkaml.gtk4-smoke", ApplicationFlags.FLAGS_NONE);
+      app.activate.connect (() => {
+        var win = new Gtk4SmokeWindow ();
+        win.application = app;
+        win.present ();
+      });
+      return app.run (args);
+    }
+  ]]>
+</ApplicationWindow>

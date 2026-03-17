@@ -1,0 +1,28 @@
+<ApplicationWindow
+  gtkaml:public="AdwSmokeWindow"
+  title="Adwaita Gtkaml Smoke"
+  default-width="560"
+  default-height="320"
+  xmlns="Adw"
+  xmlns:gtk="Gtk"
+  xmlns:gtkaml="http://gtkaml.org/0.6.0">
+  <ToolbarView>
+    <gtk:Box orientation="{Gtk.Orientation.VERTICAL}" spacing="18"
+             margin-top="24" margin-bottom="24" margin-start="24" margin-end="24">
+      <gtk:Label label="Gtkaml on libadwaita"/>
+      <gtk:Button label="Open"/>
+    </gtk:Box>
+  </ToolbarView>
+  <![CDATA[
+    static int main (string[] args) {
+      Adw.init ();
+      var app = new Adw.Application ("org.gtkaml.adw-smoke", ApplicationFlags.FLAGS_NONE);
+      app.activate.connect (() => {
+        var win = new AdwSmokeWindow ();
+        win.application = app;
+        win.present ();
+      });
+      return app.run (args);
+    }
+  ]]>
+</ApplicationWindow>

@@ -1,70 +1,39 @@
-INCLUDES = \
-	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
-	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
-	-DPACKAGE_DATA_DIR=\""$(datadir)"\" 
-
-AM_CFLAGS = -I$(top_srcdir) \
-	-Wall \
-	-g \
-	$(LIBXML2_CFLAGS) \
-	$(GIO_CFLAGS) \
+AM_CPPFLAGS = \
 	$(GLIB_CFLAGS) \
+	$(GIO_CFLAGS) \
 	$(VALA_CFLAGS) \
-	-DPACKAGE_DATADIR=\"$(pkgdatadir)\"
+	$(LIBXML2_CFLAGS) \
+	-I$(top_srcdir)/vapi \
+	-I$(top_srcdir)/libgtkaml
 
-if VALA_10
-        GTKAML_COMPILER = GtkamlCompiler-0.10.vala
-else
-        GTKAML_COMPILER = GtkamlCompiler.vala
-endif
+bin_PROGRAMS = gtkamlc
 
+BUILT_SOURCES = gtkamlc.stamp
+CLEANFILES = gtkamlc.stamp
 
-bin_PROGRAMS = gtkamlc 
-
-BUILT_SOURCES = gtkamlc.vala.stamp
-CLEANFILES = gtkamlc.vala.stamp
-
-
-gtkamlc_VALASOURCES = \
-	GtkonParser.vala \
-	$(GTKAML_COMPILER) \
-	GtkamlCodeContext.vala \
-	GtkamlSAXParser.vala \
-	GtkamlParser.vala \
-	GtkamlCodeGenerator.vala \
-	GtkamlXmlNamespace.vala \
-	GtkamlXmlAttribute.vala \
-	GtkamlState.vala \
-	GtkamlStateStack.vala \
-	GtkamlClassDefinition.vala \
-	GtkamlRootClassDefinition.vala \
-	GtkamlReferenceClassDefinition.vala \
-	GtkamlAttribute.vala \
-	GtkamlSimpleAttribute.vala \
-	GtkamlComplexAttribute.vala \
-	GtkamlMethod.vala \
-	GtkamlImplicitsResolver.vala \
-	GtkamlImplicitsStore.vala \
-	GtkamlMethodMatcher.vala
+gtkamlc_VALASOURCES = gtkamlcompiler.vala
 
 nodist_gtkamlc_SOURCES = \
-	gtkamlc.vala.stamp \
-	$(gtkamlc_VALASOURCES:.vala=.c) \
-	gtkamlc.h \
-	GtkamlSAXParser_start_parsing.c
+	gtkamlc.stamp \
+	$(gtkamlc_VALASOURCES:.vala=.c)
 
-gtkamlc.vala.stamp: $(gtkamlc_VALASOURCES)
-	$(VALAC) -h gtkamlc.h -C $(VALAFLAGS) --vapidir=$(top_srcdir)/vapi --pkg config --pkg gio-2.0 --pkg libxml-2.0 --pkg $(VALA_PKG) $^ 
+gtkamlc.stamp: $(gtkamlc_VALASOURCES)
+	$(VALAC) -C $(VALAFLAGS) --vapidir $(top_srcdir)/vapi --vapidir ../libgtkaml --pkg valaccodegen --pkg gtkaml-1.0 --pkg libxml-2.0 --pkg libvala-$(VALA_VERSION) --pkg glib-2.0 --pkg gio-2.0 --pkg config $^
 	touch $@
 
 gtkamlc_LDADD = \
-	$(LIBXML2_LIBS)\
+	$(top_srcdir)/libgtkaml/libgtkaml.la \
+	-L$(VALA_CODEGEN_LIBDIR) \
+	-lvalaccodegen \
 	$(GLIB_LIBS) \
 	$(GIO_LIBS) \
-	$(VALA_LIBS)
+	$(VALA_LIBS) \
+	$(LIBXML2_LIBS)
 
-EXTRA_DIST = $(gtkamlc_VALASOURCES) GtkamlSAXParser_start_parsing.c GtkamlCompiler-0.10.vala GtkamlCompiler.vala
+gtkamlc_LDFLAGS = \
+	-Wl,-rpath,$(VALA_CODEGEN_LIBDIR)
+
+EXTRA_DIST = $(gtkamlc_VALASOURCES)
 
 install-exec-hook:
 	cd $(DESTDIR)$(bindir) && $(LN_S) -f gtkamlc$(EXEEXT) gtkaml$(EXEEXT)
-

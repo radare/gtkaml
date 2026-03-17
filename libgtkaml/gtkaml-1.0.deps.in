@@ -1,0 +1,4 @@
+glib-2.0
+gio-2.0
+libvala-@VALA_VERSION@
+libxml-2.0

@@ -1,18 +1,27 @@
 if ENABLE_TESTS
-TESTS_DIR = tests
+TESTS_DIRS = tests
 endif
 
-SUBDIRS = src data vapi $(TESTS_DIR)
+SUBDIRS = \
+	libgtkaml \
+	src \
+	markuphints \
+	$(TESTS_DIRS)
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = gtkaml-1.0.pc
 
 gtkamldocdir = ${prefix}/doc/gtkaml
 
 dist_man_MANS = gtkamlc.1
 
 EXTRA_DIST = \
-	README\
-	COPYING\
-	AUTHORS\
-	INSTALL\
+	README \
+	COPYING \
+	AUTHORS \
+	gtkaml-1.0.pc.in \
+	autogen.sh \
+	INSTALL \
 	examples/SimpleViewer2/Makefile \
 	examples/SimpleViewer2/SimpleViewer2.gtkaml \
 	examples/gtkaml/Makefile \
@@ -33,6 +42,4 @@ EXTRA_DIST = \
 	editors/vim/README \
 	editors/vim/gtkaml.vim \
 	editors/vim/gtkon.vim \
-	editors/vim/vala.vim \
-	data/Stk.implicits
-
+	editors/vim/vala.vim

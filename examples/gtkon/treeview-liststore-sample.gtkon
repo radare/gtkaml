@@ -18,7 +18,7 @@ Window gtkon:version=0.4 using=Gtk gtkaml:name="TreeViewSample" title="Tree View
 	-{
 		private void setup_treeview () {
 			TreeIter iter;
-			var listmodel = new ListStore (4, typeof (string), typeof (string), typeof (string), typeof (string));
+			var listmodel = new Gtk.ListStore (4, typeof (string), typeof (string), typeof (string), typeof (string));
 			listmodel.append (out iter);
 			listmodel.set (iter, 0, "My Visacard", 1, "card", 2, "102,10", 3, "red", -1);
 

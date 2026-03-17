@@ -97,7 +97,6 @@ vala_internal_vapi_dir = join_paths(
   'vapi',
 )
 valadoc = find_program('valadoc', required: get_option('docs'))
-gtkaml_to_vala = find_program('tools/gtkaml-to-vala.sh')
 
 config_data = configuration_data()
 config_data.set_quoted('PACKAGE_VERSION', meson.project_version())
@@ -127,6 +126,13 @@ common_deps = [
   gio_dep,
   libxml2_dep,
   vala_dep,
+]
+
+gtkamlc_markup_args = [
+  '--vapidir',
+  meson.project_source_root() / 'markuphints',
+  '--implicitsdir',
+  meson.project_source_root() / 'data',
 ]
 
 pkg = import('pkgconfig')

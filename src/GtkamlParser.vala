@@ -32,6 +32,15 @@ public class Gtkaml.Parser : Vala.Parser {
 	private CodeContext context;
 	
 	private ImplicitsStore implicits_store = new ImplicitsStore ();
+
+	private string build_generated_filename (string source_filename, string extension) {
+		var basename = Path.get_basename (source_filename);
+		var dot = basename.last_index_of_char ('.');
+		if (dot != -1) {
+			basename = basename.substring (0, dot);
+		}
+		return Path.build_filename (context.directory, basename + extension);
+	}
 	
 	public Parser () {
 		base ();
@@ -63,7 +72,7 @@ public class Gtkaml.Parser : Vala.Parser {
 
 public bool use_genie;
 	public void parse_gtkon_file (SourceFile gtkon_source_file) {
-		var gtkaml_filename = gtkon_source_file.filename.replace (".gtkon", ".gtkaml");
+		var gtkaml_filename = build_generated_filename (gtkon_source_file.filename, ".gtkaml");
 		var gp = new GtkonParser ();
 		gp.use_genie (use_genie);
 		gp.parse_file (gtkon_source_file.filename);
@@ -95,8 +104,7 @@ public bool use_genie;
 					
 					string vala_contents =  code_generator.yield ();
 					if (vala_contents != null) { 
-						string vala_filename = gtkaml_source_file.filename.substring (0, 
-							gtkaml_source_file.filename.length - ".gtkaml".length) + ".vala";
+						string vala_filename = build_generated_filename (gtkaml_source_file.filename, ".vala");
 						FileUtils.set_contents (vala_filename, vala_contents);
 						context.generated_files.add (vala_filename);
 						var generated_source_file = new SourceFile (context, SourceFileType.FAST, vala_filename);

@@ -1,0 +1,39 @@
+name: Meson
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        gtk_api:
+          - auto
+          - gtk3
+          - gtk4
+          - adwaita
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Ubuntu 24 build dependencies
+        uses: ./.github/actions/setup-ubuntu24
+
+      - name: Configure
+        run: >
+          meson setup build
+          -Dexamples=false
+          -Dtests=true
+          -Dgtk_api=${{ matrix.gtk_api }}
+
+      - name: Build
+        run: meson compile -C build

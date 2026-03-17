@@ -1,0 +1,27 @@
+name: Autotools
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Ubuntu 24 build dependencies
+        uses: ./.github/actions/setup-ubuntu24
+
+      - name: Bootstrap autotools
+        run: ./autogen.sh --enable-tests
+
+      - name: Build
+        run: make -j"$(nproc)" V=1

@@ -1,13 +1,11 @@
 custom_target(
-  'adwaita-smoke',
-  input: 'smoke.gtkaml',
-  output: 'smoke.vala',
+  'example-simpleviewer2',
+  input: 'SimpleViewer2.gtkaml',
+  output: 'SimpleViewer2.vala',
   command: [
     gtkamlc,
     '--pkg',
-    'gtk4',
-    '--pkg',
-    'libadwaita-1',
+    'gtk+-3.0',
   ] + gtkamlc_markup_args + [
     '-V',
     '@INPUT@',

@@ -10,6 +10,7 @@ typedef struct _GtkamlSAXParser GtkamlSAXParser;
 
 struct _GtkamlSAXParser {
 	GObject parent_instance;
+	gpointer priv;
 	gpointer xmlCtxt;
 };
 

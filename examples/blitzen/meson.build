@@ -1,13 +1,11 @@
 custom_target(
-  'adwaita-smoke',
-  input: 'smoke.gtkaml',
-  output: 'smoke.vala',
+  'example-blitzen-markup',
+  input: 'test.gtkon',
+  output: 'test.vala',
   command: [
     gtkamlc,
     '--pkg',
-    'gtk4',
-    '--pkg',
-    'libadwaita-1',
+    'stk-1.0',
   ] + gtkamlc_markup_args + [
     '-V',
     '@INPUT@',

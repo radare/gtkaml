@@ -1,0 +1,28 @@
+name: Setup Ubuntu 24 Build Dependencies
+description: Install the toolchain and GTK development packages needed by gtkaml CI jobs.
+
+runs:
+  using: composite
+  steps:
+    - name: Install build dependencies
+      shell: bash
+      run: |
+        set -euxo pipefail
+        sudo apt-get update
+        sudo apt-get install --yes --no-install-recommends \
+          autoconf \
+          automake \
+          build-essential \
+          libadwaita-1-dev \
+          libglib2.0-dev \
+          libgtk-3-dev \
+          libgtk-4-dev \
+          libtool \
+          libtool-bin \
+          libvala-0.56-dev \
+          libxml2-dev \
+          make \
+          meson \
+          ninja-build \
+          pkg-config \
+          valac

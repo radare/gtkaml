@@ -1,9 +1,9 @@
 if build_gtk3_targets
   foreach test_data : [
-    ['test0.gtkaml', 'test0'],
-    ['test4.gtkon', 'test4'],
-    ['test5.gtkon', 'test5'],
-    ['test7.gtkon', 'test7'],
+    ['test0.gtkaml', 'test0.vala'],
+    ['test4.gtkon', 'test4.vala'],
+    ['test5.gtkon', 'test5.vala'],
+    ['test7.gtkon', 'test7.vala'],
   ]
     custom_target(
       'gtk3-smoke-' + test_data[1],
@@ -14,8 +14,7 @@ if build_gtk3_targets
         '--pkg',
         'gtk+-3.0',
       ] + gtkamlc_markup_args + [
-        '-o',
-        '@OUTPUT@',
+        '-V',
         '@INPUT@',
       ],
       build_by_default: true,

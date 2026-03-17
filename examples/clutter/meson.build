@@ -1,7 +1,7 @@
 custom_target(
   'example-clutter-full',
   input: 'full-example.gtkon',
-  output: 'full-example',
+  output: 'full-example.vala',
   command: [
     gtkamlc,
     '--pkg',
@@ -13,8 +13,7 @@ custom_target(
     '--pkg',
     'mx-1.0',
   ] + gtkamlc_markup_args + [
-    '-o',
-    '@OUTPUT@',
+    '-V',
     '@INPUT@',
   ],
   build_by_default: true,

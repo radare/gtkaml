@@ -1,7 +1,7 @@
 custom_target(
   'adwaita-smoke',
   input: 'smoke.gtkaml',
-  output: 'smoke',
+  output: 'smoke.vala',
   command: [
     gtkamlc,
     '--pkg',
@@ -9,8 +9,7 @@ custom_target(
     '--pkg',
     'libadwaita-1',
   ] + gtkamlc_markup_args + [
-    '-o',
-    '@OUTPUT@',
+    '-V',
     '@INPUT@',
   ],
   build_by_default: true,
